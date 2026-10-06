@@ -224,3 +224,11 @@ func test_release_is_rejected_for_a_zero_encounter_record() -> void:
 	state.record_release("fish_minnow")
 	assert_eq(state.get_collection_record("fish_minnow")["releases"], 0)
 	state.free()
+
+func test_awards_never_lower_a_loaded_balance() -> void:
+	var state := _new_state()
+	state.load_data({"save_version": 1, "economy": {"ripple": 2_000_000_000}})
+	var before: int = state.get_ripple()
+	state.add_ripple(5)
+	assert_true(state.get_ripple() >= before, "an award reduced the balance (%d -> %d)" % [before, state.get_ripple()])
+	state.free()

@@ -8,8 +8,8 @@ extends Node
 ## `data` is exactly what SaveService writes; do not add fields without updating SaveSchema
 ## (defaults + normalization) and, if the layout changes, a migration.
 
-const MAX_CURRENCY := 999_999_999
-const MAX_POPULATION := 9999
+const MAX_CURRENCY := SaveSchema.MAX_CURRENCY
+const MAX_POPULATION := SaveSchema.MAX_POPULATION
 
 ## Bumped by every mutation so SaveService can tell whether there is anything new to write.
 var revision: int = 0

@@ -295,9 +295,13 @@ func _check_owned_list(section: Dictionary, field: String, known: Dictionary, la
 	if typeof(value) != TYPE_ARRAY or value.is_empty():
 		_errors.append("%s.%s: must be a non-empty array" % [file_name, label])
 		return
+	var seen: Dictionary = {}
 	for entry in value:
 		if not known.has(entry):
 			_errors.append("%s.%s: unknown or invalid id %s" % [file_name, label, var_to_str(entry)])
+		elif seen.has(entry):
+			_errors.append("%s.%s: duplicate id %s" % [file_name, label, var_to_str(entry)])
+		seen[entry] = true
 
 # --- field helpers ---
 

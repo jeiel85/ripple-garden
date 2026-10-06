@@ -11,6 +11,10 @@ extends RefCounted
 ## normalization is also what makes a save round-trip equal to the in-memory state.
 
 const CURRENT_VERSION := 1
+## Upper bounds so a damaged or hand-edited save cannot hold values the game would later
+## clamp downward (which would make an award reduce a balance).
+const MAX_CURRENCY := 999_999_999
+const MAX_POPULATION := 9999
 
 const QUALITY_OPTIONS: PackedStringArray = ["low", "medium", "high"]
 const FPS_OPTIONS: Array = [30, 60]
@@ -136,13 +140,13 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	_merge_section(result, input, "inventory")
 
 	var profile: Dictionary = result["profile"]
-	profile["created_at"] = _int_or(profile.get("created_at"), now)
-	profile["last_session_at"] = _int_or(profile.get("last_session_at"), now)
+	profile["created_at"] = maxi(0, _int_or(profile.get("created_at"), now))
+	profile["last_session_at"] = maxi(0, _int_or(profile.get("last_session_at"), now))
 	profile["game_minutes"] = _float_or(profile.get("game_minutes"), 480.0)
 
 	var economy: Dictionary = result["economy"]
-	economy["ripple"] = maxi(0, _int_or(economy.get("ripple"), 0))
-	economy["memory"] = maxi(0, _int_or(economy.get("memory"), 0))
+	economy["ripple"] = clampi(_int_or(economy.get("ripple"), 0), 0, MAX_CURRENCY)
+	economy["memory"] = clampi(_int_or(economy.get("memory"), 0), 0, MAX_CURRENCY)
 
 	var entitlement: Dictionary = result["entitlement_cache"]
 	entitlement["full_game"] = entitlement.get("full_game") == true
@@ -211,8 +215,8 @@ static func validate(save: Variant) -> PackedStringArray:
 	if typeof(save["profile"].get("game_minutes")) != TYPE_FLOAT:
 		problems.append("profile.game_minutes must be a number")
 	for key in ["ripple", "memory"]:
-		if typeof(save["economy"].get(key)) != TYPE_INT or save["economy"][key] < 0:
-			problems.append("economy.%s must be a non-negative integer" % key)
+		if typeof(save["economy"].get(key)) != TYPE_INT or save["economy"][key] < 0 or save["economy"][key] > MAX_CURRENCY:
+			problems.append("economy.%s must be an integer in 0..%d" % [key, MAX_CURRENCY])
 
 	for region_id in save["regions"]:
 		var region: Variant = save["regions"][region_id]
@@ -253,12 +257,12 @@ static func _normalize_region(raw: Variant) -> Dictionary:
 		if not region.has(key):
 			region[key] = raw[key]
 	region["restoration_level"] = maxi(0, _int_or(raw.get("restoration_level"), 0))
-	region["restoration_points"] = maxi(0, _int_or(raw.get("restoration_points"), 0))
+	region["restoration_points"] = clampi(_int_or(raw.get("restoration_points"), 0), 0, MAX_CURRENCY)
 	var population := {}
 	var raw_population: Variant = raw.get("species_population")
 	if typeof(raw_population) == TYPE_DICTIONARY:
 		for fish_id in raw_population:
-			population[fish_id] = maxi(0, _int_or(raw_population[fish_id], 0))
+			population[fish_id] = clampi(_int_or(raw_population[fish_id], 0), 0, MAX_POPULATION)
 	region["species_population"] = population
 	region["unlocked_spots"] = _string_list(raw.get("unlocked_spots"))
 	region["seen_events"] = _string_list(raw.get("seen_events"))

@@ -105,3 +105,23 @@ func test_equipped_item_that_is_not_owned_is_replaced() -> void:
 func test_valid_equipment_is_kept() -> void:
 	var raw := {"save_version": 1, "inventory": {"rods": ["rod_bamboo", "rod_light"], "baits": ["bait_bread"], "equipped_rod": "rod_light"}}
 	assert_eq(SaveSchema.normalize(raw, NOW)["inventory"]["equipped_rod"], "rod_light")
+
+func test_negative_timestamps_are_repaired() -> void:
+	var raw := {"save_version": 1, "profile": {"created_at": -5, "last_session_at": -100}}
+	var normalized := SaveSchema.normalize(raw, NOW)
+	assert_eq(normalized["profile"]["created_at"], 0)
+	assert_eq(normalized["profile"]["last_session_at"], 0)
+	assert_eq(SaveSchema.validate(normalized), PackedStringArray(), "normalized save must pass the sanity check")
+
+func test_oversized_values_are_clamped_to_the_declared_maximum() -> void:
+	var raw := {
+		"save_version": 1,
+		"economy": {"ripple": 5_000_000_000, "memory": SaveSchema.MAX_CURRENCY + 1},
+		"regions": {"region_01_quiet_pond": {"restoration_points": 9_999_999_999, "species_population": {"fish_a": 99999}}},
+	}
+	var normalized := SaveSchema.normalize(raw, NOW)
+	assert_eq(normalized["economy"]["ripple"], SaveSchema.MAX_CURRENCY)
+	assert_eq(normalized["economy"]["memory"], SaveSchema.MAX_CURRENCY)
+	assert_eq(normalized["regions"]["region_01_quiet_pond"]["restoration_points"], SaveSchema.MAX_CURRENCY)
+	assert_eq(normalized["regions"]["region_01_quiet_pond"]["species_population"]["fish_a"], SaveSchema.MAX_POPULATION)
+	assert_eq(SaveSchema.validate(normalized), PackedStringArray())

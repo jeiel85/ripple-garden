@@ -237,3 +237,10 @@ func test_balance_vertical_slice_region_and_level_range() -> void:
 	raw = _raw()
 	raw["balance"]["vertical_slice"]["max_restoration_level"] = 11
 	_assert_error(ContentValidator.validate(raw), "vertical_slice.max_restoration_level: must be an integer 1..10")
+
+func test_balance_starting_inventory_rejects_duplicate_ids() -> void:
+	var raw := _raw()
+	raw["balance"]["starting_inventory"]["baits"].append("bait_bread")
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "balance.json.starting_inventory.baits: duplicate id")
+	assert_true(result["balance"].is_empty(), "balance with duplicates kept")
