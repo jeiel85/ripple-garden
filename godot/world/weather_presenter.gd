@@ -96,7 +96,8 @@ func _process(delta: float) -> void:
 			_ripples.remove_at(index)
 		index -= 1
 	var lightning: float = visual.get("lightning", 0.0)
-	_flash = maxf(0.0, _flash - delta * 2.5)
+	# Reduced Motion never shows lightning, not even the rest of a flash already on screen.
+	_flash = 0.0 if reduced_motion else maxf(0.0, _flash - delta * 2.5)
 	if lightning > 0.01 and not reduced_motion:
 		_next_flash -= delta * lightning
 		if _next_flash <= 0.0:

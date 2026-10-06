@@ -43,8 +43,10 @@ func test_lightning_flashes_in_a_storm_but_never_with_reduced_motion() -> void:
 		presenter._process(1.0 / 30.0)
 		flashed = flashed or presenter.flash_strength() > 0.0
 	assert_true(flashed, "a storm flashes now and then")
+	presenter._flash = 1.0  # a flash on screen at the moment Reduced Motion is switched on
 	presenter.reduced_motion = true
-	presenter._flash = 0.0
+	presenter._process(1.0 / 30.0)
+	assert_eq(presenter.flash_strength(), 0.0, "the flash already showing goes at once")
 	for i in 900:
 		presenter._process(1.0 / 30.0)
 		assert_eq(presenter.flash_strength(), 0.0, "Reduced Motion never flashes")
