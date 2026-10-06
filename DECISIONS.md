@@ -116,3 +116,11 @@
 - `Windows Desktop`(release): 디버그 메뉴·치트 없음, CI 릴리스가 이것을 쓴다. `Windows QA`: 같은 템플릿에 커스텀 기능 태그 `qa`만 켜서
   디버그 메뉴(F12)와 진단 도구를 사용할 수 있다. 개발 도구(`tools/*`)와 테스트는 두 프리셋 모두에서 제외한다.
 - exe 아이콘은 rcedit 도입 전까지 Godot 기본값이다(D-004). 바로가기는 `assets/branding/ripple_garden.ico`를 따로 가리킨다.
+
+## D-015 콘텐츠 검증은 게임의 ContentValidator가 단일 출처 (2026-10-06, P0-026)
+
+- 대안: Python 검증기를 유지하고 규칙을 양쪽에 계속 맞춘다 / Python 검증기를 정본으로 하고 게임이 JSON schema를 읽는다.
+- 선택: 런타임이 실제로 쓰는 `ContentValidator`만 규칙을 가진다. 검증 명령(`tools/validate_content.gd`)이 같은 코드를 헤드리스로 실행하고
+  로컬라이제이션 키 존재(`LocalizationCheck`)를 더해 오류를 출력/종료 코드로 알린다. Python 검증기(`tools/validate_content.py`)는 삭제했다.
+- 이유: 규칙이 두 곳에 있으면 한쪽만 고쳐져 "CI는 통과하는데 게임은 항목을 제외"하는 상태가 생긴다. 데이터 파일이 늘어날수록(날씨·레이아웃·오디오…)
+  중복 비용이 커진다. Python은 버전 검사(`check_version.py`)에만 남는다.

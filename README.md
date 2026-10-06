@@ -46,10 +46,10 @@
 
 Godot 프로젝트는 `godot/` 폴더입니다. 편집기에서 `godot/project.godot`을 열면 됩니다.
 
-콘텐츠 데이터 정합성 검사:
+콘텐츠 데이터 정합성 검사 (게임이 쓰는 `ContentValidator`와 로컬라이제이션 키 검사를 그대로 실행하며, 처음 한 번은 아래 `--import`가 필요합니다):
 
 ```bash
-python tools/validate_content.py
+godot --headless --path godot -s res://tools/validate_content.gd
 ```
 
 버전 정합성 검사 (`project.godot` ↔ export preset, 선택적으로 태그):

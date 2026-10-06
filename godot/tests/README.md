@@ -42,4 +42,4 @@ func test_something() -> void:
 - Save roundtrip / backup recovery / migration sequence (P0-005, P0-006, P0-027)
 - Fishing state transition legality (P0-011)
 
-정적 콘텐츠 무결성은 `tools/validate_content.py`가 따로 검사합니다.
+정적 콘텐츠 무결성은 같은 `ContentValidator`를 쓰는 `godot --headless --path godot -s res://tools/validate_content.gd`가 따로 검사합니다(CI에서도 실행).

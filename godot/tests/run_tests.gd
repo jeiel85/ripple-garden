@@ -71,9 +71,22 @@ func _run() -> void:
 				for problem in problems:
 					printerr("FAIL ", label, " — ", problem)
 
+	_remove_scratch("user://test_saves")
 	print("\n%d passed, %d failed" % [passed, failed])
 	OS.remove_logger(_collector)
 	quit(0 if failed == 0 and passed > 0 else 1)
+
+## Tests write saves under user://test_saves; delete it so a test run leaves no trace in the player's
+## data folder.
+func _remove_scratch(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	for sub in dir.get_directories():
+		_remove_scratch(path.path_join(sub))
+	for file_name in dir.get_files():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path.path_join(file_name)))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 ## Removes one logged error per expected substring; reports expected errors
 ## that never appeared and any errors left over.
