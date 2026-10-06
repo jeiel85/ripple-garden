@@ -14,7 +14,8 @@
   - 정책은 D-008, 테스트 `tests/unit/test_save_service.gd`
 - [x] P0-006 Save v1 migration framework
   - `save/save_migrator.gd` (운영 마이그레이션 테이블은 v1만 있어 비어 있음), id alias는 `data/content_aliases.json`
-- [ ] P0-007 TimeService session/game/offline clock
+- [x] P0-007 TimeService session/game/offline clock
+  - 정책은 D-009, 하루 길이·시간대 경계는 `data/balance.json`의 `time`
 - [ ] P0-008 Region 01 base scene
 - [ ] P0-009 Habitat zone component
 - [ ] P0-010 EncounterResolver seeded weighted random

@@ -280,6 +280,33 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 				_errors.append("%s.starting_inventory.%s: must be one of starting_inventory.%s (got %s)" % [
 					file_name, pair[0], pair[1], var_to_str(equipped)])
 
+	var time: Variant = data.get("time")
+	if typeof(time) != TYPE_DICTIONARY:
+		_errors.append("%s.time: must be an object" % file_name)
+	else:
+		var day_length: Variant = time.get("day_length_real_sec")
+		if not _is_number(day_length) or day_length < 60.0 or day_length > 86400.0:
+			_errors.append("%s.time.day_length_real_sec: must be a number in 60..86400 (got %s)" % [
+				file_name, var_to_str(day_length)])
+		var starts: Variant = time.get("band_starts_hour")
+		if typeof(starts) != TYPE_DICTIONARY:
+			_errors.append("%s.time.band_starts_hour: must be an object" % file_name)
+		else:
+			var previous := -1.0
+			for band in TIME_BANDS:
+				var hour: Variant = starts.get(band)
+				if not _is_number(hour) or hour < 0.0 or hour >= 24.0:
+					_errors.append("%s.time.band_starts_hour.%s: must be a number in 0..24 (got %s)" % [
+						file_name, band, var_to_str(hour)])
+				elif hour <= previous:
+					_errors.append("%s.time.band_starts_hour.%s: bands must start in order %s" % [
+						file_name, band, ", ".join(TIME_BANDS)])
+				else:
+					previous = hour
+			for band in starts:
+				if not band in TIME_BANDS:
+					_errors.append("%s.time.band_starts_hour: '%s' is not a known time band" % [file_name, band])
+
 	var slice: Variant = data.get("vertical_slice")
 	if typeof(slice) != TYPE_DICTIONARY:
 		_errors.append("%s.vertical_slice: must be an object" % file_name)
