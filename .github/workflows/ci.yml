@@ -20,9 +20,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate content data
-        run: python tools/validate_content.py
-
       - name: Check version consistency
         run: python tools/check_version.py
 
@@ -39,6 +36,9 @@ jobs:
 
       - name: Import project
         run: '"$GODOT_BIN" --headless --path godot --import'
+
+      - name: Validate content data
+        run: '"$GODOT_BIN" --headless --path godot -s res://tools/validate_content.gd'
 
       - name: Run Godot tests
         run: '"$GODOT_BIN" --headless --path godot -s res://tests/run_tests.gd'

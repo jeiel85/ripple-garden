@@ -116,3 +116,18 @@
 - `Windows Desktop`(release): 디버그 메뉴·치트 없음, CI 릴리스가 이것을 쓴다. `Windows QA`: 같은 템플릿에 커스텀 기능 태그 `qa`만 켜서
   디버그 메뉴(F12)와 진단 도구를 사용할 수 있다. 개발 도구(`tools/*`)와 테스트는 두 프리셋 모두에서 제외한다.
 - exe 아이콘은 rcedit 도입 전까지 Godot 기본값이다(D-004). 바로가기는 `assets/branding/ripple_garden.ico`를 따로 가리킨다.
+
+## D-015 콘텐츠 검증은 게임의 ContentValidator가 단일 출처 (2026-10-06, P0-026)
+
+- 대안: Python 검증기를 유지하고 규칙을 양쪽에 계속 맞춘다 / Python 검증기를 정본으로 하고 게임이 JSON schema를 읽는다.
+- 선택: 런타임이 실제로 쓰는 `ContentValidator`만 규칙을 가진다. 검증 명령(`tools/validate_content.gd`)이 같은 코드를 헤드리스로 실행하고
+  로컬라이제이션 키 존재(`LocalizationCheck`)를 더해 오류를 출력/종료 코드로 알린다. Python 검증기(`tools/validate_content.py`)는 삭제했다.
+- 이유: 규칙이 두 곳에 있으면 한쪽만 고쳐져 "CI는 통과하는데 게임은 항목을 제외"하는 상태가 생긴다. 데이터 파일이 늘어날수록(날씨·레이아웃·오디오…)
+  중복 비용이 커진다. Python은 버전 검사(`check_version.py`)에만 남는다.
+
+## D-016 Android 내보내기: 디버그 서명 APK, 서명·스토어 빌드는 P3로 (2026-10-06, P0-028)
+
+- 프리셋 `Android`: `arm64-v8a`(실기기) + `x86_64`(에뮬레이터), Gradle 빌드 없음(내장 템플릿 APK), 패키지 `com.jeiel85.ripplegarden`,
+  가로/세로는 프로젝트 설정(세로). 권한은 요청하지 않는다(오프라인 게임, INTERNET 없음). 버전 이름은 `config/version`과 같아야 하며 `tools/check_version.py`가 검사한다.
+- 이번 빌드는 편집기의 디버그 키스토어로 서명한 **디버그 APK**다. 배포용 키스토어·AAB·Play 정책 대응은 구매 연동과 함께 P3-001/P3-009에서 한다.
+- Android CI 빌드는 SDK/JDK/키스토어 준비가 필요해 아직 CI에 넣지 않았다(→ Backlog). 로컬에서는 README의 명령으로 만든다.

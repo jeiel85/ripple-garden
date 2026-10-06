@@ -38,6 +38,10 @@ def main() -> int:
         for value in values:
             if value != version:
                 errors.append(f"{PRESETS.name}: {key}='{value}' != config/version '{version}'")
+    # The Android preset carries its own version name; it must follow the game version too.
+    for value in read_values(PRESETS, "version/name"):
+        if value != version:
+            errors.append(f"{PRESETS.name}: version/name='{value}' != config/version '{version}'")
 
     if len(sys.argv) > 1:
         tag = sys.argv[1]
