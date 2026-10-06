@@ -41,7 +41,7 @@ func _init() -> void:
 	box.add_child(UiKit.button(tr("ui.water_mind.exit"), exit, true))
 	box.add_child(UiKit.label(tr("ui.water_mind.mixer"), "DimLabel"))
 	for key in MIXER_KEYS:
-		var caption := UiKit.label(tr("ui.setting." + key), "", HORIZONTAL_ALIGNMENT_LEFT, false)
+		var caption := UiKit.label(tr("ui.setting." + key), "", HORIZONTAL_ALIGNMENT_LEFT, true)
 		box.add_child(caption)
 		var slider := HSlider.new()
 		slider.min_value = 0.0

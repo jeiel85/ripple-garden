@@ -19,6 +19,7 @@ static func button(text: String, callback: Callable, primary: bool = false, min_
 	node.text = text
 	node.custom_minimum_size = Vector2(0, min_height)
 	node.focus_mode = Control.FOCUS_ALL
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # long text (other languages, large text) wraps, never widens its screen
 	if primary:
 		node.theme_type_variation = "PrimaryButton"
 	node.pressed.connect(callback)

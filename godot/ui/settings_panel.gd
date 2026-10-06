@@ -90,6 +90,7 @@ func _row(spec: Array) -> Control:
 			var toggle := CheckButton.new()
 			toggle.text = tr("ui.setting." + key)
 			toggle.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
+			toggle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # long labels wrap instead of widening the panel
 			toggle.toggled.connect(func(on: bool) -> void:
 				if not _syncing:
 					GameState.set_setting(key, on))
@@ -97,7 +98,7 @@ func _row(spec: Array) -> Control:
 			return toggle
 		"slider":
 			var box := UiKit.vbox(4)
-			var caption := UiKit.label("", "", HORIZONTAL_ALIGNMENT_LEFT, false)
+			var caption := UiKit.label("", "", HORIZONTAL_ALIGNMENT_LEFT, true)
 			caption.name = "Caption"
 			box.add_child(caption)
 			var slider := HSlider.new()
@@ -117,7 +118,7 @@ func _row(spec: Array) -> Control:
 			return box
 		"option":
 			var box := UiKit.hbox(12)
-			var caption := UiKit.label(tr("ui.setting." + key), "", HORIZONTAL_ALIGNMENT_LEFT, false)
+			var caption := UiKit.label(tr("ui.setting." + key), "", HORIZONTAL_ALIGNMENT_LEFT, true)
 			caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			box.add_child(caption)
 			var option := OptionButton.new()

@@ -56,7 +56,7 @@ func setup(deps: Dictionary) -> void:
 	fight_meter = FightMeter.new()
 	fight_meter.visible = false
 	fight_meter.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	fight_meter.offset_top = 150
+	fight_meter.offset_top = 235
 	fight_meter.offset_left = 30
 	fight_meter.offset_right = -30
 	root.add_child(fight_meter)
@@ -143,9 +143,17 @@ func _build_panels(deps: Dictionary) -> void:
 
 # --- panels ---
 
+## Width a modal panel may take: its design width, but never more than the screen minus a margin
+## (a narrow phone must not push the panel's edge off screen).
+static func fit_width(design_width: float, available_width: float) -> float:
+	return minf(design_width, available_width - 48.0)
+
 func _open(panel: Control) -> void:
 	if water_mind.active:
 		return
+	if not panel.has_meta("design_width"):
+		panel.set_meta("design_width", panel.custom_minimum_size.x)
+	panel.custom_minimum_size.x = fit_width(float(panel.get_meta("design_width")), get_viewport().get_visible_rect().size.x)
 	if _current_panel != null:
 		_modal_center.remove_child(_current_panel)
 	_current_panel = panel

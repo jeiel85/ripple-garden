@@ -198,3 +198,46 @@ func test_restoration_panel_names_what_the_next_stage_brings() -> void:
 		assert_false(names.is_empty(), "stage %d promises nothing" % level)
 	assert_true(panel._next_stage_names(2).contains(String(TranslationServer.translate("ui.prop.reed"))))
 	panel.free()
+
+# --- panels fit the screen in every language ---
+
+func test_modal_width_never_exceeds_the_screen() -> void:
+	assert_eq(UIController.fit_width(640.0, 720.0), 640.0, "a normal phone keeps the design width")
+	assert_eq(UIController.fit_width(640.0, 600.0), 552.0, "a narrow screen shrinks the panel and keeps a margin")
+	assert_true(UIController.fit_width(640.0, 400.0) < 400.0)
+
+func test_no_panel_is_wider_than_its_design_width_in_korean_or_english() -> void:
+	var previous := TranslationServer.get_locale()
+	_fresh_state()
+	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
+	# Measured with the real UI theme (30 px text): the default theme's 16 px text would hide the problem.
+	var theme := UiTheme.build(1.0, false, false)
+	for locale in ["ko", "en"]:
+		TranslationServer.set_locale(locale)
+		var panels: Array = []
+		var settings := SettingsPanel.new()
+		panels.append(settings)
+		var gear := GearPanel.new()
+		panels.append(gear)
+		var restore := RestorationPanel.new()
+		restore.setup(restoration, "region_01_quiet_pond")
+		panels.append(restore)
+		var journal := JournalPanel.new()
+		journal.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), "region_01_quiet_pond")
+		panels.append(journal)
+		var inspect := InspectPanel.new()
+		panels.append(inspect)
+		var licenses := TextPanel.new()
+		licenses.show_text("Licenses", TextPanel.licenses_text())
+		panels.append(licenses)
+		for panel in panels:
+			panel.theme = theme
+			tree.root.add_child(panel)
+			if panel.has_method("refresh"):
+				panel.refresh()
+			var design_width: float = panel.custom_minimum_size.x
+			assert_true(panel.get_combined_minimum_size().x <= design_width + 1.0,
+				"%s needs %.0f px in %s but is designed for %.0f" % [panel.get_script().get_path().get_file(), panel.get_combined_minimum_size().x, locale, design_width])
+			panel.free()
+	TranslationServer.set_locale(previous)
+	_fresh_state()
