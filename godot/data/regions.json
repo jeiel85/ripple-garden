@@ -13,7 +13,13 @@
       "cloudy",
       "rain"
     ],
-    "restoration_levels": 10
+    "restoration_levels": 10,
+    "map": {
+      "x": 0.27,
+      "y": 0.27,
+      "style": "pond",
+      "icon": "pin"
+    }
   },
   {
     "id": "region_02_forest_stream",
@@ -30,7 +36,13 @@
       "rain",
       "mist"
     ],
-    "restoration_levels": 10
+    "restoration_levels": 10,
+    "map": {
+      "x": 0.73,
+      "y": 0.26,
+      "style": "valley",
+      "icon": "valley"
+    }
   },
   {
     "id": "region_03_reed_river",
@@ -48,7 +60,13 @@
       "storm",
       "mist"
     ],
-    "restoration_levels": 10
+    "restoration_levels": 10,
+    "map": {
+      "x": 0.56,
+      "y": 0.52,
+      "style": "river",
+      "icon": "freshwater"
+    }
   },
   {
     "id": "region_04_blue_coast",
@@ -66,7 +84,13 @@
       "storm",
       "mist"
     ],
-    "restoration_levels": 10
+    "restoration_levels": 10,
+    "map": {
+      "x": 0.25,
+      "y": 0.74,
+      "style": "coast",
+      "icon": "sea"
+    }
   },
   {
     "id": "region_05_moonlight_isle",
@@ -84,6 +108,12 @@
       "storm",
       "mist"
     ],
-    "restoration_levels": 10
+    "restoration_levels": 10,
+    "map": {
+      "x": 0.74,
+      "y": 0.78,
+      "style": "isle",
+      "icon": "night"
+    }
   }
 ]

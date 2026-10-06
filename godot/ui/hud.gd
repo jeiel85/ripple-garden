@@ -20,6 +20,7 @@ signal journal_pressed
 signal gear_pressed
 signal restore_pressed
 signal camp_pressed
+signal map_pressed
 signal settings_pressed
 signal water_mind_pressed
 signal cta_down
@@ -162,6 +163,14 @@ func _build_top() -> Control:
 	weather_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	status.add_child(weather_label)
 	status_pill.add_child(status)
+	# The whole pill is the way to the region map (P1-010).
+	var status_button := Button.new()
+	status_button.theme_type_variation = "FlatButton"
+	status_button.tooltip_text = tr("ui.map.open")
+	status_button.focus_mode = Control.FOCUS_ALL
+	status_button.pressed.connect(func() -> void: map_pressed.emit())
+	status_pill.add_child(status_button)
+	status_pill.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(status_pill)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL

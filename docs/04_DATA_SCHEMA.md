@@ -106,6 +106,7 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
 - `balance.json`: `starting_inventory`에 bags·accessories·equipped_*·bait_counts, `equipment.bait_pack_size`
 - 시작 미끼에는 끝없는 미끼가 하나 이상 있어야 하고, 시작 재고는 시작 가방에 들어가야 한다(검증기가 강제)
 - `decorations.json` (P1-002): [{id `deco_*`, name_key, desc_key, category furniture | ornament, prop(PropKinds), scale, price?, unlock?}]
+- `regions.json` (P1-010): `map` {x 0..1, y 0..1, style pond | valley | river | coast | isle, icon} — 지도 위 섬 자리
 - `region_layouts.json`: `camp_slots` [{id, x, y}], `camp_focus` {x, y, zoom}; `balance.json` `starting_camp` {region: {slot: deco}}
 
 ## 6. Migration Rules
