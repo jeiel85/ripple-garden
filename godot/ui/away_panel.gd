@@ -2,9 +2,10 @@ class_name AwayPanel
 extends PanelContainer
 
 ## "While you were away" (GDD §14, P1-007): one short card after an absence — how long, which fish
-## multiplied and the Ripple that trickled in — and a single button to go and look. It points at the
-## world rather than at numbers: the new fish are already swimming when the card closes. Never stacked
-## with other rewards; shown once per absence.
+## multiplied and the Ripple that trickled in — and a single button back to the pond. The numbers are the
+## pond's real counts; how many of them swim on screen follows the population steps (PopulationModel), so a
+## small increase may not add a visible fish. Never stacked with other screens: the UIController holds the
+## card until nothing else is open and no line is out; shown once per absence.
 
 signal close_pressed
 

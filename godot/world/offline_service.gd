@@ -26,6 +26,13 @@ class Summary:
 	func hours() -> float:
 		return seconds / 3600.0
 
+	## Adds another absence that came before this one was shown (both already applied to the save).
+	func merge(other: Summary) -> void:
+		seconds += other.seconds
+		ripple += other.ripple
+		for fish_id in other.fish_added:
+			fish_added[fish_id] = int(fish_added.get(fish_id, 0)) + int(other.fish_added[fish_id])
+
 var _state: Node
 var _config: Dictionary
 

@@ -45,6 +45,8 @@ var _camera: CameraController
 var _region_id := ""
 ## Set by "다시 낚시": cast again as soon as the released fish is gone.
 var _recast_after_release := false
+## An away summary that arrived while something else was on screen (shown once things are quiet).
+var _pending_away: OfflineService.Summary = null
 
 func _init() -> void:
 	layer = 10
@@ -278,6 +280,7 @@ func close_panel() -> void:
 	# The inspect screen is part of the fishing flow: closing a side panel returns to it.
 	if _fishing.state == FishingController.State.INSPECT:
 		_show_inspect()
+	_show_pending_away()
 
 func is_panel_open() -> bool:
 	return _current_panel != null
@@ -393,6 +396,8 @@ func _on_fishing_state_changed(_previous: String, current: String) -> void:
 		_recast_after_release = false
 		if _current_panel == null and not water_mind.active:
 			world_input.cast_quick()
+	if current == "ready":
+		_show_pending_away()
 
 func _on_cast_rejected(reason: String) -> void:
 	show_message(tr("ui.toast.no_fish_here") if reason == "no_fish_here" else "")
@@ -426,9 +431,24 @@ func _refresh_journal_notice() -> void:
 
 ## "While you were away": one short card; skipped while another screen or water-mind is up (the fish are
 ## in the pond either way).
+## The card waits for a quiet moment: not over another screen or water-mind, and not while a line is
+## out (it would hide a bite). The rewards are already in the save; only the telling waits.
 func show_away_summary(summary: OfflineService.Summary) -> void:
-	if _current_panel != null or water_mind.active:
+	if _pending_away == null:
+		_pending_away = summary
+	else:
+		_pending_away.merge(summary)
+	_show_pending_away()
+
+func has_pending_away() -> bool:
+	return _pending_away != null
+
+func _show_pending_away() -> void:
+	if _pending_away == null or _current_panel != null or water_mind.active \
+			or not _fishing.state in [FishingController.State.READY, FishingController.State.AIM]:
 		return
+	var summary := _pending_away
+	_pending_away = null
 	_open(away_panel)
 	away_panel.show_summary(summary)
 
@@ -477,6 +497,7 @@ func exit_water_mind() -> void:
 	world_input.enabled = true
 	if _fishing.state == FishingController.State.INSPECT:
 		_show_inspect()  # a catch that arrived while the screen was hidden
+	_show_pending_away()
 
 func _on_time_preview(band: String) -> void:
 	if band.is_empty():

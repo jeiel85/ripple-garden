@@ -77,6 +77,22 @@ func test_returning_shows_one_short_card() -> void:
 	assert_true(root.ui.away_panel.line_count() >= 1)
 	root.ui.away_panel.close_pressed.emit()
 	assert_false(root.ui.is_panel_open())
+	# Coming back while another screen is open: the card waits for it to close instead of being lost.
+	root.ui.open_journal()
+	TimeService._announce_offline(3 * 3600)
+	assert_eq(root.ui.current_panel(), root.ui.journal_panel)
+	assert_true(root.ui.has_pending_away())
+	root.ui.close_panel()
+	assert_eq(root.ui.current_panel(), root.ui.away_panel, "shown once the journal closed")
+	root.ui.away_panel.close_pressed.emit()
+	# Coming back with a line out: the card waits for the line to come in, so a bite is never hidden.
+	root.ui.world_input.cast_quick()
+	assert_true(root.fishing.state in [FishingController.State.CAST, FishingController.State.WAIT], "the line is out")
+	TimeService._announce_offline(3 * 3600)
+	assert_false(root.ui.is_panel_open(), "nothing covers a waiting line")
+	root.fishing.cancel()
+	assert_eq(root.ui.current_panel(), root.ui.away_panel, "shown when the line is back in")
+	root.ui.away_panel.close_pressed.emit()
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()
