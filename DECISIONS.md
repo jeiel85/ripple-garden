@@ -74,3 +74,11 @@
 - 벽시계는 "자리를 비운 시간" 계산에만 쓰며 `[0, 12h]`로 clamp한다(되돌린 시계 → 0, 장기 부재 → 12h 상한). 앱 일시정지→재개와 세이브 로드가 같은 규칙을 쓴다.
 - Real-time Mode는 로컬 시각을 그대로 게임 시계로 쓰고 전용 보상은 없다(GDD §13).
 - 시간대 경계는 콘텐츠(`band_starts_hour`)다. 시간대 개수(현재 4)는 `TimeService.TIME_BANDS`이며 P1-005에서 5개로 확장한다.
+
+## D-010 낚시 코어: 상태 머신은 뷰를 모르고, 포획은 잡는 즉시 기록 (2026-10-06, P0-011~016)
+
+- `FishingController`는 전이 표(`TRANSITIONS`)에 없는 이동을 오류로 거부하고, 시간은 `advance(delta)`로만 흐른다(테스트 가능, 프레임 한 번에 여러 상태 경계 통과 가능). 애니메이션·소리·햅틱은 EventBus 구독자다.
+- 실패는 항상 부드럽다: 훅을 놓치거나 장력 싸움에서 지면 `fish_escaped`로 끝나고 READY로 돌아간다. 희귀(등급 ≥ pity_min_rarity) 종을 놓치면 세션 내 pity 카운터만 오른다(저장 안 함).
+- 물고기를 올리는 순간(LAND 진입) 도감에 기록하고 `session.pending_catch`로 저장한다. 방생은 그 뒤의 별도 단계이며, 강제 종료돼도 다음 실행에서 `resume_pending_catch()`로 INSPECT에 복귀한다. **판매/보관 경로는 존재하지 않는다**(UI_UX §4, GDD §11).
+- 장력 싸움은 순수 시뮬레이션(`FightSimulation`)이고 어종별 당김 패턴은 `behaviors.json`이다. 테스트가 72종 전부가 꾸준한 플레이어에게 낚이고, 방치·계속 감기는 실패함을 강제한다.
+- 모든 타이밍·보상 수치는 `balance.json`(`fishing`, `rewards`)이며 ContentValidator가 범위·상호 관계(예: 풀기 목표가 안전 구간 아래)를 검증한다.

@@ -13,6 +13,7 @@ var baits: Dictionary = {}
 var progression: Dictionary = {}
 var balance: Dictionary = {}
 var aliases: Dictionary = {}
+var behaviors: Dictionary = {}
 var errors := PackedStringArray()
 
 var _fish_by_region: Dictionary = {}
@@ -36,6 +37,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	progression = result["progression"]
 	balance = result["balance"]
 	aliases = result["aliases"]
+	behaviors = result["behaviors"]
 	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])
@@ -64,6 +66,9 @@ func get_fish_for_region(region_id: String) -> Array:
 					_fish_by_region[fish_region] = []
 				_fish_by_region[fish_region].append(fish_def)
 	return _fish_by_region.get(region_id, [])
+
+func get_behavior(behavior_id: String) -> Dictionary:
+	return behaviors.get(behavior_id, {})
 
 func get_rod(rod_id: String) -> Dictionary:
 	return rods.get(rod_id, {})

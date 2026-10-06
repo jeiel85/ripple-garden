@@ -16,6 +16,9 @@ extends Node
 ##    exposes its own signal to the one view that needs it.
 
 # --- fishing flow ---
+## Lower-case state names: "ready", "aim", "cast", "wait", "bite_hint", "hook", "fight", "land",
+## "inspect", "release". Strings, not the enum, so listeners need no reference to the controller.
+signal fishing_state_changed(previous: String, current: String)
 signal cast_landed(position: Vector2, habitat: String)
 signal bite_hinted()
 signal fish_hooked(fish_id: String)

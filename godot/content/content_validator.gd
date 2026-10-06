@@ -6,11 +6,12 @@ extends RefCounted
 ## code never sees malformed definitions; every problem is reported in `errors`.
 ##
 ## Input:  {"fish": Array, "regions": Array, "rods": Array, "baits": Array,
-##          "progression": Dictionary, "balance": Dictionary, "aliases": Dictionary} — a value may be null when its file
+##          "progression": Dictionary, "balance": Dictionary, "aliases": Dictionary,
+##          "behaviors": Array} — a value may be null when its file
 ##          could not be read (the loader reports that error itself).
 ## Output: {"fish": {id: def}, "regions": {...}, "rods": {...}, "baits": {...},
 ##          "progression": Dictionary (empty if invalid), "balance": Dictionary (empty if invalid),
-##          "aliases": Dictionary (empty if invalid),
+##          "aliases": Dictionary (empty if invalid), "behaviors": {id: def},
 ##          "errors": PackedStringArray}
 
 const TIME_BANDS: PackedStringArray = preload("res://autoload/time_service.gd").TIME_BANDS
@@ -23,6 +24,7 @@ const FILE_NAMES := {
 	"progression": "progression.json",
 	"balance": "balance.json",
 	"aliases": "content_aliases.json",
+	"behaviors": "behaviors.json",
 }
 
 const ID_PATTERNS := {
@@ -30,6 +32,7 @@ const ID_PATTERNS := {
 	"regions": "^region_[0-9]{2}_[a-z0-9_]+$",
 	"rods": "^rod_[a-z0-9_]+$",
 	"baits": "^bait_[a-z0-9_]+$",
+	"behaviors": "^[a-z][a-z0-9_]*$",
 }
 
 static func validate(raw: Dictionary) -> Dictionary:
@@ -41,6 +44,8 @@ static func validate(raw: Dictionary) -> Dictionary:
 		for tag in bait_def["tags"]:
 			v._bait_tags[tag] = true
 	var rods := v._validate_list(raw.get("rods"), "rods", v._check_rod)
+	var behaviors := v._validate_list(raw.get("behaviors"), "behaviors", v._check_behavior)
+	v._behaviors = behaviors
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
@@ -53,12 +58,14 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"progression": progression,
 		"balance": balance,
 		"aliases": aliases,
+		"behaviors": behaviors,
 		"errors": v._errors,
 	}
 
 var _errors := PackedStringArray()
 var _regions: Dictionary = {}
 var _bait_tags: Dictionary = {}
+var _behaviors: Dictionary = {}
 var _item_errors := PackedStringArray()
 
 func _validate_list(items: Variant, category: String, check: Callable) -> Dictionary:
@@ -117,10 +124,18 @@ func _check_rod(d: Dictionary) -> void:
 	_require_number(d, "tension_assist", 0.0, 1.0, true)
 	_require_string_list(d, "tags")
 
+func _check_behavior(d: Dictionary) -> void:
+	_require_min_max(d, "pull_interval_sec", 0.1, 60.0)
+	_require_min_max(d, "pull_duration_sec", 0.05, 30.0)
+	_require_number(d, "pull_scale", 0.0, 3.0, false)
+	if typeof(d.get("alternate")) != TYPE_BOOL:
+		_item_errors.append("alternate: must be true or false")
+
 func _check_fish(d: Dictionary) -> void:
 	_require_string(d, "name_key")
 	_require_string(d, "journal_key")
-	_require_string(d, "behavior")
+	if _require_string(d, "behavior") and not _behaviors.has(d["behavior"]):
+		_item_errors.append("behavior: unknown behavior '%s'" % d["behavior"])
 	_require_int(d, "rarity", 1, 5)
 	_require_number(d, "base_weight", 0.0, INF, false)
 
@@ -318,6 +333,68 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 		_check_balance_number(encounter, "encounter", "ecosystem_rarity_bonus_per_level", 0.0, 2.0)
 		_check_balance_number(encounter, "encounter", "size_skew", 0.1, 10.0)
 
+	var fishing: Variant = data.get("fishing")
+	if typeof(fishing) != TYPE_DICTIONARY:
+		_errors.append("%s.fishing: must be an object" % file_name)
+	else:
+		_check_balance_range(fishing, "fishing", "cast_sec", 0.1, 10.0)
+		_check_balance_range(fishing, "fishing", "wait_sec", 0.5, 120.0)
+		_check_balance_range(fishing, "fishing", "bite_hint_sec", 0.1, 10.0)
+		_check_balance_range(fishing, "fishing", "hook_window_sec", 0.3, 20.0)
+		_check_balance_range(fishing, "fishing", "hook_window_relaxed_sec", 0.3, 20.0)
+		for field in ["land_sec", "release_sec"]:
+			_check_balance_number(fishing, "fishing", field, 0.1, 30.0)
+		var wait: Variant = fishing.get("wait_sec")
+		if typeof(wait) == TYPE_DICTIONARY:
+			_check_balance_number(wait, "fishing.wait_sec", "floor", 0.5, 120.0)
+			if _is_number(wait.get("floor")) and _is_number(wait.get("max")) and wait["floor"] > wait["max"]:
+				_errors.append("%s.fishing.wait_sec.floor: must not exceed max" % file_name)
+		var hook: Variant = fishing.get("hook_window_sec")
+		var relaxed: Variant = fishing.get("hook_window_relaxed_sec")
+		if typeof(hook) == TYPE_DICTIONARY and typeof(relaxed) == TYPE_DICTIONARY \
+				and _is_number(hook.get("min")) and _is_number(relaxed.get("min")) and relaxed["min"] < hook["min"]:
+			_errors.append("%s.fishing.hook_window_relaxed_sec: relaxed windows must not be shorter than the normal ones" % file_name)
+		var fight: Variant = fishing.get("fight")
+		if typeof(fight) != TYPE_DICTIONARY:
+			_errors.append("%s.fishing.fight: must be an object" % file_name)
+		else:
+			_check_balance_range(fight, "fishing.fight", "band", 0.0, 1.0)
+			for field in ["hold_target", "release_target", "start_progress", "slack_threshold", "snap_threshold"]:
+				_check_balance_number(fight, "fishing.fight", field, 0.0, 1.0)
+			for field in ["response_per_sec", "duration_scale", "slack_grace_sec", "snap_grace_sec"]:
+				_check_balance_number(fight, "fishing.fight", field, 0.01, 60.0)
+			for field in ["regress_above_band_per_sec", "regress_below_band_per_sec"]:
+				_check_balance_number(fight, "fishing.fight", field, 0.0, 5.0)
+			var band: Variant = fight.get("band")
+			if typeof(band) == TYPE_DICTIONARY and _is_number(band.get("min")) and _is_number(band.get("max")):
+				if _is_number(fight.get("release_target")) and fight["release_target"] >= band["min"]:
+					_errors.append("%s.fishing.fight.release_target: must be below the safe band so letting go relaxes the line" % file_name)
+				if _is_number(fight.get("hold_target")) and fight["hold_target"] <= band["max"]:
+					_errors.append("%s.fishing.fight.hold_target: must be above the safe band so reeling tightens the line" % file_name)
+
+	var rewards: Variant = data.get("rewards")
+	if typeof(rewards) != TYPE_DICTIONARY:
+		_errors.append("%s.rewards: must be an object" % file_name)
+	else:
+		var ripple_table: Variant = rewards.get("ripple_by_rarity")
+		for rarity in ["1", "2", "3", "4", "5"]:
+			if typeof(ripple_table) != TYPE_DICTIONARY:
+				_errors.append("%s.rewards.ripple_by_rarity: must be an object keyed by rarity 1..5" % file_name)
+				break
+			_check_balance_range(ripple_table, "rewards.ripple_by_rarity", rarity, 0.0, 100000.0, true)
+		for table_name in ["memory_first_discovery_by_rarity", "restoration_points_by_rarity"]:
+			var table: Variant = rewards.get(table_name)
+			if typeof(table) != TYPE_DICTIONARY:
+				_errors.append("%s.rewards.%s: must be an object keyed by rarity 1..5" % [file_name, table_name])
+				continue
+			for rarity in ["1", "2", "3", "4", "5"]:
+				_check_balance_number(table, "rewards." + table_name, rarity, 0.0, 100000.0, true)
+		_check_balance_number(rewards, "rewards", "first_discovery_restoration_bonus", 0.0, 100000.0, true)
+		_check_balance_number(rewards, "rewards", "repeat_decay_per_release", 0.0, 1.0)
+		_check_balance_number(rewards, "rewards", "repeat_floor", 0.0, 1.0)
+		if _is_number(rewards.get("repeat_floor")) and rewards["repeat_floor"] <= 0.0:
+			_errors.append("%s.rewards.repeat_floor: must be above 0 so repeat catches never give nothing (BALANCE section 6)" % file_name)
+
 	var slice: Variant = data.get("vertical_slice")
 	if typeof(slice) != TYPE_DICTIONARY:
 		_errors.append("%s.vertical_slice: must be an object" % file_name)
@@ -360,6 +437,19 @@ func _validate_aliases(data: Variant, current: Dictionary) -> Dictionary:
 				_errors.append("%s: must lead to an existing %s id without looping (ends at %s)" % [
 					label, category, var_to_str(target)])
 	return data if _errors.size() == before else {}
+
+## `section[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
+func _check_balance_range(section: Dictionary, section_name: String, field: String,
+		lo: float, hi: float, integer: bool = false) -> void:
+	var value: Variant = section.get(field)
+	var label := "%s.%s.%s" % [FILE_NAMES["balance"], section_name, field]
+	if typeof(value) != TYPE_DICTIONARY or not _is_number(value.get("min")) or not _is_number(value.get("max")):
+		_errors.append("%s: must be an object with numeric min and max" % label)
+		return
+	if value["min"] < lo or value["max"] > hi or value["min"] > value["max"] \
+			or (integer and not (_is_int(value["min"]) and _is_int(value["max"]))):
+		_errors.append("%s: requires %s <= min <= max <= %s%s (got %s..%s)" % [
+			label, lo, hi, " (integers)" if integer else "", value["min"], value["max"]])
 
 ## Appends an error unless `section[field]` is a finite number in [min_value, max_value]
 ## (an integer when `integer` is set).
@@ -424,6 +514,14 @@ func _require_number(d: Dictionary, field: String, min_value: float, max_value: 
 	if not ok:
 		_item_errors.append("%s%s: must be a number in %s%s, %s] (got %s)" % [
 			prefix, field, "[" if min_inclusive else "(", min_value, max_value, var_to_str(value)])
+
+## `d[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
+func _require_min_max(d: Dictionary, field: String, lo: float, hi: float) -> void:
+	var value: Variant = d.get(field)
+	if typeof(value) != TYPE_DICTIONARY or not _is_number(value.get("min")) or not _is_number(value.get("max")):
+		_item_errors.append("%s: must be an object with numeric min and max" % field)
+	elif value["min"] < lo or value["max"] > hi or value["min"] > value["max"]:
+		_item_errors.append("%s: requires %s <= min <= max <= %s (got %s..%s)" % [field, lo, hi, value["min"], value["max"]])
 
 func _require_modifier_map(d: Dictionary, field: String, allowed: PackedStringArray, what: String) -> void:
 	var value: Variant = d.get(field)

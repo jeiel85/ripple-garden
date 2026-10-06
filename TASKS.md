@@ -5,7 +5,7 @@
   - EntitlementService autoload는 P1-011에서 등록 (TECH_SPEC §2 목록 중 유일한 미등록 항목)
 - [x] P0-002 ContentDB JSON loader + validation errors
   - 런타임 검증: `godot/content/content_validator.gd` (DATA_SCHEMA §7). 로컬라이제이션 키 존재는 `tests/unit/test_localization_keys.gd`
-  - behavior 값은 정의 목록이 아직 없어 비어 있지 않은 문자열만 검사 → P0-015(fight)에서 behavior 정의 시 참조 검사 추가
+  - behavior 값은 `data/behaviors.json` 정의를 참조해 검사한다(P0-015에서 추가됨)
 - [x] P0-003 EventBus typed event conventions
   - 규약은 D-006, 자동 검사는 `tests/unit/test_event_bus.gd`
 - [x] P0-004 GameState domain model
@@ -20,12 +20,18 @@
 - [ ] P0-009 Habitat zone component
 - [x] P0-010 EncounterResolver seeded weighted random
   - 수치는 `data/balance.json`의 `encounter`. 테스트: 결정성·조건 필터·0 가중치·pity 상한/리셋·빈도 분포 (`test_encounter_resolver.gd`)
-- [ ] P0-011 Fishing state machine
-- [ ] P0-012 cast input
-- [ ] P0-013 bite timing + feedback hooks
-- [ ] P0-014 hook timing + relaxed/auto hook
-- [ ] P0-015 fight tension simulation
-- [ ] P0-016 catch inspect/release flow
+- [x] P0-011 Fishing state machine
+  - 전이 표·타이머·복귀 경로, 정책 D-010 (`test_fishing_controller.gd`)
+- [x] P0-012 cast input
+  - `fishing/cast_aim.gd` 조준 기하(순수). 터치 입력 위젯은 월드 UI에서 연결
+- [x] P0-013 bite timing + feedback hooks
+  - 대기 하한 3.5s·로드 민감도·BITE_HINT 이벤트, 햅틱 `fishing_feedback.gd`
+- [x] P0-014 hook timing + relaxed/auto hook
+  - 일반 1.5~2.5s / 완화 3~4s / 자동 훅(불이익 없음)
+- [x] P0-015 fight tension simulation
+  - `fishing/fight_simulation.gd` + `data/behaviors.json`(어종 behavior 참조 검증 추가)
+- [x] P0-016 catch inspect/release flow
+  - `fishing/catch_service.gd` (보상·반복 감소·pending_catch 복구), 판매 경로 없음
 - [ ] P0-017 collection journal state
 - [ ] P0-018 region population state
 - [ ] P0-019 visible fish presenter + pool
