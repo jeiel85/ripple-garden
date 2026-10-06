@@ -14,12 +14,16 @@ static func label(text: String, variation: String = "", align: HorizontalAlignme
 		node.theme_type_variation = variation
 	return node
 
-static func button(text: String, callback: Callable, primary: bool = false, min_height: float = UiTheme.TOUCH_MIN_PX) -> Button:
+## `wrap` lets long text break onto lines. Leave it off for buttons that share a row with something
+## that expands: a wrapping button has no minimum width, so the neighbour would squash it flat.
+static func button(text: String, callback: Callable, primary: bool = false, min_height: float = UiTheme.TOUCH_MIN_PX,
+		wrap: bool = false) -> Button:
 	var node := Button.new()
 	node.text = text
 	node.custom_minimum_size = Vector2(0, min_height)
 	node.focus_mode = Control.FOCUS_ALL
-	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # long text (other languages, large text) wraps, never widens its screen
+	if wrap:
+		node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if primary:
 		node.theme_type_variation = "PrimaryButton"
 	node.pressed.connect(callback)

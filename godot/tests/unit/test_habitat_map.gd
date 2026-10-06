@@ -122,3 +122,19 @@ func test_props_appear_progressively_with_restoration() -> void:
 		var palette_changed: bool = layout["levels"][level] != layout["levels"][level - 1]
 		assert_true(added + removed + animals_added > 0 or palette_changed, "level %d changes nothing visible" % level)
 	assert_true(visible_by_level[cap] > visible_by_level[0], "a restored pond should be fuller than a barren one")
+
+func test_a_zone_poking_past_the_pond_does_not_make_the_bank_a_habitat() -> void:
+	var map := _map()
+	# (115, 668) lies inside the left vegetation zone's polygon but just outside the pond outline.
+	assert_false(map.is_water(Vector2(115, 668)))
+	assert_eq(map.habitat_at(Vector2(115, 668)), "", "the bank must not count as fishable water")
+	_free_zones()
+
+func test_random_points_are_always_on_the_water() -> void:
+	var map := _map()
+	var rng := RandomNumberGenerator.new()
+	for seed_value in 40:
+		rng.seed = seed_value
+		for habitat in ContentDB.get_region(REGION)["habitats"]:
+			assert_true(map.is_water(map.random_point([habitat], rng)), "%s point off the water (seed %d)" % [habitat, seed_value])
+	_free_zones()

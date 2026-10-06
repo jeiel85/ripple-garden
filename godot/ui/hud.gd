@@ -140,6 +140,9 @@ func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> vo
 	bottom_bar.add_theme_constant_override("margin_bottom", 20 + int(bottom_inset))
 	for button in [journal_button, gear_button, restore_button, settings_button, water_mind_button]:
 		button.custom_minimum_size.y = touch_min
+	# The top buttons never wrap, so they get a real minimum width (the 48 dp target) next to the status text.
+	for button in [settings_button, water_mind_button]:
+		button.custom_minimum_size.x = touch_min
 	cta_button.custom_minimum_size.y = touch_min * 1.2
 
 # --- idle fade ---

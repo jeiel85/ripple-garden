@@ -46,7 +46,7 @@ func _fill(box: VBoxContainer, ids: Array, equipped_id: String, is_rod: bool) ->
 			label = "%s\n%s" % [label, tr("ui.gear.rod_stats") % [roundi(float(def["range"]) * 100.0), float(def["bite_speed"])]]
 		if equipped:
 			label = tr("ui.gear.item_equipped") % label  # the state is also in the text, never colour alone
-		var button := UiKit.button(label, func() -> void: _equip(item_id, is_rod), equipped)
+		var button := UiKit.button(label, func() -> void: _equip(item_id, is_rod), equipped, UiTheme.TOUCH_MIN_PX, true)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		box.add_child(button)
 

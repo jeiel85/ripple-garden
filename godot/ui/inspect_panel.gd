@@ -32,6 +32,11 @@ func _init() -> void:
 		box.add_child(node)
 	add_child(UiKit.margin(box, 26))
 
+func _focus_release() -> void:
+	# Deferred: by then the panel may already have been closed again.
+	if _release.is_inside_tree():
+		_release.grab_focus()
+
 ## `pending` is the pending-catch info: fish_id, size_cm, first_discovery.
 func show_catch(pending: Dictionary) -> void:
 	var fish_id: String = pending["fish_id"]
@@ -46,4 +51,4 @@ func show_catch(pending: Dictionary) -> void:
 	_size.text = tr("ui.inspect.size") % float(pending["size_cm"])
 	var record := GameState.get_collection_record(fish_id)
 	_meetings.text = tr("ui.inspect.encounters") % int(record["encounters"])
-	_release.grab_focus.call_deferred()
+	_focus_release.call_deferred()

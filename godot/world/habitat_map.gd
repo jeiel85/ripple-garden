@@ -12,8 +12,11 @@ func _init(pond_polygon: PackedVector2Array, zones: Array[HabitatZone]) -> void:
 	pond = pond_polygon
 	_zones = zones
 
-## Habitat tag at `point`, or "" when the point is not on a habitat (land, outside the pond).
+## Habitat tag at `point`, or "" when the point is not on a habitat (land, outside the pond). Zones may
+## poke slightly past the pond outline, so a point must be on the water as well as inside a zone.
 func habitat_at(point: Vector2) -> String:
+	if not is_water(point):
+		return ""
 	for i in range(_zones.size() - 1, -1, -1):
 		if _zones[i].contains_point(point):
 			return _zones[i].habitat_tag
@@ -44,7 +47,7 @@ func random_point(habitats: Array, rng: RandomNumberGenerator) -> Vector2:
 				break
 		var bounds := _bounds(chosen.polygon)
 		var point := Vector2(rng.randf_range(bounds.position.x, bounds.end.x), rng.randf_range(bounds.position.y, bounds.end.y))
-		if chosen.contains_point(point) and habitat_at(point) in habitats:
+		if habitat_at(point) in habitats:  # on the water and in a zone of this habitat
 			return point
 	return candidates[0].polygon[0].lerp(_bounds(candidates[0].polygon).get_center(), 0.5)
 

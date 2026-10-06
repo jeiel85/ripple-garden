@@ -295,3 +295,24 @@ func test_resuming_with_a_pending_catch_goes_straight_to_inspect() -> void:
 	assert_eq(root.fishing.state, FishingController.State.INSPECT)
 	assert_eq(root.ui.current_panel(), root.ui.inspect_panel)
 	_stop(root)
+
+func test_the_hud_lays_out_without_squashed_buttons_in_korean_and_english() -> void:
+	var previous := TranslationServer.get_locale()
+	for locale in ["ko", "en"]:
+		TranslationServer.set_locale(locale)
+		var root := _start()
+		await tree.process_frame
+		await tree.process_frame
+		var hud: Hud = root.ui.hud
+		var screen_width: float = tree.root.get_visible_rect().size.x
+		for button in [hud.journal_button, hud.gear_button, hud.restore_button, hud.settings_button, hud.water_mind_button, hud.cta_button]:
+			assert_true(button.size.x >= UiTheme.TOUCH_MIN_PX - 1.0, "%s (%s) is only %.0f px wide" % [button.text, locale, button.size.x])
+			assert_true(button.size.y >= UiTheme.TOUCH_MIN_PX - 1.0, "%s (%s) is only %.0f px tall" % [button.text, locale, button.size.y])
+			assert_true(button.get_global_rect().end.x <= screen_width + 1.0, "%s (%s) runs off the right edge" % [button.text, locale])
+		assert_true(hud.status_label.get_global_rect().end.x <= hud.water_mind_button.get_global_rect().position.x + 1.0,
+			"the status text must stay left of the buttons (%s)" % locale)
+		# Single-line buttons must not be wrapped letter by letter.
+		for button in [hud.journal_button, hud.settings_button, hud.water_mind_button]:
+			assert_true(button.size.y < UiTheme.TOUCH_MIN_PX * 1.8, "%s (%s) wraps into a tall pill" % [button.text, locale])
+		_stop(root)
+	TranslationServer.set_locale(previous)
