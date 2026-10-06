@@ -6,10 +6,11 @@ extends RefCounted
 ## code never sees malformed definitions; every problem is reported in `errors`.
 ##
 ## Input:  {"fish": Array, "regions": Array, "rods": Array, "baits": Array,
-##          "progression": Dictionary, "balance": Dictionary} — a value may be null when its file
+##          "progression": Dictionary, "balance": Dictionary, "aliases": Dictionary} — a value may be null when its file
 ##          could not be read (the loader reports that error itself).
 ## Output: {"fish": {id: def}, "regions": {...}, "rods": {...}, "baits": {...},
 ##          "progression": Dictionary (empty if invalid), "balance": Dictionary (empty if invalid),
+##          "aliases": Dictionary (empty if invalid),
 ##          "errors": PackedStringArray}
 
 const TIME_BANDS: PackedStringArray = preload("res://autoload/time_service.gd").TIME_BANDS
@@ -21,6 +22,7 @@ const FILE_NAMES := {
 	"baits": "baits.json",
 	"progression": "progression.json",
 	"balance": "balance.json",
+	"aliases": "content_aliases.json",
 }
 
 const ID_PATTERNS := {
@@ -42,6 +44,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
+	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
 	return {
 		"fish": fish,
 		"regions": regions,
@@ -49,6 +52,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"baits": baits,
 		"progression": progression,
 		"balance": balance,
+		"aliases": aliases,
 		"errors": v._errors,
 	}
 
@@ -287,6 +291,36 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 			_errors.append("%s.vertical_slice.max_restoration_level: must be an integer 1..%d" % [
 				file_name, int(regions[region_id]["restoration_levels"])])
 
+	return data if _errors.size() == before else {}
+
+## Content id aliases for old saves (DATA_SCHEMA §6): {category: {old_id: new_id}}. An old id must
+## no longer exist, and following the chain must end at an existing id without looping.
+func _validate_aliases(data: Variant, current: Dictionary) -> Dictionary:
+	var file_name: String = FILE_NAMES["aliases"]
+	if data == null:
+		return {}
+	if typeof(data) != TYPE_DICTIONARY:
+		_errors.append("%s: top level must be an object" % file_name)
+		return {}
+	var before := _errors.size()
+	for category in current:
+		var table: Variant = data.get(category)
+		if typeof(table) != TYPE_DICTIONARY:
+			_errors.append("%s.%s: must be an object of old id -> new id" % [file_name, category])
+			continue
+		for old_id in table:
+			var label := "%s.%s[%s]" % [file_name, category, old_id]
+			if current[category].has(old_id):
+				_errors.append("%s: the old id still exists as content" % label)
+				continue
+			var target: Variant = table[old_id]
+			var hops := 0
+			while typeof(target) == TYPE_STRING and table.has(target) and hops <= table.size():
+				target = table[target]
+				hops += 1
+			if typeof(target) != TYPE_STRING or not current[category].has(target):
+				_errors.append("%s: must lead to an existing %s id without looping (ends at %s)" % [
+					label, category, var_to_str(target)])
 	return data if _errors.size() == before else {}
 
 func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:

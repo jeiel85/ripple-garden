@@ -12,6 +12,7 @@ var rods: Dictionary = {}
 var baits: Dictionary = {}
 var progression: Dictionary = {}
 var balance: Dictionary = {}
+var aliases: Dictionary = {}
 var errors := PackedStringArray()
 
 func _ready() -> void:
@@ -32,6 +33,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	baits = result["baits"]
 	progression = result["progression"]
 	balance = result["balance"]
+	aliases = result["aliases"]
 	errors = load_errors
 	errors.append_array(result["errors"])
 
