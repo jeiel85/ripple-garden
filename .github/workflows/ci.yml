@@ -107,7 +107,8 @@ jobs:
           $zip = "dist\RippleGarden-$tag-windows-x64.zip"
           Compress-Archive -Path build\windows\* -DestinationPath $zip
           $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
-          "$hash  $(Split-Path $zip -Leaf)" | Out-File -Encoding ascii dist\SHA256SUMS.txt
+          # LF line ending so `sha256sum -c` works on Linux/macOS/Git Bash.
+          [IO.File]::WriteAllText("$PWD\dist\SHA256SUMS.txt", "$hash  $(Split-Path $zip -Leaf)`n")
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $zip dist\SHA256SUMS.txt --clobber
