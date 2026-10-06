@@ -94,6 +94,8 @@ static func default_region(_region_id: String = "") -> Dictionary:
 		"species_population": {},
 		"unlocked_spots": [],
 		"seen_events": [],
+		# P1-002: {slot_id: {"item": decoration_id, "flip": bool}}
+		"camp": {},
 	}
 
 static func default_collection_record() -> Dictionary:
@@ -123,6 +125,8 @@ static func default_save(now: int) -> Dictionary:
 			# D-019: bags hold the counted baits, accessories dress the angler.
 			"bags": [], "equipped_bag": "", "accessories": [], "equipped_accessory": "",
 			"bait_counts": {},
+			# P1-002: camp decorations owned, and which ones the player has already seen in the camp screen.
+			"decorations": [], "decorations_seen": [],
 		},
 		"settings": default_settings(),
 		"entitlement_cache": {"full_game": false},
@@ -163,7 +167,7 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	entitlement["full_game"] = _bool_or_false(entitlement.get("full_game"))
 
 	var inventory: Dictionary = result["inventory"]
-	for list_key in ["rods", "baits", "bags", "accessories"]:
+	for list_key in ["rods", "baits", "bags", "accessories", "decorations", "decorations_seen"]:
 		inventory[list_key] = _string_list(inventory.get(list_key))
 	for equipped_key in ["equipped_rod", "equipped_bait", "equipped_bag", "equipped_accessory"]:
 		inventory[equipped_key] = _string_or(inventory.get(equipped_key), "")
@@ -315,7 +319,25 @@ static func _normalize_region(raw: Variant) -> Dictionary:
 	region["species_population"] = population
 	region["unlocked_spots"] = _string_list(raw.get("unlocked_spots"))
 	region["seen_events"] = _string_list(raw.get("seen_events"))
+	region["camp"] = normalize_camp(raw.get("camp"))
 	return region
+
+## {slot_id: {"item": decoration_id, "flip": bool}}; anything malformed is dropped, and a decoration
+## placed in two slots keeps only its first slot.
+static func normalize_camp(raw: Variant) -> Dictionary:
+	var camp := {}
+	if typeof(raw) != TYPE_DICTIONARY:
+		return camp
+	var used := {}
+	for slot_id in raw:
+		var entry: Variant = raw[slot_id]
+		if typeof(slot_id) != TYPE_STRING or typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("item")) != TYPE_STRING:
+			continue
+		if entry["item"].is_empty() or used.has(entry["item"]):
+			continue
+		used[entry["item"]] = true
+		camp[slot_id] = {"item": entry["item"], "flip": _bool_or_false(entry.get("flip"))}
+	return camp
 
 static func _normalize_collection_record(raw: Variant) -> Dictionary:
 	var record := default_collection_record()

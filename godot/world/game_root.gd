@@ -16,6 +16,7 @@ var journal: JournalModel
 var debug: DebugService = null
 var settings: SettingsApplier
 var loadout: LoadoutService
+var camp: CampService
 var hints: TutorialHints
 
 @onready var region: RegionRuntime = $World/RegionRuntime
@@ -35,6 +36,7 @@ func _ready() -> void:
 	restoration = RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
 	journal = JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"])
 	loadout = LoadoutService.new(GameState)
+	camp = CampService.new(GameState, loadout)
 	hints = TutorialHints.new(GameState, region_id)
 
 	if not region.setup(region_id, GameState.get_restoration_level(region_id), TimeService.get_time_band()):
@@ -56,7 +58,7 @@ func _ready() -> void:
 
 	ui.setup({
 		"fishing": fishing, "region": region, "restoration": restoration, "journal": journal,
-		"loadout": loadout, "hints": hints, "debug": debug, "region_id": region_id,
+		"loadout": loadout, "camp": camp, "camera": camera, "hints": hints, "debug": debug, "region_id": region_id,
 	})
 
 	EventBus.settings_changed.connect(settings.apply)

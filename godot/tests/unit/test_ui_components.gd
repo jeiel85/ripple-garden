@@ -282,12 +282,13 @@ func test_the_restoration_bar_is_full_at_the_cap_even_after_a_partial_stage() ->
 func test_restore_ready_is_shown_by_text_as_well_as_colour() -> void:
 	var hud := Hud.new()
 	tree.root.add_child(hud)
-	var idle_text := hud.restore_button.text
+	hud.set_restore_ready(false)
+	var idle_text := hud.restore_button.tooltip_text
 	hud.set_restore_ready(true)
-	assert_true(hud.restore_button.text != idle_text, "the label must change, not only the colour")
+	assert_true(hud.restore_button.tooltip_text != idle_text, "the name must change, not only the colour")
 	assert_true(hud.restore_dot.visible, "a dot marks the button")
 	hud.set_restore_ready(false)
-	assert_eq(hud.restore_button.text, idle_text)
+	assert_eq(hud.restore_button.tooltip_text, idle_text)
 	assert_false(hud.restore_dot.visible)
 	hud.free()
 

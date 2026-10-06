@@ -31,17 +31,11 @@
       {"kind": "rock", "x": 645, "y": 205, "scale": 1.5},
       {"kind": "camp_ground", "x": 150, "y": 255, "scale": 1.0},
       {"kind": "rock", "x": 520, "y": 252, "scale": 1.0},
-      {"kind": "tent", "x": 112, "y": 250, "scale": 1.0},
-      {"kind": "birdhouse", "x": 330, "y": 252, "scale": 1.0, "min_level": 3},
       {"kind": "rock", "x": 570, "y": 285, "scale": 1.4},
       {"kind": "rock", "x": 700, "y": 290, "scale": 1.6},
-      {"kind": "camp_chair", "x": 215, "y": 292, "scale": 1.0},
       {"kind": "reed", "x": 470, "y": 298, "scale": 1.0, "min_level": 2},
-      {"kind": "signboard", "x": 292, "y": 305, "scale": 1.0, "min_level": 1},
       {"kind": "flower", "x": 30, "y": 220, "scale": 1.0, "min_level": 3},
       {"kind": "flower", "x": 260, "y": 330, "scale": 1.0, "min_level": 3},
-      {"kind": "lantern", "x": 66, "y": 300, "scale": 1.0},
-      {"kind": "crate", "x": 70, "y": 330, "scale": 0.9},
       {"kind": "reed", "x": 515, "y": 290, "scale": 0.9, "min_level": 2},
       {"kind": "tree", "x": 20, "y": 345, "scale": 1.9},
       {"kind": "grass_tuft", "x": 180, "y": 350, "scale": 1.0, "min_level": 1},
@@ -87,6 +81,15 @@
       {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "day", "dusk"]},
       {"kind": "butterfly", "count": 3, "min_level": 4, "time_bands": ["day"]},
       {"kind": "firefly", "count": 10, "min_level": 5, "time_bands": ["dusk", "night"]}
-    ]
+    ],
+    "camp_slots": [
+      {"id": "camp_1", "x": 112, "y": 250},
+      {"id": "camp_2", "x": 220, "y": 295},
+      {"id": "camp_3", "x": 70, "y": 335},
+      {"id": "camp_4", "x": 292, "y": 305},
+      {"id": "camp_5", "x": 330, "y": 252},
+      {"id": "camp_6", "x": 168, "y": 345}
+    ],
+    "camp_focus": {"x": 190, "y": 300, "zoom": 1.45}
   }
 }

@@ -4,7 +4,8 @@ extends Control
 ## The always-on interface, laid out like the main-world mockup (UI_UX §3, D-018):
 ##   top     a dark pill with region | clock | weather, a pill with the two currencies, a round
 ##           settings button, and under it the round water-mind button
-##   bottom  Journal and Gear cards, the wooden fishing button (with a band of water) and Restore
+##   bottom  Journal and Gear cards, the wooden fishing button (with a band of water) and Camp; the
+##           round Restore button sits under the water-mind button on the right
 ## While a line is out the bottom row turns into the fishing controls of the bite/reel mockup:
 ## Cancel, a large round action button (hook / reel) ringed by the landing progress, and a shortcut
 ## to the journal, with a one-line tip underneath.
@@ -18,6 +19,7 @@ extends Control
 signal journal_pressed
 signal gear_pressed
 signal restore_pressed
+signal camp_pressed
 signal settings_pressed
 signal water_mind_pressed
 signal cta_down
@@ -80,6 +82,8 @@ var cta_button: Button
 var cta_label: Label
 var restore_button: Button
 var restore_dot: UiKit.NoticeDot
+var camp_button: Button
+var camp_dot: UiKit.NoticeDot
 var journal_dot: UiKit.NoticeDot
 var cancel_button: Button
 var action_button: ReelButton
@@ -113,6 +117,9 @@ func _init() -> void:
 	side_column.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	water_mind_button = UiKit.round_button("lotus", tr("ui.button.water_mind"), func() -> void: water_mind_pressed.emit())
 	side_column.add_child(water_mind_button)
+	restore_button = UiKit.round_button("sprout", tr("ui.button.restore"), func() -> void: restore_pressed.emit())
+	restore_dot = UiKit.notice_dot(restore_button)
+	side_column.add_child(restore_button)
 	add_child(side_column)
 
 	bottom_bar = MarginContainer.new()
@@ -211,18 +218,18 @@ func _build_bottom() -> Control:
 	cta_button.size_flags_stretch_ratio = 2.4
 	cta_button.button_down.connect(func() -> void: cta_down.emit())
 	cta_button.button_up.connect(func() -> void: cta_up.emit())
-	restore_button = UiKit.icon_button("sprout", tr("ui.button.restore"), func() -> void: restore_pressed.emit())
-	for button in [journal_button, gear_button, restore_button]:
+	camp_button = UiKit.icon_button("camp", tr("ui.button.camp"), func() -> void: camp_pressed.emit())
+	for button in [journal_button, gear_button, camp_button]:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.clip_text = false
 		button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
-	restore_button.size_flags_stretch_ratio = 1.3
+	camp_button.size_flags_stretch_ratio = 1.3
 	journal_dot = UiKit.notice_dot(journal_button)
-	restore_dot = UiKit.notice_dot(restore_button)
+	camp_dot = UiKit.notice_dot(camp_button)
 	row.add_child(journal_button)
 	row.add_child(gear_button)
 	row.add_child(cta_button)
-	row.add_child(restore_button)
+	row.add_child(camp_button)
 	return row
 
 func _build_fishing() -> Control:
@@ -319,8 +326,12 @@ func set_cta_for_state(state_name: String) -> void:
 	var tip_key: String = TIP_BY_STATE.get(state_name, "")
 	tip_label.text = tr(tip_key) if not tip_key.is_empty() else ""
 	tip_label.get_parent().visible = not tip_key.is_empty()
-	# Opening the journal mid-fight would leave the fish unattended: only while waiting.
-	fishing_journal_button.disabled = state_name in ["bite_hint", "hook", "fight", "land"]
+	# Opening the journal mid-fight would leave the fish unattended: only while waiting. Settings follow
+	# the same rule, and restoration (a change to the world, not a look) waits until the line is in.
+	var fish_on := state_name in ["bite_hint", "hook", "fight", "land"]
+	fishing_journal_button.disabled = fish_on
+	settings_button.disabled = fish_on
+	restore_button.disabled = fishing
 	cancel_button.disabled = state_name == "land"
 	_can_fade = state_name == "ready"
 	wake()
@@ -338,12 +349,16 @@ func apply_visibility() -> void:
 func is_fishing_layout() -> bool:
 	return fishing_bar.visible
 
-## A soft "ready" cue for restoration: a dot on the button and a changed label, so the state is
+## A soft "ready" cue for restoration: a dot on the round button and a changed name, so the state is
 ## never carried by colour alone.
 func set_restore_ready(is_ready: bool) -> void:
-	restore_button.text = tr("ui.button.restore_ready") if is_ready else tr("ui.button.restore")
+	restore_button.tooltip_text = tr("ui.button.restore_ready") if is_ready else tr("ui.button.restore")
 	restore_dot.visible = is_ready
-	restore_button.tooltip_text = tr("ui.notice.restore_ready") if is_ready else ""
+
+## Something new to look at in the camp (a decoration that became available).
+func set_camp_notice(has_news: bool) -> void:
+	camp_dot.visible = has_news
+	camp_button.tooltip_text = tr("ui.notice.camp_new") if has_news else ""
 
 ## Something new waits in the journal (a species met but not looked at yet).
 func set_journal_notice(has_new: bool) -> void:
@@ -354,9 +369,9 @@ func set_journal_notice(has_new: bool) -> void:
 ## the top bar when the screen is too narrow for them (the icons stay; they also carry tooltips).
 func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> void:
 	_set_margins(top_inset, bottom_inset)
-	for button in [journal_button, gear_button, restore_button, cancel_button, fishing_journal_button]:
+	for button in [journal_button, gear_button, camp_button, cancel_button, fishing_journal_button]:
 		button.custom_minimum_size.y = touch_min * 1.1
-	for button in [settings_button, water_mind_button]:
+	for button in [settings_button, water_mind_button, restore_button]:
 		button.custom_minimum_size = Vector2(touch_min, touch_min)
 	cta_button.custom_minimum_size.y = touch_min * 1.3
 	action_button.custom_minimum_size = Vector2.ONE * touch_min * 1.75
