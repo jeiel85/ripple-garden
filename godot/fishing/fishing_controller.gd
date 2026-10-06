@@ -94,7 +94,13 @@ func _catch_service() -> CatchService:
 
 # --- commands ---
 
+## Starts aiming. Idempotent while already aiming (a repeated press must not be an error); refused
+## in any state that is not READY or AIM.
 func begin_aim() -> bool:
+	if state == State.AIM:
+		return true
+	if state != State.READY:
+		return false
 	return _enter(State.AIM)
 
 ## Casts towards `target`, which landed in `habitat_tag` ("" means not water). Refused (and the

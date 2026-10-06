@@ -444,3 +444,14 @@ func test_a_controller_without_a_save_hook_never_saves() -> void:
 	var parts := _make(7)
 	assert_false(parts[0].save_hook.is_valid(), "tests must never write the player's save")
 	_free(parts)
+
+func test_begin_aim_is_idempotent_and_refused_outside_ready() -> void:
+	var parts := _make()
+	var controller: FishingController = parts[0]
+	assert_true(controller.begin_aim())
+	assert_true(controller.begin_aim(), "a repeated press while aiming is fine")
+	assert_eq(controller.state, FishingController.State.AIM)
+	controller.cast(WATER, "shallow")
+	assert_false(controller.begin_aim(), "no aiming while a line is out")
+	assert_eq(controller.state, FishingController.State.CAST)
+	_free(parts)
