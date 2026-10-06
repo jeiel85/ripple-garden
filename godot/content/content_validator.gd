@@ -44,6 +44,8 @@ const ID_PATTERNS := {
 	"decorations": "^deco_[a-z0-9_]+$",
 }
 const DECORATION_CATEGORIES: PackedStringArray = ["furniture", "ornament"]
+## How an island is drawn on the region map (world/region_map_view.gd).
+const MAP_STYLES: PackedStringArray = ["pond", "valley", "river", "coast", "isle"]
 ## Lists that live inside another file (equipment.json holds bags and accessories).
 const LIST_FILES := {"bags": "equipment.json", "accessories": "equipment.json"}
 ## Equipment grades (GDD §12, D-019). "event" items are granted by a moment, never sold.
@@ -153,6 +155,13 @@ func _check_region(d: Dictionary) -> void:
 	_require_string_list(d, "habitats")
 	_require_string_list(d, "weather")
 	_require_int(d, "restoration_levels", 1, 100)
+	# Where the island sits on the region map (P1-010): x, y in 0..1 of the map, a drawing style and a label icon.
+	var place: Variant = d.get("map")
+	if typeof(place) != TYPE_DICTIONARY or not _is_number(place.get("x")) or not _is_number(place.get("y")) \
+			or place["x"] < 0.0 or place["x"] > 1.0 or place["y"] < 0.0 or place["y"] > 1.0 \
+			or typeof(place.get("style")) != TYPE_STRING or not place["style"] in MAP_STYLES \
+			or typeof(place.get("icon")) != TYPE_STRING or not UiIcons.has_icon(place["icon"]):
+		_item_errors.append("map: must be {x: 0..1, y: 0..1, style: %s, icon: a name from UiIcons.NAMES}" % " | ".join(MAP_STYLES))
 
 ## Baits: `consumable` false means an endless supply (the fallback bait); a consumable bait is bought
 ## in packs for `price` once `unlock` is met.

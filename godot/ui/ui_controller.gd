@@ -24,6 +24,7 @@ var journal_panel: JournalPanel
 var gear_panel: GearPanel
 var restoration_panel: RestorationPanel
 var camp_panel: CampPanel
+var map_panel: RegionMapPanel
 var settings_panel: SettingsPanel
 var licenses_panel: TextPanel
 var debug_menu: DebugMenu = null
@@ -107,6 +108,7 @@ func setup(deps: Dictionary) -> void:
 	hud.gear_pressed.connect(open_gear)
 	hud.restore_pressed.connect(func() -> void: _toggle(restoration_panel))
 	hud.camp_pressed.connect(open_camp)
+	hud.map_pressed.connect(func() -> void: _toggle(map_panel))
 	hud.settings_pressed.connect(func() -> void: _toggle(settings_panel))
 	hud.water_mind_pressed.connect(enter_water_mind)
 	hud.cta_down.connect(_on_cta_down)
@@ -183,6 +185,9 @@ func _build_panels(deps: Dictionary) -> void:
 	camp_panel = CampPanel.new()
 	camp_panel.setup(_camp, deps["loadout"], _region_id)
 	camp_panel.close_pressed.connect(close_panel)
+	map_panel = RegionMapPanel.new()
+	map_panel.setup(RegionUnlocks.new(GameState), _region_id)
+	map_panel.close_pressed.connect(close_panel)
 	settings_panel = SettingsPanel.new()
 	settings_panel.close_pressed.connect(close_panel)
 	settings_panel.message.connect(show_message)
@@ -373,8 +378,8 @@ func _on_fishing_state_changed(_previous: String, current: String) -> void:
 		fight_meter.update_values(0.5, _fishing.fight.progress if _fishing.fight != null else 0.0)
 		_hint_once("hint_reel", "ui.hint.reel")
 	elif current == "bite_hint":
-		# A look opened while waiting (journal, settings) gives way to the bite, so it can still be hooked.
-		if _current_panel == journal_panel or _current_panel == settings_panel:
+		# A look opened while waiting (journal, settings, map) gives way to the bite, so it can still be hooked.
+		if _current_panel in [journal_panel, settings_panel, map_panel]:
 			close_panel()
 		_hint_once("hint_hook", "ui.hint.hook")
 	elif current == "inspect":
