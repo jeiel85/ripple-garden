@@ -69,7 +69,9 @@ func _init() -> void:
 func _build_top() -> Control:
 	var row := UiKit.hbox(12)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	status_label = UiKit.label("", "", HORIZONTAL_ALIGNMENT_LEFT, false)
+	# The status text may wrap onto two lines so a long name never pushes the buttons off screen.
+	status_label = UiKit.label("", "", HORIZONTAL_ALIGNMENT_LEFT, true)
+	status_label.custom_minimum_size = Vector2(120, 0)
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

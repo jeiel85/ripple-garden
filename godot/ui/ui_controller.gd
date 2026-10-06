@@ -219,7 +219,7 @@ func _on_cta_up() -> void:
 
 func _on_fishing_state_changed(_previous: String, current: String) -> void:
 	var fighting := current == "fight"
-	fight_meter.visible = fighting or current == "hook" or current == "bite_hint"
+	fight_meter.visible = fighting  # the meter means nothing before the fish is hooked
 	if fighting:
 		var band: Dictionary = ContentDB.balance["fishing"]["fight"]["band"]
 		fight_meter.configure(float(band["min"]), float(band["max"]), GameState.get_setting("high_contrast_meter") == true)

@@ -10,6 +10,10 @@ config/version="0.2.0"
 run/main_scene="res://world/game_root.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.07, 0.14, 0.16, 1)
+boot_splash/image="res://branding/splash.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=true
 
 [audio]
 

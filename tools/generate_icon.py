@@ -5,6 +5,7 @@ Writes the same drawing in three forms from one set of shapes:
   godot/icon.svg                        the project icon (vector)
   assets/branding/ripple_garden_512.png preview / store art placeholder
   assets/branding/ripple_garden.ico     Windows icon (16..256 px) used by shortcuts
+  godot/branding/splash.png             boot splash image
 
     python tools/generate_icon.py
 
@@ -92,9 +93,12 @@ def main() -> None:
     branding.mkdir(parents=True, exist_ok=True)
     master = render(1024)
     master.resize((512, 512), Image.LANCZOS).save(branding / "ripple_garden_512.png")
+    splash = ROOT / "godot" / "branding"
+    splash.mkdir(parents=True, exist_ok=True)
+    master.resize((384, 384), Image.LANCZOS).save(splash / "splash.png")
     sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
     master.resize((256, 256), Image.LANCZOS).save(branding / "ripple_garden.ico", sizes=sizes)
-    print("wrote godot/icon.svg, assets/branding/ripple_garden_512.png, assets/branding/ripple_garden.ico")
+    print("wrote godot/icon.svg, godot/branding/splash.png, assets/branding/ripple_garden_512.png, assets/branding/ripple_garden.ico")
 
 
 if __name__ == "__main__":
