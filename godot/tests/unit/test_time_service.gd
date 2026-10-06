@@ -44,8 +44,9 @@ func test_pause_and_non_positive_delta_do_not_advance() -> void:
 
 func test_band_boundaries_match_content() -> void:
 	var starts: Dictionary = ContentDB.balance["time"]["band_starts_hour"]
-	var cases := {0.0: "night", 5.99: "night", 6.0: "dawn", 8.99: "dawn", 9.0: "day", 16.99: "day",
-		17.0: "dusk", 19.99: "dusk", 20.0: "night", 23.99: "night"}
+	# balance.json (P1-005): dawn 5, morning 7, day 11, dusk 17, night 20.
+	var cases := {0.0: "night", 4.99: "night", 5.0: "dawn", 6.99: "dawn", 7.0: "morning", 10.99: "morning",
+		11.0: "day", 16.99: "day", 17.0: "dusk", 19.99: "dusk", 20.0: "night", 23.99: "night"}
 	for hour in cases:
 		assert_eq(TimeService.band_for_minutes(hour * 60.0, starts), cases[hour], "hour %s" % hour)
 	assert_eq(TimeService.band_for_minutes(-60.0, starts), "night", "negative minutes wrap to the previous day")
@@ -67,14 +68,15 @@ func test_band_change_event_fires_once_per_change() -> void:
 	var bands: Array = []
 	var handler := func(band: String) -> void: bands.append(band)
 	EventBus.game_time_band_changed.connect(handler)
-	service.set_game_minutes(5.0 * 60.0)  # night
+	service.set_game_minutes(4.0 * 60.0)  # night
 	bands.clear()
-	service.advance(30.0)   # 05:00 -> 05:30, still night (1 real second = 1 game minute)
-	service.advance(40.0)   # -> 06:10 dawn
-	service.advance(10.0)   # -> 06:20 still dawn
-	service.advance(180.0)  # -> 09:20 day
+	service.advance(30.0)   # 04:00 -> 04:30, still night (1 real second = 1 game minute)
+	service.advance(40.0)   # -> 05:10 dawn
+	service.advance(10.0)   # -> 05:20 still dawn
+	service.advance(120.0)  # -> 07:20 morning
+	service.advance(240.0)  # -> 11:20 day
 	EventBus.game_time_band_changed.disconnect(handler)
-	assert_deep_eq(bands, ["dawn", "day"])
+	assert_deep_eq(bands, ["dawn", "morning", "day"])
 	service.free()
 
 func test_offline_seconds_clamps_to_cap_and_never_goes_negative() -> void:

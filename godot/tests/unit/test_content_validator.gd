@@ -294,7 +294,7 @@ func test_weather_visual_values_are_checked() -> void:
 
 func test_region_with_layout_needs_its_weather_defined() -> void:
 	var raw := _raw()
-	raw["weather"].pop_back()  # rain
+	raw["weather"] = raw["weather"].filter(func(entry: Dictionary) -> bool: return entry["id"] != "rain")
 	_assert_error(ContentValidator.validate(raw), "region lists weather 'rain' that weather.json does not define")
 
 func test_layout_zone_habitat_must_belong_to_the_region() -> void:

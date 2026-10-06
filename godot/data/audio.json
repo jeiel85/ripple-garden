@@ -16,11 +16,11 @@
     "level_speedup": 0.15,
     "volume": {"min": 0.35, "max": 0.8},
     "clips": [
-      {"id": "bird_a", "stream": "res://audio/streams/bird_a.wav", "bands": ["dawn", "day", "dusk"], "min_level": 0, "weight": 3},
-      {"id": "bird_b", "stream": "res://audio/streams/bird_b.wav", "bands": ["dawn", "day"], "min_level": 2, "weight": 2},
+      {"id": "bird_a", "stream": "res://audio/streams/bird_a.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 0, "weight": 3},
+      {"id": "bird_b", "stream": "res://audio/streams/bird_b.wav", "bands": ["dawn", "morning", "day"], "min_level": 2, "weight": 2},
       {"id": "frog", "stream": "res://audio/streams/frog.wav", "bands": ["dusk", "night"], "min_level": 1, "weight": 2},
       {"id": "cricket", "stream": "res://audio/streams/cricket.wav", "bands": ["dusk", "night"], "min_level": 2, "weight": 3},
-      {"id": "fish_jump", "stream": "res://audio/streams/fish_jump.wav", "bands": ["dawn", "day", "dusk", "night"], "min_level": 1, "weight": 1}
+      {"id": "fish_jump", "stream": "res://audio/streams/fish_jump.wav", "bands": ["dawn", "morning", "day", "dusk", "night"], "min_level": 1, "weight": 1}
     ]
   },
   "cues": {

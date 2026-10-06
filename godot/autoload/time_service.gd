@@ -13,9 +13,9 @@ extends Node
 
 const OFFLINE_CAP_SEC := 12 * 60 * 60
 ## Every value get_time_band() can return. Content time_bands keys are validated against this.
-const TIME_BANDS: PackedStringArray = ["dawn", "day", "dusk", "night"]
+const TIME_BANDS: PackedStringArray = ["dawn", "morning", "day", "dusk", "night"]
 const FALLBACK_DAY_LENGTH_SEC := 1440.0
-const FALLBACK_BAND_STARTS := {"dawn": 6.0, "day": 9.0, "dusk": 17.0, "night": 20.0}
+const FALLBACK_BAND_STARTS := {"dawn": 5.0, "morning": 7.0, "day": 11.0, "dusk": 17.0, "night": 20.0}
 const MINUTES_PER_DAY := 1440.0
 
 var game_minutes: float = 8.0 * 60.0

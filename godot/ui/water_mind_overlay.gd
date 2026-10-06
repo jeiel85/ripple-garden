@@ -24,7 +24,7 @@ const DIM_ALPHA := 0.6
 const DIM_FADE_SEC := 6.0
 const MIXER_KEYS: PackedStringArray = ["volume_bgm", "volume_water", "volume_wind", "volume_wildlife", "volume_weather", "volume_camp"]
 ## The time-of-day preview cycles through these bands, then back to the real clock.
-const PREVIEW_BANDS: PackedStringArray = ["dawn", "day", "dusk", "night"]
+const PREVIEW_BANDS: PackedStringArray = TimeService.TIME_BANDS
 
 var active := false
 var reduced_motion := false

@@ -9,7 +9,7 @@ extends RefCounted
 ## never alter a player's game even if something calls it.
 
 ## Midpoints (hours) used to jump to a time band.
-const BAND_HOURS := {"dawn": 7.0, "day": 12.0, "dusk": 18.0, "night": 23.0}
+const BAND_HOURS := {"dawn": 6.0, "morning": 9.0, "day": 13.0, "dusk": 18.0, "night": 23.0}
 
 var enabled := BuildProfile.debug_tools_enabled()
 var fishing: FishingController

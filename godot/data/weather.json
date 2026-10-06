@@ -4,7 +4,7 @@
     "name_key": "weather.clear.name",
     "duration_sec": {"min": 150, "max": 420},
     "transition_sec": 10,
-    "next": {"cloudy": 1.0},
+    "next": {"cloudy": 0.7, "mist": 0.2, "sunshower": 0.1},
     "visual": {"cloud": 0.1, "rain": 0.0, "brightness": 1.0, "tint": "#ffffff"}
   },
   {
@@ -12,7 +12,7 @@
     "name_key": "weather.cloudy.name",
     "duration_sec": {"min": 120, "max": 300},
     "transition_sec": 10,
-    "next": {"clear": 0.55, "rain": 0.45},
+    "next": {"clear": 0.45, "rain": 0.35, "mist": 0.1, "storm": 0.1},
     "visual": {"cloud": 0.75, "rain": 0.0, "brightness": 0.88, "tint": "#dfe6ee"}
   },
   {
@@ -20,7 +20,31 @@
     "name_key": "weather.rain.name",
     "duration_sec": {"min": 100, "max": 240},
     "transition_sec": 12,
-    "next": {"cloudy": 1.0},
+    "next": {"cloudy": 0.7, "storm": 0.15, "sunshower": 0.15},
     "visual": {"cloud": 1.0, "rain": 1.0, "brightness": 0.78, "tint": "#c4d0dc"}
+  },
+  {
+    "id": "mist",
+    "name_key": "weather.mist.name",
+    "duration_sec": {"min": 120, "max": 300},
+    "transition_sec": 15,
+    "next": {"clear": 0.6, "cloudy": 0.4},
+    "visual": {"cloud": 0.35, "rain": 0.0, "brightness": 0.92, "tint": "#e6ecef", "fog": 0.75, "lightning": 0.0}
+  },
+  {
+    "id": "storm",
+    "name_key": "weather.storm.name",
+    "duration_sec": {"min": 80, "max": 180},
+    "transition_sec": 12,
+    "next": {"rain": 1.0},
+    "visual": {"cloud": 1.0, "rain": 1.0, "brightness": 0.62, "tint": "#aeb9c8", "fog": 0.15, "lightning": 0.6}
+  },
+  {
+    "id": "sunshower",
+    "name_key": "weather.sunshower.name",
+    "duration_sec": {"min": 60, "max": 150},
+    "transition_sec": 10,
+    "next": {"clear": 0.7, "rain": 0.3},
+    "visual": {"cloud": 0.25, "rain": 0.45, "brightness": 1.02, "tint": "#fff4dc", "fog": 0.0, "lightning": 0.0}
   }
 ]

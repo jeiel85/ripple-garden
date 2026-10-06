@@ -92,7 +92,7 @@ func test_visual_blends_between_previous_and_current() -> void:
 func test_set_weather_rejects_unknown_and_undefined_weather() -> void:
 	var service := _service()
 	assert_false(service.set_weather("snow"))
-	assert_false(service.set_weather("mist"), "mist belongs to other regions and is not defined yet")
+	assert_false(service.set_weather("storm"), "storms belong to other regions, not the pond")
 	assert_eq(service.current_id, "clear")
 	assert_true(service.set_weather("cloudy"))
 	assert_eq(service.current_id, "cloudy")

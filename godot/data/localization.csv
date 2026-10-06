@@ -530,3 +530,7 @@ deco.birdhouse.desc,"파랑새가 찾아와 쉬어 가요.","Bluebirds stop by t
 "ui.map.locked","%s을(를) %d단계까지 복원(지금 %d)하고 그곳 물고기 %d종(지금 %d)을 만나면 열려요","Opens when %s is restored to stage %d (now %d) and %d of its fish are met (now %d)",""
 "ui.prop.rainbow","폭포의 무지개","A rainbow in the falls",""
 "ui.animal.bird","파랑새","Bluebirds",""
+"ui.time.morning","아침","Morning",""
+weather.mist.name,"안개","Mist",""
+weather.storm.name,"폭풍우","Storm",""
+weather.sunshower.name,"여우비","Sunshower",""

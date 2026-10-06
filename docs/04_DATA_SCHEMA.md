@@ -19,7 +19,7 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
   "rarity": 1,
   "base_weight": 10.0,
   "size_cm": {"min": 8, "max": 38},
-  "time_bands": {"dawn": 1.1, "day": 1.0, "dusk": 1.2, "night": 0.8},
+  "time_bands": {"dawn": 1.1, "morning": 1.05, "day": 1.0, "dusk": 1.2, "night": 0.8},
   "weather": {"clear": 1.0, "cloudy": 1.1, "rain": 1.15},
   "bait_tags": ["bread", "worm"],
   "behavior": "steady",

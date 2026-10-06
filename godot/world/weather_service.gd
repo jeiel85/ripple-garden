@@ -130,13 +130,14 @@ func shown_id() -> String:
 	return preview_id if not preview_id.is_empty() else current_id
 
 ## Visual parameters blended between the previous and current weather (or the preview, unblended):
-## {"cloud": 0..1, "rain": 0..1, "brightness": float, "tint": Color}.
+## {"cloud": 0..1, "rain": 0..1, "brightness": float, "tint": Color, "fog": 0..1, "lightning": 0..1}.
 func visual() -> Dictionary:
 	if not preview_id.is_empty():
 		var shown: Dictionary = _definitions()[preview_id]["visual"]
-		return {"cloud": float(shown["cloud"]), "rain": float(shown["rain"]), "brightness": float(shown["brightness"]), "tint": Color(shown["tint"])}
+		return {"cloud": float(shown["cloud"]), "rain": float(shown["rain"]), "brightness": float(shown["brightness"]),
+			"tint": Color(shown["tint"]), "fog": float(shown.get("fog", 0.0)), "lightning": float(shown.get("lightning", 0.0))}
 	if current_id.is_empty():
-		return {"cloud": 0.0, "rain": 0.0, "brightness": 1.0, "tint": Color.WHITE}
+		return {"cloud": 0.0, "rain": 0.0, "brightness": 1.0, "tint": Color.WHITE, "fog": 0.0, "lightning": 0.0}
 	var from: Dictionary = _definitions()[previous_id]["visual"]
 	var to: Dictionary = _definitions()[current_id]["visual"]
 	var t := smoothstep(0.0, 1.0, blend)
@@ -145,4 +146,6 @@ func visual() -> Dictionary:
 		"rain": lerpf(float(from["rain"]), float(to["rain"]), t),
 		"brightness": lerpf(float(from["brightness"]), float(to["brightness"]), t),
 		"tint": Color(from["tint"]).lerp(Color(to["tint"]), t),
+		"fog": lerpf(float(from.get("fog", 0.0)), float(to.get("fog", 0.0)), t),
+		"lightning": lerpf(float(from.get("lightning", 0.0)), float(to.get("lightning", 0.0)), t),
 	}

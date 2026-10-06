@@ -1,7 +1,8 @@
 class_name WeatherPresenter
 extends Node2D
 
-## Shows the current weather (P0-021): drifting clouds, falling rain and rings on the pond.
+## Shows the current weather (P0-021, P1-006): drifting clouds, falling rain and rings on the pond, a low
+## mist over the water, and now and then a soft lightning flash in a storm (never with Reduced Motion).
 ## It reads WeatherService.visual() every frame, so conditions ease in and out with the
 ## service's transition instead of switching. Rain is one CPUParticles2D (GL Compatibility
 ## friendly) whose count follows graphics quality and Battery Saver; with Reduced Motion the
@@ -26,6 +27,8 @@ var _ripples: Array[Dictionary] = []
 var _visual: Dictionary = {}
 var _ripple_clock := 0.0
 var _pond_bounds := Rect2()
+var _flash := 0.0
+var _next_flash := 6.0
 
 func setup(p_weather: WeatherService, pond_polygon: PackedVector2Array) -> void:
 	weather = p_weather
@@ -92,8 +95,20 @@ func _process(delta: float) -> void:
 		if _ripples[index]["age"] >= RIPPLE_LIFETIME:
 			_ripples.remove_at(index)
 		index -= 1
-	if cloud > 0.02 or not _ripples.is_empty():
+	var lightning: float = visual.get("lightning", 0.0)
+	# Reduced Motion never shows lightning, not even the rest of a flash already on screen.
+	_flash = 0.0 if reduced_motion else maxf(0.0, _flash - delta * 2.5)
+	if lightning > 0.01 and not reduced_motion:
+		_next_flash -= delta * lightning
+		if _next_flash <= 0.0:
+			_flash = 1.0
+			_next_flash = rng.randf_range(4.0, 12.0)
+	if cloud > 0.02 or not _ripples.is_empty() or float(visual.get("fog", 0.0)) > 0.01 or _flash > 0.0:
 		queue_redraw()
+
+## 0..1 brightness of the current lightning flash (for tests).
+func flash_strength() -> float:
+	return _flash
 
 func _random_pond_point() -> Vector2:
 	for attempt in 12:
@@ -116,6 +131,24 @@ func _draw() -> void:
 		var alpha := cloud * 0.62
 		for part in [[-46.0, 6.0, 38.0], [0.0, -10.0, 50.0], [48.0, 4.0, 40.0], [92.0, 12.0, 30.0]]:
 			draw_circle(base + Vector2(part[0], part[1]) * size, part[2] * size, Color(shade.r, shade.g, shade.b, alpha))
+	var fog: float = visual.get("fog", 0.0)
+	if fog > 0.01:
+		# Soft bands of mist lying on the water, a little thicker towards the far bank.
+		for band in 5:
+			var y := _pond_bounds.position.y + _pond_bounds.size.y * (band + 0.5) / 5.0
+			var drift := 0.0 if reduced_motion else sin(Time.get_ticks_msec() / 4000.0 + band) * 30.0
+			var left := _pond_bounds.position.x - 200.0 + drift
+			var right := _pond_bounds.end.x + 200.0 + drift
+			var mist := Color(0.95, 0.97, 0.98, fog * (0.3 - band * 0.03))
+			var clear := Color(mist, 0.0)
+			# Each band fades out above and below, so the mist has no edges.
+			for half in [[-70.0, 0.0, clear, mist], [0.0, 70.0, mist, clear]]:
+				var top: float = y + half[0]
+				var bottom: float = y + half[1]
+				draw_polygon(PackedVector2Array([Vector2(left, top), Vector2(right, top), Vector2(right, bottom), Vector2(left, bottom)]),
+					PackedColorArray([half[2], half[2], half[3], half[3]]))
+	if _flash > 0.0:
+		draw_rect(Rect2(-1000, -1000, 3000, 3600), Color(1, 1, 1, _flash * 0.35))
 	for ripple in _ripples:
 		var life: float = ripple["age"] / RIPPLE_LIFETIME
 		var radius := 4.0 + life * 20.0
