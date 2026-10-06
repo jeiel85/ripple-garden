@@ -137,12 +137,15 @@ func test_framing_wins_over_a_restoration_pulse() -> void:
 	assert_true(camera.zoom.is_equal_approx(Vector2.ONE * 2.0), "the pulse must not pull the photo's zoom back (zoom %s)" % camera.zoom)
 	camera.free()
 
-# Found on the emulator: Japanese captions spilled out of the round buttons.
+# Found on the emulator: Japanese captions spilled out of the round buttons. Fonts differ by platform and
+# device, so the buttons fit their caption to the circle; the text must also be short enough that it never
+# has to shrink much.
 func test_round_button_captions_fit_their_circle_in_every_language() -> void:
 	var previous := TranslationServer.get_locale()
-	var theme := UiTheme.build(1.0, false, false)
-	var font: Font = theme.default_font if theme.default_font != null else ThemeDB.fallback_font
-	var size: int = theme.get_font_size("font_size", "RoundButton")
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	var natural: int = host.theme.get_font_size("font_size", "RoundButton")
 	for locale in ["ko", "en", "ja"]:
 		TranslationServer.set_locale(locale)
 		var keys: Array = ["ui.photo.back", "ui.photo.shutter", "ui.photo.logo_on", "ui.photo.logo_off",
@@ -150,9 +153,14 @@ func test_round_button_captions_fit_their_circle_in_every_language() -> void:
 		for frame_id in PhotoMode.FRAMES:
 			keys.append("ui.photo.frame." + frame_id)
 		for key in keys:
-			var text := String(TranslationServer.translate(key))
-			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-			assert_true(width <= 120.0 - 20.0, "%s %s '%s' is %.0f px wide for a 120 px circle" % [locale, key, text, width])
+			var button := UiKit.round_button("camera", String(TranslationServer.translate(key)), func() -> void: pass, true, 120.0)
+			host.add_child(button)
+			var size := button.get_theme_font_size("font_size")
+			var width := button.get_theme_font("font").get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+			assert_true(width <= 120.0 - UiKit.CAPTION_PADDING, "%s %s '%s' is %.0f px wide at %d px" % [locale, key, button.text, width, size])
+			assert_true(size >= natural * 0.8, "%s %s '%s' had to shrink to %d px (from %d): shorten the text" % [locale, key, button.text, size, natural])
+			button.free()
+	host.free()
 	TranslationServer.set_locale(previous)
 
 # Found on the emulator: the water-mind hint lay over the water-mind buttons.

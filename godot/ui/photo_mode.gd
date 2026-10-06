@@ -163,6 +163,8 @@ func _refresh() -> void:
 	_frame_button.tooltip_text = tr("ui.photo.frame") + " · " + _frame_button.text
 	_logo_button.text = tr("ui.photo.logo_on") if logo else tr("ui.photo.logo_off")
 	_logo_button.tooltip_text = _logo_button.text
+	UiKit.fit_caption(_frame_button)
+	UiKit.fit_caption(_logo_button)
 	_zoom_in.disabled = zoom >= MAX_ZOOM - 0.001
 	_zoom_out.disabled = zoom <= MIN_ZOOM + 0.001
 

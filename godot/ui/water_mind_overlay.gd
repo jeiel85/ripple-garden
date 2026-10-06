@@ -227,6 +227,8 @@ func _cycle_weather() -> void:
 func _refresh_captions() -> void:
 	_time_button.text = tr("ui.time." + time_preview) if not time_preview.is_empty() else tr("ui.water_mind.time")
 	_weather_button.text = tr(ContentDB.get_weather(weather_preview).get("name_key", "")) if not weather_preview.is_empty() else tr("ui.water_mind.weather")
+	UiKit.fit_caption(_time_button)
+	UiKit.fit_caption(_weather_button)
 	_weather_button.icon = UiIcons.texture(UiIcons.for_weather(weather_preview))
 
 func _sync_sliders() -> void:
