@@ -42,6 +42,10 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[input_devices]
+
+pointing/android/enable_pan_and_scale_gestures=true
+
 [internationalization]
 
 locale/translations=PackedStringArray("res://data/localization.en.translation", "res://data/localization.ko.translation")

@@ -42,12 +42,15 @@ func set_wildlife(share: float) -> void:
 	wildlife = share
 	_rebuild()
 
-## Animals out right now: {kind: count}.
+## Animals out right now: {kind: count}. The wildlife share applies to each kind's total, not to every
+## layout entry (two entries of three butterflies at 0.5 are three butterflies, not 2 + 2).
 func current_counts() -> Dictionary:
 	var counts := {}
 	for animal in layout.get("ambient_animals", []):
 		if level >= int(animal["min_level"]) and time_band in animal["time_bands"]:
-			counts[animal["kind"]] = counts.get(animal["kind"], 0) + GraphicsProfile.scaled_count(int(animal["count"]), wildlife)
+			counts[animal["kind"]] = int(counts.get(animal["kind"], 0)) + int(animal["count"])
+	for kind in counts:
+		counts[kind] = GraphicsProfile.scaled_count(counts[kind], wildlife)
 	return counts
 
 func animal_count() -> int:

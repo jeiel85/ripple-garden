@@ -140,3 +140,19 @@ func test_a_missing_tier_or_saver_field_is_rejected() -> void:
 	graphics = _graphics().duplicate(true)
 	graphics["battery_saver"].erase("water_glints")
 	assert_true(_has_error(ContentValidator.validate(_raw_with_graphics(graphics)), "graphics.battery_saver.water_glints"))
+
+func test_the_wildlife_share_applies_to_each_kind_as_a_whole() -> void:
+	var animals := AmbientAnimalPresenter.new()
+	tree.root.add_child(animals)
+	var layout := {"pond": ContentDB.get_layout(REGION)["pond"], "ambient_animals": [
+		{"kind": "butterfly", "count": 3, "min_level": 0, "time_bands": ["day"]},
+		{"kind": "butterfly", "count": 3, "min_level": 0, "time_bands": ["day"]},
+	]}
+	animals.setup(layout, 0, "day")
+	animals.set_wildlife(0.5)
+	assert_eq(animals.current_counts()["butterfly"], 3, "half of six, not round(1.5) twice")
+	animals.free()
+
+func test_android_sends_pinch_gestures_to_photo_mode() -> void:
+	assert_true(ProjectSettings.get_setting("input_devices/pointing/android/enable_pan_and_scale_gestures", false),
+		"without it Android never sends InputEventMagnifyGesture")
