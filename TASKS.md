@@ -44,7 +44,8 @@
   - `world/restoration_service.gd`(포인트로 얻고 플레이어가 선택해 적용), 단계별 팔레트·소품·동물 변화, 슬라이스 상한 5
 - [x] P0-021 weather clear/cloudy/rain
   - `world/weather_service.gd` + `data/weather.json`(최소 체류 ≥ 전환×2), `weather_presenter.gd`
-- [ ] P0-022 ambient audio layering
+- [x] P0-022 ambient audio layering
+  - `audio/ambient_mix.gd`(규칙) + `ambient_audio.gd`(재생), 데이터 `data/audio.json`, 정책 D-013. BGM은 음악 제작 전까지 비어 있음
 - [x] P0-023 water-mind mode
   - `ui/water_mind_overlay.gd`: HUD 전체 숨김, 탭 시 종료/믹서, N분 후 어둡게, 배터리 절약 안내 1회
 - [x] P0-024 settings/accessibility baseline

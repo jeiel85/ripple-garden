@@ -22,8 +22,8 @@
 | P0-004 | GameState 도메인 모델 + 세이브 스키마 | ✅ 완료 |
 | P0-005 ~ P0-006, P0-027 | 원자적 저장·백업 복구·마이그레이션 프레임워크·세이브 테스트 | ✅ 완료 |
 | P0-007 | 세션/게임/오프라인 시계, 시간대 이벤트 | ✅ 완료 |
-| P0-008 ~ P0-025 (P0-022 제외) | 월드 씬·서식지·물고기·복원·날씨·도감·설정·물멍·디버그 | 🚧 PR 검토 중 |
-| P0-022, P0-026, P0-028 | 앰비언트 오디오·콘텐츠 검증 단일화·Android/Windows 빌드 | ⏳ 진행 예정 |
+| P0-008 ~ P0-025 | 월드 씬·서식지·물고기·복원·날씨·도감·앰비언트 오디오·설정·물멍·디버그 | 🚧 PR 검토 중 |
+| P0-026, P0-028 | 콘텐츠 검증 단일화·Android/Windows 빌드 | ⏳ 진행 예정 |
 | P1 / P2 / P3 | 프로덕션 시스템 → 5개 지역 콘텐츠 → 출시 준비 | 대기 |
 
 전체 백로그는 [`TASKS.md`](TASKS.md)를 봅니다.
@@ -91,7 +91,7 @@ godot/
   content/   정적 콘텐츠 검증 (ContentValidator)
   save/      세이브 스키마(기본값·정규화·정합성 검사)
   autoload/  전역 서비스 (EventBus, GameState, ContentDB, SaveService, TimeService, AudioService)
-  audio/     오디오 버스 레이아웃 (Master/BGM/Water/Wind/Wildlife/Weather/Fishing/Camp)
+  audio/     오디오 버스 레이아웃, 앰비언트 믹스·재생, placeholder 음원(streams/)
   data/      정적 콘텐츠 JSON·로컬라이제이션 CSV — 코드에 하드코딩하지 않음
   fishing/   낚시 상태 머신·조우 판정
   world/     월드 루트 씬
