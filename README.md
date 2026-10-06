@@ -17,7 +17,8 @@
 | 단계 | 내용 | 상태 |
 |---|---|---|
 | P0-001 | Godot 프로젝트 부트스트랩, 폴더, autoload 등록 | ✅ 완료 |
-| P0-002 ~ P0-028 | Region 01 Vertical Slice (낚시 루프·저장·도감·복원·물멍) | ⏳ 진행 예정 |
+| P0-002 | ContentDB JSON 로더 + 검증 오류 보고 | ✅ 완료 |
+| P0-003 ~ P0-028 | Region 01 Vertical Slice (낚시 루프·저장·도감·복원·물멍) | ⏳ 진행 예정 |
 | P1 / P2 / P3 | 프로덕션 시스템 → 5개 지역 콘텐츠 → 출시 준비 | 대기 |
 
 전체 백로그는 [`TASKS.md`](TASKS.md)를 봅니다.
@@ -82,6 +83,7 @@ godot --headless --path godot --export-release "Windows Desktop" ../build/window
 ```text
 docs/        기획·기술·데이터·UI·밸런스·QA·출시 문서 (설계 단일 출처)
 godot/
+  content/   정적 콘텐츠 검증 (ContentValidator)
   autoload/  전역 서비스 (EventBus, GameState, ContentDB, SaveService, TimeService, AudioService)
   audio/     오디오 버스 레이아웃 (Master/BGM/Water/Wind/Wildlife/Weather/Fishing/Camp)
   data/      정적 콘텐츠 JSON·로컬라이제이션 CSV — 코드에 하드코딩하지 않음

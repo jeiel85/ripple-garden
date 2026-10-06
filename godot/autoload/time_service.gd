@@ -1,6 +1,8 @@
 extends Node
 
 const OFFLINE_CAP_SEC := 12 * 60 * 60
+## Every value get_time_band() can return. Content time_bands keys are validated against this.
+const TIME_BANDS: PackedStringArray = ["dawn", "day", "dusk", "night"]
 var game_minutes: float = 8.0 * 60.0
 var minutes_per_real_second: float = 1.0
 var paused := false
