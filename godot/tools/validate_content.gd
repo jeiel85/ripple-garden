@@ -22,7 +22,7 @@ func _run() -> void:
 	var content := {
 		"fish": content_db.fish, "regions": content_db.regions, "rods": content_db.rods,
 		"baits": content_db.baits, "weather": content_db.weather,
-		"bags": content_db.bags, "accessories": content_db.accessories, "decorations": content_db.decorations,
+		"bags": content_db.bags, "accessories": content_db.accessories, "decorations": content_db.decorations, "moments": content_db.moments,
 	}
 	problems.append_array(localization.problems(localization.read_csv(), localization.references(content)))
 

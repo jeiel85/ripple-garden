@@ -134,6 +134,9 @@ func setup(deps: Dictionary) -> void:
 	EventBus.economy_changed.connect(func(_ripple: int, _memory: int) -> void: _refresh_camp_notice())
 	EventBus.bait_ran_out.connect(func(bait_id: String, replacement_id: String) -> void:
 		show_message(tr("ui.toast.bait_out") % [tr(ContentDB.get_bait(bait_id).get("name_key", "")), tr(ContentDB.get_bait(replacement_id).get("name_key", ""))]))
+	EventBus.moment_recorded.connect(func(moment_id: String) -> void:
+		var moment: Dictionary = ContentDB.moments.get(moment_id, {})
+		show_message(tr("ui.toast.moment") % [tr(moment.get("name_key", "")), int(moment.get("memory", 0))]))
 	EventBus.item_granted.connect(func(category: String, item_id: String) -> void:
 		show_message(tr("ui.toast.gift") % tr(ContentDB.get_item(category, item_id).get("name_key", ""))))
 	EventBus.region_restoration_points_changed.connect(func(_region_id_changed: String, _points: int) -> void: _refresh_restore_hint())

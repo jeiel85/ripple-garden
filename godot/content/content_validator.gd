@@ -30,6 +30,7 @@ const FILE_NAMES := {
 	"audio": "audio.json",
 	"equipment": "equipment.json",
 	"decorations": "decorations.json",
+	"moments": "moments.json",
 }
 
 const ID_PATTERNS := {
@@ -42,7 +43,10 @@ const ID_PATTERNS := {
 	"bags": "^bag_[a-z0-9_]+$",
 	"accessories": "^acc_[a-z0-9_]+$",
 	"decorations": "^deco_[a-z0-9_]+$",
+	"moments": "^moment_[a-z0-9_]+$",
 }
+## The keys a moment's `when` condition may use (world/moment_service.gd).
+const MOMENT_CONDITIONS: PackedStringArray = ["weather", "band", "min_level", "water_mind", "caught_rarity", "camp_filled", "after_away"]
 const DECORATION_CATEGORIES: PackedStringArray = ["furniture", "ornament"]
 ## How an island is drawn on the region map (world/region_map_view.gd).
 const MAP_STYLES: PackedStringArray = ["pond", "valley", "river", "coast", "isle"]
@@ -84,6 +88,11 @@ static func validate(raw: Dictionary) -> Dictionary:
 		bags = v._validate_list(equipment_raw.get("bags"), "bags", v._check_bag)
 		accessories = v._validate_list(equipment_raw.get("accessories"), "accessories", v._check_accessory)
 	var decorations := v._validate_list(raw.get("decorations"), "decorations", v._check_decoration)
+	v._weather_ids = {}
+	for entry in raw.get("weather", []) if typeof(raw.get("weather")) == TYPE_ARRAY else []:
+		if typeof(entry) == TYPE_DICTIONARY:
+			v._weather_ids[entry.get("id")] = true
+	var moments := v._validate_list(raw.get("moments"), "moments", v._check_moment)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits, bags, accessories)
 	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
 	v._check_starting_camp(balance, layouts, decorations)
@@ -104,6 +113,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"bags": bags,
 		"accessories": accessories,
 		"decorations": decorations,
+		"moments": moments,
 		"errors": v._errors,
 	}
 
@@ -112,6 +122,7 @@ var _regions: Dictionary = {}
 var _bait_tags: Dictionary = {}
 var _behaviors: Dictionary = {}
 var _item_errors := PackedStringArray()
+var _weather_ids: Dictionary = {}
 
 func _validate_list(items: Variant, category: String, check: Callable) -> Dictionary:
 	var file_name: String = LIST_FILES.get(category, FILE_NAMES.get(category, ""))
@@ -262,6 +273,28 @@ func _check_starting_camp(balance: Dictionary, layouts: Dictionary, decorations:
 			elif placed.has(deco):
 				_errors.append("%s.starting_camp.%s: %s is placed twice" % [file_name, region_id, deco])
 			placed[deco] = true
+
+## Moments (P1-008): what to show, a small Memory gift, and a `when` condition made of known keys.
+func _check_moment(d: Dictionary) -> void:
+	for field in ["name_key", "desc_key", "hint_key", "icon"]:
+		_require_string(d, field)
+	_require_int(d, "memory", 0, 50)
+	var when: Variant = d.get("when")
+	if typeof(when) != TYPE_DICTIONARY or when.is_empty():
+		_item_errors.append("when: must be a non-empty object")
+		return
+	for key in when:
+		if not key in MOMENT_CONDITIONS:
+			_item_errors.append("when.%s: unknown condition (known: %s)" % [key, ", ".join(MOMENT_CONDITIONS)])
+	for weather_id in when.get("weather", []):
+		if not _weather_ids.has(weather_id):
+			_item_errors.append("when.weather: unknown weather '%s'" % weather_id)
+	for band in when.get("band", []):
+		if not band in TIME_BANDS:
+			_item_errors.append("when.band: unknown time band '%s'" % band)
+	for number_key in ["min_level", "caught_rarity", "camp_filled"]:
+		if when.has(number_key) and (not _is_int(when[number_key]) or when[number_key] < 0):
+			_item_errors.append("when.%s: must be an integer >= 0" % number_key)
 
 func _require_color(d: Dictionary, field: String) -> void:
 	if typeof(d.get(field)) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(d[field]) == null:

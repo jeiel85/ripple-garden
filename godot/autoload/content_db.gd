@@ -20,6 +20,7 @@ var audio: Dictionary = {}
 var bags: Dictionary = {}
 var accessories: Dictionary = {}
 var decorations: Dictionary = {}
+var moments: Dictionary = {}
 var errors := PackedStringArray()
 
 var _fish_by_region: Dictionary = {}
@@ -50,6 +51,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	bags = result["bags"]
 	accessories = result["accessories"]
 	decorations = result["decorations"]
+	moments = result["moments"]
 	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])

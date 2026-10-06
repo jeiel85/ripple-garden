@@ -37,6 +37,9 @@ static func references(content: Dictionary) -> Array:
 			refs.append([definition["id"], definition["name_key"]])
 			if definition.has("desc_key"):
 				refs.append([definition["id"], definition["desc_key"]])
+	for moment in content.get("moments", {}).values():
+		for key in ["name_key", "desc_key", "hint_key"]:
+			refs.append([moment["id"], moment[key]])
 	return refs
 
 ## Problems found: a missing key, or a required locale without text. Empty means all good.

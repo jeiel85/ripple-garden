@@ -1,0 +1,13 @@
+[
+  {"id": "moment_rain_rings", "icon": "rain", "memory": 3, "when": {"weather": ["rain"]}, "name_key": "moment.rain_rings.name", "desc_key": "moment.rain_rings.desc", "hint_key": "moment.rain_rings.hint"},
+  {"id": "moment_morning_mist", "icon": "mist", "memory": 5, "when": {"weather": ["mist"], "band": ["dawn", "morning"]}, "name_key": "moment.morning_mist.name", "desc_key": "moment.morning_mist.desc", "hint_key": "moment.morning_mist.hint"},
+  {"id": "moment_sunshower", "icon": "weather", "memory": 5, "when": {"weather": ["sunshower"]}, "name_key": "moment.sunshower.name", "desc_key": "moment.sunshower.desc", "hint_key": "moment.sunshower.hint"},
+  {"id": "moment_dragonflies", "icon": "star", "memory": 3, "when": {"band": ["morning", "day", "dusk"], "min_level": 3}, "name_key": "moment.dragonflies.name", "desc_key": "moment.dragonflies.desc", "hint_key": "moment.dragonflies.hint"},
+  {"id": "moment_firefly_night", "icon": "night", "memory": 6, "when": {"band": ["dusk", "night"], "min_level": 5}, "name_key": "moment.firefly_night.name", "desc_key": "moment.firefly_night.desc", "hint_key": "moment.firefly_night.hint"},
+  {"id": "moment_bluebirds", "icon": "star", "memory": 6, "when": {"band": ["morning", "day"], "min_level": 8}, "name_key": "moment.bluebirds.name", "desc_key": "moment.bluebirds.desc", "hint_key": "moment.bluebirds.hint"},
+  {"id": "moment_rainbow", "icon": "clear", "memory": 10, "when": {"weather": ["clear", "sunshower"], "band": ["morning", "day"], "min_level": 10}, "name_key": "moment.rainbow.name", "desc_key": "moment.rainbow.desc", "hint_key": "moment.rainbow.hint"},
+  {"id": "moment_moon_watch", "icon": "lotus", "memory": 5, "when": {"water_mind": true, "band": ["night"]}, "name_key": "moment.moon_watch.name", "desc_key": "moment.moon_watch.desc", "hint_key": "moment.moon_watch.hint"},
+  {"id": "moment_rare_meeting", "icon": "fish", "memory": 5, "when": {"caught_rarity": 3}, "name_key": "moment.rare_meeting.name", "desc_key": "moment.rare_meeting.desc", "hint_key": "moment.rare_meeting.hint"},
+  {"id": "moment_cozy_camp", "icon": "camp", "memory": 5, "when": {"camp_filled": 6}, "name_key": "moment.cozy_camp.name", "desc_key": "moment.cozy_camp.desc", "hint_key": "moment.cozy_camp.hint"},
+  {"id": "moment_waiting_pond", "icon": "clock", "memory": 3, "when": {"after_away": true}, "name_key": "moment.waiting_pond.name", "desc_key": "moment.waiting_pond.desc", "hint_key": "moment.waiting_pond.hint"}
+]
