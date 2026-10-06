@@ -18,7 +18,8 @@
   - 정책은 D-009, 하루 길이·시간대 경계는 `data/balance.json`의 `time`
 - [ ] P0-008 Region 01 base scene
 - [ ] P0-009 Habitat zone component
-- [ ] P0-010 EncounterResolver seeded weighted random
+- [x] P0-010 EncounterResolver seeded weighted random
+  - 수치는 `data/balance.json`의 `encounter`. 테스트: 결정성·조건 필터·0 가중치·pity 상한/리셋·빈도 분포 (`test_encounter_resolver.gd`)
 - [ ] P0-011 Fishing state machine
 - [ ] P0-012 cast input
 - [ ] P0-013 bite timing + feedback hooks

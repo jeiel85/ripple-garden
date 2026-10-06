@@ -307,6 +307,17 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 				if not band in TIME_BANDS:
 					_errors.append("%s.time.band_starts_hour: '%s' is not a known time band" % [file_name, band])
 
+	var encounter: Variant = data.get("encounter")
+	if typeof(encounter) != TYPE_DICTIONARY:
+		_errors.append("%s.encounter: must be an object" % file_name)
+	else:
+		_check_balance_number(encounter, "encounter", "bait_match_multiplier", 1.0, 10.0)
+		_check_balance_number(encounter, "encounter", "pity_step", 0.0, 1.0)
+		_check_balance_number(encounter, "encounter", "pity_cap", 0.0, 10.0)
+		_check_balance_number(encounter, "encounter", "pity_min_rarity", 1.0, 5.0, true)
+		_check_balance_number(encounter, "encounter", "ecosystem_rarity_bonus_per_level", 0.0, 2.0)
+		_check_balance_number(encounter, "encounter", "size_skew", 0.1, 10.0)
+
 	var slice: Variant = data.get("vertical_slice")
 	if typeof(slice) != TYPE_DICTIONARY:
 		_errors.append("%s.vertical_slice: must be an object" % file_name)
@@ -349,6 +360,16 @@ func _validate_aliases(data: Variant, current: Dictionary) -> Dictionary:
 				_errors.append("%s: must lead to an existing %s id without looping (ends at %s)" % [
 					label, category, var_to_str(target)])
 	return data if _errors.size() == before else {}
+
+## Appends an error unless `section[field]` is a finite number in [min_value, max_value]
+## (an integer when `integer` is set).
+func _check_balance_number(section: Dictionary, section_name: String, field: String,
+		min_value: float, max_value: float, integer: bool = false) -> void:
+	var value: Variant = section.get(field)
+	if not _is_number(value) or value < min_value or value > max_value or (integer and not _is_int(value)):
+		_errors.append("%s.%s.%s: must be %s in %s..%s (got %s)" % [
+			FILE_NAMES["balance"], section_name, field, "an integer" if integer else "a number",
+			min_value, max_value, var_to_str(value)])
 
 func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:
 	var file_name: String = FILE_NAMES["balance"]

@@ -15,6 +15,8 @@ var balance: Dictionary = {}
 var aliases: Dictionary = {}
 var errors := PackedStringArray()
 
+var _fish_by_region: Dictionary = {}
+
 func _ready() -> void:
 	load_all()
 
@@ -34,6 +36,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	progression = result["progression"]
 	balance = result["balance"]
 	aliases = result["aliases"]
+	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])
 
@@ -50,6 +53,17 @@ func get_fish(fish_id: String) -> Dictionary:
 
 func get_region(region_id: String) -> Dictionary:
 	return regions.get(region_id, {})
+
+## Fish definitions that live in `region_id`, in catalog order. Cached per load so callers
+## (encounter rolls, presenters) never scan the whole catalog.
+func get_fish_for_region(region_id: String) -> Array:
+	if _fish_by_region.is_empty():
+		for fish_def in fish.values():
+			for fish_region in fish_def["regions"]:
+				if not _fish_by_region.has(fish_region):
+					_fish_by_region[fish_region] = []
+				_fish_by_region[fish_region].append(fish_def)
+	return _fish_by_region.get(region_id, [])
 
 func get_rod(rod_id: String) -> Dictionary:
 	return rods.get(rod_id, {})

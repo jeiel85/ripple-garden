@@ -25,5 +25,13 @@
       "dusk": 17.0,
       "night": 20.0
     }
+  },
+  "encounter": {
+    "bait_match_multiplier": 1.35,
+    "pity_step": 0.15,
+    "pity_cap": 1.0,
+    "pity_min_rarity": 3,
+    "ecosystem_rarity_bonus_per_level": 0.08,
+    "size_skew": 1.6
   }
 }
