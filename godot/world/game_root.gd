@@ -21,6 +21,7 @@ var settings: SettingsApplier
 var loadout: LoadoutService
 var camp: CampService
 var offline: OfflineService
+var moments: MomentService
 var hints: TutorialHints
 
 @onready var region: RegionRuntime = $World/RegionRuntime
@@ -42,6 +43,7 @@ func _ready() -> void:
 	loadout = LoadoutService.new(GameState)
 	camp = CampService.new(GameState, loadout)
 	offline = OfflineService.new(GameState, ContentDB.balance["offline"])
+	moments = MomentService.new(GameState, region_id)
 	hints = TutorialHints.new(GameState, region_id)
 
 	if not region.setup(region_id, GameState.get_restoration_level(region_id), TimeService.get_time_band()):
@@ -73,12 +75,23 @@ func _ready() -> void:
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.fish_escaped.connect(_on_fish_escaped)
 	EventBus.offline_time_elapsed.connect(func(_seconds: int) -> void: _handle_time_away())
+	# Moments are looked for whenever the scene changes in a way they care about (never per frame).
+	moments.context_provider = func() -> Dictionary:
+		return {"weather": region.weather.current_id, "band": TimeService.get_time_band(), "water_mind": ui.water_mind.active}
+	for signal_name in ["weather_changed", "game_time_band_changed"]:
+		EventBus.connect(signal_name, func(_value: String) -> void: moments.check())
+	EventBus.region_restoration_changed.connect(func(_changed: String, _level: int) -> void: moments.check())
+	EventBus.water_mind_changed.connect(func(_active: bool) -> void: moments.check())
+	EventBus.camp_changed.connect(func(_changed: String) -> void: moments.check())
+	EventBus.fish_caught.connect(func(fish_id: String, _size: float, _first: bool) -> void:
+		moments.check({"caught_rarity": int(ContentDB.get_fish(fish_id).get("rarity", 1))}))
 	# Keepsakes whose moment came while an older build was running arrive now.
 	loadout.grant_keepsakes()
 	# A fish caught but not released before the last exit is waiting to be inspected.
 	fishing.resume_pending_catch()
 	# Time away before this scene existed (the load) is handled now; later absences arrive as events.
 	_handle_time_away()
+	moments.check()  # whatever is already true when the game opens
 
 ## KO and EN are translated; any other system language falls back to English until JA arrives (P1-013).
 func _pick_language() -> void:
@@ -107,6 +120,7 @@ func _handle_time_away() -> void:
 		save_hook.call()
 	if not summary.is_empty():
 		ui.show_away_summary(summary)
+		moments.check({"after_away": true})
 
 func _on_state_replaced() -> void:
 	settings.apply_all()

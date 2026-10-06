@@ -41,6 +41,8 @@ signal inventory_changed()
 signal bait_ran_out(bait_id: String, replacement_id: String)
 ## An item arrived by itself (an "event" keepsake whose moment came). `category` is rod | bait | bag | accessory.
 signal item_granted(category: String, item_id: String)
+## A moment (P1-008) was seen for the first time and written into the journal.
+signal moment_recorded(moment_id: String)
 ## A region's camp was rearranged (a decoration placed, moved, turned or put away).
 signal camp_changed(region_id: String)
 ## Read the new value through GameState.get_setting(key).

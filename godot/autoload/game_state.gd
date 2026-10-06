@@ -413,6 +413,24 @@ func take_bait(bait_id: String) -> bool:
 	_inventory_changed()
 	return true
 
+# --- moments (P1-008) ---
+
+func has_moment(moment_id: String) -> bool:
+	ensure_initialized()
+	return data["moments"].has(moment_id)
+
+## When a moment was first seen (unix seconds), 0 if never.
+func moment_seen_at(moment_id: String) -> int:
+	ensure_initialized()
+	return data["moments"].get(moment_id, 0)
+
+func record_moment(moment_id: String) -> void:
+	ensure_initialized()
+	if data["moments"].has(moment_id):
+		return
+	data["moments"][moment_id] = _now()
+	_changed()
+
 # --- camp (P1-002) ---
 
 func get_owned_decorations() -> Array:

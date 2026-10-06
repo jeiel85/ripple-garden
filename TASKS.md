@@ -69,7 +69,7 @@
 - [x] P1-005 5 time bands
 - [x] P1-006 6 weather types
 - [x] P1-007 offline aggregate simulation
-- [ ] P1-008 moment/ambient event journal
+- [x] P1-008 moment/ambient event journal
 - [ ] P1-009 photo mode
 - [x] P1-010 map/region unlock
   - `progression.json`의 `unique_fish`는 "선행 지역에서 발견한 종 수"로 해석 (ContentValidator가 그 지역 서식 종 수 이하를 강제)

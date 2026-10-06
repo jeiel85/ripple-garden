@@ -132,6 +132,8 @@ static func default_save(now: int) -> Dictionary:
 		"entitlement_cache": {"full_game": false},
 		# A fish that was caught but not yet released when the game closed (see GameState).
 		"session": {"pending_catch": {}},
+		# P1-008: {moment_id: unix time first seen}
+		"moments": {},
 	}
 
 ## Returns a copy of `raw` with every known field present and correctly typed, keeping
@@ -198,6 +200,14 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 			else:
 				settings[key] = raw_settings[key]
 	result["settings"] = settings
+
+	var moments := {}
+	var raw_moments: Variant = input.get("moments")
+	if typeof(raw_moments) == TYPE_DICTIONARY:
+		for moment_id in raw_moments:
+			if typeof(moment_id) == TYPE_STRING and _is_number(raw_moments[moment_id]):
+				moments[moment_id] = maxi(0, _int_or(raw_moments[moment_id], 0))
+	result["moments"] = moments
 
 	var regions := {}
 	var raw_regions: Variant = input.get("regions")

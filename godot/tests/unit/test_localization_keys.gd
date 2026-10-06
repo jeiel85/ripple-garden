@@ -10,7 +10,7 @@ func _content() -> Dictionary:
 	return {
 		"fish": content_db.fish, "regions": content_db.regions, "rods": content_db.rods,
 		"baits": content_db.baits, "weather": content_db.weather,
-		"bags": content_db.bags, "accessories": content_db.accessories, "decorations": content_db.decorations,
+		"bags": content_db.bags, "accessories": content_db.accessories, "decorations": content_db.decorations, "moments": content_db.moments,
 	}
 
 func test_content_localization_keys_exist() -> void:

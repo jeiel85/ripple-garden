@@ -10,7 +10,8 @@ extends Control
 ## ignorance is never punished. A crown marks a fully known species, "NEW" one met but not looked at
 ## yet (looking at its page clears it, and with it the dot on the journal button and the "All" tab).
 ##
-## Tabs follow the world: all species, one per region group, and the rare ones (rarity 4+).
+## Tabs follow the world: all species, one per region group, the rare ones (rarity 4+), and the moments
+## seen by the water (P1-008), which use the same notebook: cards on the left, the page on the right.
 
 signal close_pressed
 
@@ -25,6 +26,7 @@ const TABS: Array = [
 	["river", "freshwater", "ui.journal.tab.river", ["region_03_reed_river"], 1],
 	["sea", "sea", "ui.journal.tab.sea", ["region_04_blue_coast", "region_05_moonlight_isle"], 1],
 	["special", "special", "ui.journal.tab.special", [], 4],
+	["moments", "star", "ui.journal.tab.moments", [], 0],
 ]
 const SORTS: PackedStringArray = ["found", "name", "size"]
 
@@ -102,15 +104,19 @@ func _init() -> void:
 	for entry in TABS:
 		var tab_id: String = entry[0]
 		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", 24.0, false)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
-		button.add_theme_font_size_override("font_size", 22)
+		button.add_theme_font_size_override("font_size", 20)
 		button.add_theme_constant_override("h_separation", 2)
-		button.custom_minimum_size.x = 60
+		button.custom_minimum_size.x = 104
 		_tabs[tab_id] = button
 		tab_row.add_child(button)
 	_all_dot = UiKit.notice_dot(_tabs["all"])
-	column.add_child(tab_row)
+	# Seven tabs do not fit a phone in every language: the strip scrolls sideways instead of squeezing.
+	var tab_scroll := ScrollContainer.new()
+	tab_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tab_scroll.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX + 8
+	tab_scroll.add_child(tab_row)
+	column.add_child(tab_scroll)
 
 	# Notebook: cards on the left, the chosen fish on the right.
 	var book := UiKit.hbox(8)
@@ -212,6 +218,11 @@ func setup(p_journal: JournalModel, p_region_id: String) -> void:
 
 ## Rebuilds the cards and the page from the current save.
 func refresh() -> void:
+	if tab == "moments":
+		_refresh_moments()
+		return
+	_page_rows.get_parent().get_child(_page_rows.get_index() + 1).visible = true  # the home-waters card
+	_page_portrait.get_parent().visible = true
 	for child in _list.get_children():
 		_list.remove_child(child)  # gone at once: a queued free would leave old cards in the layout this frame
 		child.queue_free()
@@ -234,6 +245,7 @@ func refresh() -> void:
 	for tab_id in _tabs:
 		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
 	_sort_button.text = tr("ui.journal.sort." + sort_mode)
+	_sort_button.visible = true
 	if selected_id.is_empty() or not _cards.has(selected_id):
 		selected_id = _first_interesting(entries)
 	_show_page(selected_id)
@@ -477,6 +489,71 @@ func _row(icon_name: String, caption_key: String, value: String, open: bool, nee
 	line.color = Color(UiTheme.CREAM_BORDER, 0.6)
 	line.custom_minimum_size = Vector2(0, 1)
 	_page_rows.add_child(line)
+
+# --- moments (P1-008) ---
+
+func _refresh_moments() -> void:
+	for child in _list.get_children():
+		_list.remove_child(child)
+		child.queue_free()
+	_cards.clear()
+	var seen := 0
+	for moment_id in ContentDB.moments:
+		if GameState.has_moment(moment_id):
+			seen += 1
+		var card := _moment_card(moment_id)
+		_cards[moment_id] = card
+		_list.add_child(card)
+	_progress.text = tr("ui.journal.progress") % [seen, ContentDB.moments.size()]
+	_sort_button.visible = false  # moments keep the order they are listed in; there is nothing to sort
+	for tab_id in _tabs:
+		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
+	if selected_id.is_empty() or not _cards.has(selected_id):
+		selected_id = ContentDB.moments.keys()[0] if not ContentDB.moments.is_empty() else ""
+	_show_moment(selected_id)
+
+func _moment_card(moment_id: String) -> Button:
+	var def: Dictionary = ContentDB.moments[moment_id]
+	var seen: bool = GameState.has_moment(moment_id)
+	var card := Button.new()
+	card.custom_minimum_size = Vector2(0, 168)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.focus_mode = Control.FOCUS_ALL
+	card.theme_type_variation = "CardSelected" if moment_id == selected_id else ""
+	card.pressed.connect(func() -> void:
+		selected_id = moment_id
+		for id in _cards:
+			(_cards[id] as Button).theme_type_variation = "CardSelected" if id == moment_id else ""
+		_show_moment(moment_id))
+	var box := UiKit.vbox(6)
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.offset_top = 18
+	box.offset_bottom = -8
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var picture := UiKit.icon(def["icon"] if seen else "lock", 64.0, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
+	picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	box.add_child(picture)
+	var caption := UiKit.label(tr(def["name_key"]) if seen else tr("ui.journal.unknown_name"), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
+	caption.add_theme_color_override("font_color", UiTheme.INK)
+	box.add_child(caption)
+	card.add_child(box)
+	card.tooltip_text = caption.text
+	return card
+
+func _show_moment(moment_id: String) -> void:
+	for child in _page_rows.get_children():
+		_page_rows.remove_child(child)
+		child.queue_free()
+	_page_portrait.get_parent().visible = false
+	_page_rows.get_parent().get_child(_page_rows.get_index() + 1).visible = false  # the home-waters card
+	var def: Dictionary = ContentDB.moments.get(moment_id, {})
+	if def.is_empty():
+		return
+	var seen: bool = GameState.has_moment(moment_id)
+	_page_name.text = tr(def["name_key"]) if seen else tr("ui.journal.unknown_name")
+	_page_line.text = tr(def["desc_key"]) if seen else tr(def["hint_key"])
+	_row("calendar", "ui.journal.row.seen_on", InspectPanel.date_text(GameState.moment_seen_at(moment_id), false) if seen else "", seen, 1)
+	_row("memory", "ui.journal.row.memory", "+%d" % int(def.get("memory", 0)), true, 0)
 
 ## A tiny painted view of the species' home water (until region thumbnails arrive as art).
 class HomeView extends Control:
