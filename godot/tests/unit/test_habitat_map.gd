@@ -41,7 +41,8 @@ func test_land_resolves_to_no_habitat() -> void:
 	var map := _map()
 	var layout := ContentDB.get_layout(REGION)
 	assert_eq(map.habitat_at(Vector2(10, 10)), "", "sky")
-	assert_eq(map.habitat_at(Vector2(float(layout["rod_origin"][0]), float(layout["rod_origin"][1]))), "", "the angler's own spot")
+	assert_eq(map.habitat_at(Vector2(float(layout["angler"]["x"]), float(layout["angler"]["y"]))), "", "the angler's own spot on the dock")
+	assert_false(map.is_water(Vector2(float(layout["angler"]["x"]), float(layout["angler"]["y"]))), "the dock is not water")
 	assert_false(map.is_water(Vector2(10, 10)))
 	_free_zones()
 
@@ -51,10 +52,10 @@ func test_pond_points_resolve_to_a_habitat_and_overlays_win() -> void:
 	assert_true(map.is_water(center))
 	assert_true(map.habitat_at(center) != "")
 	# The bottom zone is an overlay on the open-water base zone.
-	assert_eq(map.habitat_at(Vector2(360, 820)), "bottom")
-	assert_eq(map.habitat_at(Vector2(360, 600)), "open_water")
-	assert_eq(map.habitat_at(Vector2(190, 700)), "vegetation")
-	assert_eq(map.habitat_at(Vector2(360, 950)), "shallow")
+	assert_eq(map.habitat_at(Vector2(540, 680)), "bottom")
+	assert_eq(map.habitat_at(Vector2(600, 450)), "open_water")
+	assert_eq(map.habitat_at(Vector2(660, 480)), "vegetation")
+	assert_eq(map.habitat_at(Vector2(500, 330)), "shallow")
 	_free_zones()
 
 func test_random_points_land_in_the_requested_habitat() -> void:
@@ -125,9 +126,9 @@ func test_props_appear_progressively_with_restoration() -> void:
 
 func test_a_zone_poking_past_the_pond_does_not_make_the_bank_a_habitat() -> void:
 	var map := _map()
-	# (115, 668) lies inside the left vegetation zone's polygon but just outside the pond outline.
-	assert_false(map.is_water(Vector2(115, 668)))
-	assert_eq(map.habitat_at(Vector2(115, 668)), "", "the bank must not count as fishable water")
+	# (205, 961) lies inside the lower vegetation zone's polygon but just outside the pond outline.
+	assert_false(map.is_water(Vector2(205, 961)))
+	assert_eq(map.habitat_at(Vector2(205, 961)), "", "the bank must not count as fishable water")
 	_free_zones()
 
 func test_random_points_are_always_on_the_water() -> void:

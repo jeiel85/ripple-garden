@@ -43,6 +43,8 @@ const AUDIO_BUSES: PackedStringArray = preload("res://autoload/audio_service.gd"
 const AUDIO_CUES: PackedStringArray = ["cast", "landed", "bite", "hooked", "caught", "released", "escaped"]
 const PROP_KINDS: PackedStringArray = PropKinds.PROPS
 const ANIMAL_KINDS: PackedStringArray = PropKinds.ANIMALS
+## How far past the design viewport a region's pond and scenery may extend (wider/taller screens).
+const LAYOUT_BLEED := Vector2(480, 320)
 const HEX_COLOR := "^#[0-9a-fA-F]{6}$"
 
 static func validate(raw: Dictionary) -> Dictionary:
@@ -586,13 +588,25 @@ func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, 
 	for field in ["rod_origin"]:
 		if not _is_point_within(layout.get(field), width, height):
 			_errors.append("%s.%s: must be a point inside the viewport" % [label, field])
-	if not _is_number(layout.get("horizon_y")) or layout["horizon_y"] < 0 or layout["horizon_y"] > height:
-		_errors.append("%s.horizon_y: must be a number inside the viewport height" % label)
+	# The horizon may sit above the screen (a top-down view such as the main-world mockup has no sky).
+	if not _is_number(layout.get("horizon_y")) or layout["horizon_y"] < -LAYOUT_BLEED.y * 4.0 or layout["horizon_y"] > height:
+		_errors.append("%s.horizon_y: must be a number no lower than the viewport bottom" % label)
+	if layout.has("cast_forward_deg") and (not _is_number(layout["cast_forward_deg"]) or absf(layout["cast_forward_deg"]) > 180.0):
+		_errors.append("%s.cast_forward_deg: must be a number in -180..180" % label)
+	if layout.has("angler"):
+		var angler: Variant = layout["angler"]
+		if typeof(angler) != TYPE_DICTIONARY or not _is_point_within([angler.get("x"), angler.get("y")], width, height):
+			_errors.append("%s.angler: must be {x, y} inside the viewport" % label)
+	if layout.has("waterfall"):
+		var fall: Variant = layout["waterfall"]
+		if typeof(fall) != TYPE_DICTIONARY or not _is_point_within_bleed([fall.get("x"), fall.get("y")], width, height) \
+				or not _is_number(fall.get("width")) or not _is_number(fall.get("height")) or fall["width"] <= 0 or fall["height"] <= 0:
+			_errors.append("%s.waterfall: must be {x, y, width > 0, height > 0} near the viewport" % label)
 	var reach: Variant = layout.get("cast_reach_px")
 	if typeof(reach) != TYPE_DICTIONARY or not _is_number(reach.get("near")) or not _is_number(reach.get("far")) \
 			or reach["near"] <= 0 or reach["far"] <= reach["near"]:
 		_errors.append("%s.cast_reach_px: requires 0 < near < far" % label)
-	_check_polygon(layout.get("pond"), width, height, "%s.pond" % label)
+	_check_polygon(layout.get("pond"), width, height, "%s.pond" % label, true)
 
 	var covered: Dictionary = {}
 	var zones: Variant = layout.get("zones")
@@ -643,9 +657,8 @@ func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, 
 				continue
 			if typeof(prop.get("kind")) != TYPE_STRING or not prop["kind"] in PROP_KINDS:
 				_errors.append("%s.kind: unknown prop '%s' (known: %s)" % [prop_label, prop.get("kind"), ", ".join(PROP_KINDS)])
-			if not _is_number(prop.get("x")) or not _is_number(prop.get("y")) \
-					or prop["x"] < 0 or prop["x"] > width or prop["y"] < 0 or prop["y"] > height:
-				_errors.append("%s: x and y must be inside the viewport" % prop_label)
+			if not _is_point_within_bleed([prop.get("x"), prop.get("y")], width, height):
+				_errors.append("%s: x and y must be inside the viewport or its bleed margin" % prop_label)
 			if prop.has("scale") and (not _is_number(prop["scale"]) or prop["scale"] < 0.2 or prop["scale"] > 3.0):
 				_errors.append("%s.scale: must be a number in 0.2..3" % prop_label)
 			var min_level: int = int(prop["min_level"]) if prop.has("min_level") and _is_int(prop["min_level"]) else 0
@@ -780,13 +793,17 @@ func _check_audio_source(entry: Dictionary, label: String) -> void:
 	if not entry.get("bus") in AUDIO_BUSES:
 		_errors.append("%s.bus: must be one of %s (got %s)" % [label, ", ".join(AUDIO_BUSES), var_to_str(entry.get("bus"))])
 
-func _check_polygon(points: Variant, width: float, height: float, label: String) -> void:
+## leed allows points in the margin around the viewport that wider or taller screens show (the pond
+## and scenery continue past the design area so no edge is ever bare). Habitat zones never bleed: a cast
+## must land where the design area can show it.
+func _check_polygon(points: Variant, width: float, height: float, label: String, bleed: bool = false) -> void:
 	if typeof(points) != TYPE_ARRAY or points.size() < 3:
 		_errors.append("%s: must be a polygon with at least 3 points" % label)
 		return
 	for point in points:
-		if not _is_point_within(point, width, height):
-			_errors.append("%s: every point must be [x, y] inside the viewport (got %s)" % [label, var_to_str(point)])
+		var inside := _is_point_within_bleed(point, width, height) if bleed else _is_point_within(point, width, height)
+		if not inside:
+			_errors.append("%s: every point must be [x, y] inside the viewport%s (got %s)" % [label, " or its bleed margin" if bleed else "", var_to_str(point)])
 			return
 
 static func _is_point(value: Variant) -> bool:
@@ -794,6 +811,10 @@ static func _is_point(value: Variant) -> bool:
 
 static func _is_point_within(value: Variant, width: float, height: float) -> bool:
 	return _is_point(value) and value[0] >= 0 and value[0] <= width and value[1] >= 0 and value[1] <= height
+
+static func _is_point_within_bleed(value: Variant, width: float, height: float) -> bool:
+	return _is_point(value) and value[0] >= -LAYOUT_BLEED.x and value[0] <= width + LAYOUT_BLEED.x \
+		and value[1] >= -LAYOUT_BLEED.y and value[1] <= height + LAYOUT_BLEED.y
 
 ## `section[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
 func _check_balance_range(section: Dictionary, section_name: String, field: String,

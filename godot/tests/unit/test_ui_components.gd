@@ -146,7 +146,10 @@ func test_journal_panel_lists_every_species_and_hides_the_unmet() -> void:
 	tree.root.add_child(panel)
 	panel.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), "region_01_quiet_pond")
 	panel.refresh()
-	assert_eq(panel.card_count(), 10)
+	assert_eq(panel.card_count(), ContentDB.fish.size(), "the All tab lists every species of the game")
+	assert_eq(panel._counter.text, "%d / %d" % [1, ContentDB.fish.size()])
+	panel.select_tab("pond")
+	assert_eq(panel.card_count(), 10, "the pond tab lists the pond's species")
 	assert_eq(panel._progress.text, String(TranslationServer.translate("ui.journal.progress")) % [1, 10])
 	panel.free()
 	_fresh_state()
@@ -280,9 +283,10 @@ func test_restore_ready_is_shown_by_text_as_well_as_colour() -> void:
 	var idle_text := hud.restore_button.text
 	hud.set_restore_ready(true)
 	assert_true(hud.restore_button.text != idle_text, "the label must change, not only the colour")
-	assert_eq(hud.restore_button.theme_type_variation, &"PrimaryButton")
+	assert_true(hud.restore_dot.visible, "a dot marks the button")
 	hud.set_restore_ready(false)
 	assert_eq(hud.restore_button.text, idle_text)
+	assert_false(hud.restore_dot.visible)
 	hud.free()
 
 func test_sliders_and_popup_rows_are_full_size_touch_targets() -> void:

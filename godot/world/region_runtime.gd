@@ -47,8 +47,17 @@ func rod_origin() -> Vector2:
 ## Aim geometry for a rod (`rod_range` is the rod's 0..1 range stat).
 func cast_aim_for(rod_range: float) -> CastAim:
 	var reach: Dictionary = layout["cast_reach_px"]
-	var aim := CastAim.new(rod_origin(), float(reach["near"]), CastAim.reach_for_rod(rod_range, float(reach["near"]), float(reach["far"])))
+	var aim := CastAim.new(rod_origin(), float(reach["near"]), CastAim.reach_for_rod(rod_range, float(reach["near"]), float(reach["far"])),
+		float(layout.get("cast_forward_deg", 0.0)))
 	return aim
+
+## Where the angler sits (the rod is held from here), or a point under the rod tip when the layout
+## has no angler.
+func angler_position() -> Vector2:
+	var angler: Variant = layout.get("angler")
+	if typeof(angler) == TYPE_DICTIONARY:
+		return Vector2(float(angler["x"]), float(angler["y"]))
+	return rod_origin() + Vector2(0, 90)
 
 ## Shows a restoration level. With `animate` the world eases to it (UI_UX §6: a short, quiet change).
 func apply_level(level: int, animate: bool) -> void:

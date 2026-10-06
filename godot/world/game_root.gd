@@ -44,7 +44,7 @@ func _ready() -> void:
 	if load_save:
 		# A landed fish and its release reach the disk at once (tests and tools leave this unset).
 		fishing.save_hook = SaveService.save_if_dirty
-	region.fishing_view.setup(fishing, region.rod_origin())
+	region.fishing_view.setup(fishing, region.rod_origin(), region.angler_position())
 	ambient_audio.setup(region_id, region.weather)
 	fishing.state_changed.connect(_on_fishing_state_changed)
 

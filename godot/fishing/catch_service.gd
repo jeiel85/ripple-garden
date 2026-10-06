@@ -29,9 +29,10 @@ func _init(game_state: Node, rewards: Dictionary) -> void:
 	_game_state = game_state
 	_rewards = rewards
 
-## Records the catch and returns the pending-catch info (also stored in the save).
-func begin_catch(encounter: EncounterResolver.Encounter, region_id: String) -> Dictionary:
-	var first_discovery: bool = _game_state.record_encounter(encounter.fish_id, encounter.size_cm, encounter.behavior)
+## Records the catch and returns the pending-catch info (also stored in the save). `weather_id` is the
+## weather it was caught in (remembered for a first discovery).
+func begin_catch(encounter: EncounterResolver.Encounter, region_id: String, weather_id: String = "") -> Dictionary:
+	var first_discovery: bool = _game_state.record_encounter(encounter.fish_id, encounter.size_cm, encounter.behavior, weather_id)
 	var pending := {
 		"fish_id": encounter.fish_id,
 		"size_cm": encounter.size_cm,

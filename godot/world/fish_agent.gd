@@ -49,9 +49,9 @@ func configure(fish_def: Dictionary) -> void:
 	length_px = lerpf(MIN_LENGTH_PX, MAX_LENGTH_PX, sqrt(share))
 	base_speed = 26.0 + 14.0 * (1.0 - share)
 	var rarity := int(fish_def["rarity"])
-	var hue := float(absi(hash(fish_id)) % 360) / 360.0
-	body_color = Color.from_hsv(hue, 0.30 + 0.07 * rarity, 0.78 - 0.02 * rarity)
-	accent_color = Color.from_hsv(fposmod(hue + 0.08, 1.0), 0.55 + 0.08 * rarity, 0.9)
+	var colors := FishColors.for_species(fish_id, rarity)
+	body_color = colors["body"]
+	accent_color = colors["accent"]
 	velocity = Vector2.ZERO
 	target = Vector2.ZERO  # a pooled agent must not keep swimming to the previous species' destination
 	heading = randf() * TAU

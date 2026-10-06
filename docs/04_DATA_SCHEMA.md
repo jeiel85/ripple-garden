@@ -57,9 +57,16 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
   "smallest_cm": 0.0,
   "first_seen_at": 0,
   "last_seen_at": 0,
-  "observed_behaviors": []
+  "observed_behaviors": [],
+  "first_weather": "",
+  "journal_seen": false
 }
 ```
+
+- `first_weather`: 처음 만난 날의 날씨 id (도감 "발견한 날의 날씨"). 이 필드 이전의 세이브는 `""`(기록 없음).
+- `journal_seen`: 처음 만난 뒤 도감에서 그 종의 페이지를 봤는지 (NEW 표시와 알림 점, D-018).
+  새 발견은 `false`로 시작하고, 이 필드가 없는 예전 기록은 `true`로 읽는다(이미 본 것으로 취급).
+- 세이브 버전은 그대로 1이다. 두 필드 모두 로드할 때 기본값으로 채워지는 추가 필드다(D-007).
 
 ## 5. Region State
 ```json

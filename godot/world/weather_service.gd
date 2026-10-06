@@ -14,6 +14,8 @@ var blend := 1.0
 var current_id := ""
 var previous_id := ""
 var region_id := ""
+## A weather shown on screen only (water-mind picker); "" = show the real weather.
+var preview_id := ""
 var rng := RandomNumberGenerator.new()
 ## Weather definitions; defaults to ContentDB.weather. Tests may inject their own.
 var definitions: Dictionary = {}
@@ -111,9 +113,28 @@ func _pick_next() -> String:
 			return weather_id
 	return ids.back()
 
-## Visual parameters blended between the previous and current weather:
+## Water-mind's weather picker (D-018): shows `weather_id` without changing the real weather, which
+## keeps running underneath (fishing and the journal only ever see `current_id`). Returns false for an
+## id the region cannot have.
+func set_preview(weather_id: String) -> bool:
+	if not weather_id in allowed_ids():
+		return false
+	preview_id = weather_id
+	return true
+
+func clear_preview() -> void:
+	preview_id = ""
+
+## What the screen shows: the preview while one is set, otherwise the real weather.
+func shown_id() -> String:
+	return preview_id if not preview_id.is_empty() else current_id
+
+## Visual parameters blended between the previous and current weather (or the preview, unblended):
 ## {"cloud": 0..1, "rain": 0..1, "brightness": float, "tint": Color}.
 func visual() -> Dictionary:
+	if not preview_id.is_empty():
+		var shown: Dictionary = _definitions()[preview_id]["visual"]
+		return {"cloud": float(shown["cloud"]), "rain": float(shown["rain"]), "brightness": float(shown["brightness"]), "tint": Color(shown["tint"])}
 	if current_id.is_empty():
 		return {"cloud": 0.0, "rain": 0.0, "brightness": 1.0, "tint": Color.WHITE}
 	var from: Dictionary = _definitions()[previous_id]["visual"]

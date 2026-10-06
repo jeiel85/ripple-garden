@@ -97,11 +97,12 @@ func test_inspect_screen_opens_on_landing_and_blocks_world_input() -> void:
 	assert_false(root.ui.world_input.enabled)
 	assert_false(root.ui.hud.visible)
 	root.ui.inspect_panel.journal_pressed.emit()
-	assert_eq(root.ui.current_panel(), root.ui.journal_panel)
+	assert_eq(root.ui.current_panel(), root.ui.journal_panel, "Record opens the fish's journal page")
+	assert_eq(root.ui.journal_panel.selected_id, "fish_crucian_carp")
+	assert_eq(GameState.get_collection_record("fish_crucian_carp")["releases"], 1, "and lets the fish go: nothing stays pending")
+	assert_true(GameState.get_pending_catch().is_empty())
 	root.ui.close_panel()
-	assert_eq(root.ui.current_panel(), root.ui.inspect_panel, "closing the journal returns to the catch")
-	root.ui.inspect_panel.release_pressed.emit()
-	assert_false(root.ui.is_panel_open())
+	assert_false(root.ui.is_panel_open(), "closing the journal returns to the pond")
 	_stop(root)
 
 func test_playing_many_attempts_does_not_grow_the_node_tree() -> void:
@@ -309,8 +310,11 @@ func test_the_hud_lays_out_without_squashed_buttons_in_korean_and_english() -> v
 			assert_true(button.size.x >= UiTheme.TOUCH_MIN_PX - 1.0, "%s (%s) is only %.0f px wide" % [button.text, locale, button.size.x])
 			assert_true(button.size.y >= UiTheme.TOUCH_MIN_PX - 1.0, "%s (%s) is only %.0f px tall" % [button.text, locale, button.size.y])
 			assert_true(button.get_global_rect().end.x <= screen_width + 1.0, "%s (%s) runs off the right edge" % [button.text, locale])
-		assert_true(hud.status_label.get_global_rect().end.x <= hud.water_mind_button.get_global_rect().position.x + 1.0,
-			"the status text must stay left of the buttons (%s)" % locale)
+		assert_true(hud.status_pill.get_global_rect().end.x <= hud.currency_pill.get_global_rect().position.x + 1.0,
+			"the status pill must stay left of the currencies (%s)" % locale)
+		assert_true(hud.currency_pill.get_global_rect().end.x <= hud.settings_button.get_global_rect().position.x + 1.0,
+			"the currencies must stay left of the settings button (%s)" % locale)
+		assert_true(hud.currency_pill.get_global_rect().end.x <= screen_width + 1.0, "the top row runs off the screen (%s)" % locale)
 		# Single-line buttons must not be wrapped letter by letter.
 		for button in [hud.journal_button, hud.settings_button, hud.water_mind_button]:
 			assert_true(button.size.y < UiTheme.TOUCH_MIN_PX * 1.8, "%s (%s) wraps into a tall pill" % [button.text, locale])
