@@ -167,6 +167,9 @@ static func centered_button(icon_name: String, text: String, callback: Callable,
 	node.add_child(content)
 	node.set_meta("label", word)
 	node.custom_minimum_size = Vector2(maxf(content.get_combined_minimum_size().x + 48.0, 200.0), UiTheme.TOUCH_MIN_PX)
+	# The word only has its real size once the theme reaches it (in the tree): the button grows to fit then.
+	content.minimum_size_changed.connect(func() -> void:
+		node.custom_minimum_size.x = maxf(node.custom_minimum_size.x, content.get_combined_minimum_size().x + 48.0))
 	node.pressed.connect(callback)
 	return node
 

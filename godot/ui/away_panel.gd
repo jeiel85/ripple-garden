@@ -20,6 +20,7 @@ func _init() -> void:
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
 	head.add_child(UiKit.icon("clock", 40.0, UiTheme.GREEN))
 	_title = UiKit.label("", "TitleLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL  # a wrapping label without width breaks every letter
 	head.add_child(_title)
 	box.add_child(head)
 	_rows = UiKit.vbox(8)

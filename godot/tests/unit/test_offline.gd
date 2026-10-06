@@ -80,3 +80,28 @@ func test_returning_shows_one_short_card() -> void:
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()
+
+# Found on the emulator: the title broke after every letter and "Take a look" spilled out of its button.
+func test_the_card_lays_out_in_every_language() -> void:
+	var previous := TranslationServer.get_locale()
+	var summary := OfflineService.Summary.new()
+	summary.seconds = 8 * 3600
+	summary.fish_added = {"fish_catfish": 2, "fish_minnow": 2}
+	summary.ripple = 31
+	for locale in ["ko", "en", "ja"]:
+		TranslationServer.set_locale(locale)
+		var host := Control.new()
+		host.size = Vector2(720, 1280)
+		host.theme = UiTheme.build(1.0, false, false)
+		tree.root.add_child(host)
+		var card := AwayPanel.new()
+		host.add_child(card)
+		card.show_summary(summary)
+		await tree.process_frame
+		await tree.process_frame
+		assert_true(card._title.get_line_count() <= 2, "%s: the title wraps into %d lines" % [locale, card._title.get_line_count()])
+		var look: Button = card.find_children("*", "Button", true, false)[0]
+		var word: Label = look.get_meta("label")
+		assert_true(word.get_global_rect().end.x <= look.get_global_rect().end.x + 1.0, "%s: the button's word spills out" % locale)
+		host.free()
+	TranslationServer.set_locale(previous)
