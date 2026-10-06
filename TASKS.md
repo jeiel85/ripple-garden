@@ -56,7 +56,10 @@
   - 단일 출처는 `ContentValidator`(GDScript). Python 검증기는 제거했고 `godot -s res://tools/validate_content.gd`가 같은 규칙 + 로컬라이제이션 키(`LocalizationCheck`)를 검사한다(CI 포함, D-015)
 - [x] P0-027 save roundtrip/migration tests
   - 라운드트립·3세대 백업·손상/절단 복구·중단된 tmp·정지/종료 저장·신버전 보호·마이그레이션 전 백업: `test_save_service.gd`, `test_save_migrator.gd`, `test_save_schema.gd`
-- [ ] P0-028 Android/Windows vertical slice builds
+- [x] P0-028 Android/Windows vertical slice builds
+  - Windows: `Windows Desktop`(release, CI 릴리스) / `Windows QA`(디버그 메뉴 포함). Android: 디버그 서명 APK(`Android` 프리셋, D-016)
+  - 검증: Android 에뮬레이터(API 36 x86_64)에서 설치·기동·낚시 루프 전체·방생 후 즉시 저장·홈/재개 저장·설정을 확인했고, Windows QA exe를 기동해 확인했다.
+    **실기기와 저사양 기기, 성능·발열·배터리는 아직 측정하지 않았다**(P3-005/006). 릴리스 서명·AAB·스토어 제출은 P3-001.
 
 ## P1 — Production Systems
 - [ ] P1-001 full 10 restoration levels

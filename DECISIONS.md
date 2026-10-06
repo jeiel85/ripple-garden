@@ -124,3 +124,10 @@
   로컬라이제이션 키 존재(`LocalizationCheck`)를 더해 오류를 출력/종료 코드로 알린다. Python 검증기(`tools/validate_content.py`)는 삭제했다.
 - 이유: 규칙이 두 곳에 있으면 한쪽만 고쳐져 "CI는 통과하는데 게임은 항목을 제외"하는 상태가 생긴다. 데이터 파일이 늘어날수록(날씨·레이아웃·오디오…)
   중복 비용이 커진다. Python은 버전 검사(`check_version.py`)에만 남는다.
+
+## D-016 Android 내보내기: 디버그 서명 APK, 서명·스토어 빌드는 P3로 (2026-10-06, P0-028)
+
+- 프리셋 `Android`: `arm64-v8a`(실기기) + `x86_64`(에뮬레이터), Gradle 빌드 없음(내장 템플릿 APK), 패키지 `com.jeiel85.ripplegarden`,
+  가로/세로는 프로젝트 설정(세로). 권한은 요청하지 않는다(오프라인 게임, INTERNET 없음). 버전 이름은 `config/version`과 같아야 하며 `tools/check_version.py`가 검사한다.
+- 이번 빌드는 편집기의 디버그 키스토어로 서명한 **디버그 APK**다. 배포용 키스토어·AAB·Play 정책 대응은 구매 연동과 함께 P3-001/P3-009에서 한다.
+- Android CI 빌드는 SDK/JDK/키스토어 준비가 필요해 아직 CI에 넣지 않았다(→ Backlog). 로컬에서는 README의 명령으로 만든다.

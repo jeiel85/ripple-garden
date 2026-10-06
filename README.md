@@ -23,7 +23,7 @@
 | P0-005 ~ P0-006, P0-027 | 원자적 저장·백업 복구·마이그레이션 프레임워크·세이브 테스트 | ✅ 완료 |
 | P0-007 | 세션/게임/오프라인 시계, 시간대 이벤트 | ✅ 완료 |
 | P0-008 ~ P0-025 | 월드 씬·서식지·물고기·복원·날씨·도감·앰비언트 오디오·설정·물멍·디버그 | 🚧 PR 검토 중 |
-| P0-026, P0-028 | 콘텐츠 검증 단일화·Android/Windows 빌드 | ⏳ 진행 예정 |
+| P0-026, P0-028 | 콘텐츠 검증 단일화·Android/Windows 빌드 | 🚧 PR 검토 중 |
 | P1 / P2 / P3 | 프로덕션 시스템 → 5개 지역 콘텐츠 → 출시 준비 | 대기 |
 
 전체 백로그는 [`TASKS.md`](TASKS.md)를 봅니다.
@@ -75,6 +75,25 @@ Windows 빌드 (`build/windows/RippleGarden.exe`로 출력):
 
 ```bash
 godot --headless --path godot --export-release "Windows Desktop" ../build/windows/RippleGarden.exe
+```
+
+QA 빌드 (같은 빌드에 커스텀 기능 태그 `qa`만 켠 것: F12 디버그 메뉴가 열린다. 배포하지 않는다):
+
+```bash
+godot --headless --path godot --export-release "Windows QA" ../build/windows-qa/RippleGarden-QA.exe
+```
+
+Android 디버그 APK (Android SDK, JDK 17, 템플릿이 필요하고 Godot 편집기 설정에 SDK 경로와 디버그 키스토어가 지정돼 있어야 합니다):
+
+```bash
+godot --headless --path godot --export-debug "Android" ../build/android/RippleGarden-debug.apk
+adb install -r build/android/RippleGarden-debug.apk
+```
+
+화면을 직접 확인하는 개발용 캡처 (실제 창에서 장면을 만들고 PNG로 저장):
+
+```bash
+godot --path godot -s res://tools/capture_screenshot.gd -- --out=shot.png --level=3 --hour=18 --populate=5
 ```
 
 ## CI / 릴리스
