@@ -68,7 +68,7 @@
 - [x] P1-004 bait system
 - [x] P1-005 5 time bands
 - [x] P1-006 6 weather types
-- [ ] P1-007 offline aggregate simulation
+- [x] P1-007 offline aggregate simulation
 - [ ] P1-008 moment/ambient event journal
 - [ ] P1-009 photo mode
 - [x] P1-010 map/region unlock

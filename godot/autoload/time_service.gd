@@ -101,6 +101,20 @@ func _check_band() -> void:
 func offline_seconds(last_session_at: int) -> int:
 	return clampi(int(_wall_now()) - last_session_at, 0, OFFLINE_CAP_SEC)
 
+## Offline seconds announced but not yet handled by the world. The load-time catch-up happens before the
+## game scene has connected to EventBus, so the scene claims it once it is ready (P1-007).
+var _unclaimed_offline := 0
+
+## Returns the offline seconds nobody has handled yet and forgets them.
+func claim_offline() -> int:
+	var away := _unclaimed_offline
+	_unclaimed_offline = 0
+	return away
+
+func _announce_offline(away: int) -> void:
+	_unclaimed_offline = mini(OFFLINE_CAP_SEC, _unclaimed_offline + away)
+	EventBus.offline_time_elapsed.emit(away)
+
 func on_app_paused() -> void:
 	_paused_at = _wall_now()
 
@@ -112,7 +126,7 @@ func on_app_resumed() -> void:
 	_paused_at = -1.0
 	if away > 0:
 		_advance_game(away)
-		EventBus.offline_time_elapsed.emit(away)
+		_announce_offline(away)
 
 ## Pretends the player was away for `seconds` (clamped like a real absence): the game clock catches
 ## up and the offline event fires. Used by the QA debug menu; returns the seconds applied.
@@ -122,7 +136,7 @@ func skip_time(seconds: int) -> int:
 	var away := clampi(seconds, 0, OFFLINE_CAP_SEC)
 	if away > 0:
 		_advance_game(away)
-		EventBus.offline_time_elapsed.emit(away)
+		_announce_offline(away)
 	return away
 
 # --- persistence ---
@@ -141,7 +155,7 @@ func restore_from_state() -> void:
 		_advance_game(away)
 	_check_band()
 	if away > 0:
-		EventBus.offline_time_elapsed.emit(away)
+		_announce_offline(away)
 
 func _on_setting_changed(key: String) -> void:
 	if key != "real_time_mode":

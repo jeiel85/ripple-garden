@@ -9,6 +9,9 @@ extends Node
 ## Tests and tools turn this off: the scene then starts from whatever GameState already holds
 ## (a new game if none) and never touches the player's save file.
 var load_save := true
+## Writes the save now (set with `load_save`; tests may set their own). Used where waiting for the
+## autosave would let a crash replay a reward.
+var save_hook := Callable()
 
 var region_id := ""
 var restoration: RestorationService
@@ -17,6 +20,7 @@ var debug: DebugService = null
 var settings: SettingsApplier
 var loadout: LoadoutService
 var camp: CampService
+var offline: OfflineService
 var hints: TutorialHints
 
 @onready var region: RegionRuntime = $World/RegionRuntime
@@ -37,6 +41,7 @@ func _ready() -> void:
 	journal = JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"])
 	loadout = LoadoutService.new(GameState)
 	camp = CampService.new(GameState, loadout)
+	offline = OfflineService.new(GameState, ContentDB.balance["offline"])
 	hints = TutorialHints.new(GameState, region_id)
 
 	if not region.setup(region_id, GameState.get_restoration_level(region_id), TimeService.get_time_band()):
@@ -47,6 +52,7 @@ func _ready() -> void:
 	if load_save:
 		# A landed fish and its release reach the disk at once (tests and tools leave this unset).
 		fishing.save_hook = SaveService.save_if_dirty
+		save_hook = SaveService.save_game
 	region.fishing_view.setup(fishing, region.rod_origin(), region.angler_position())
 	ambient_audio.setup(region_id, region.weather)
 	fishing.state_changed.connect(_on_fishing_state_changed)
@@ -66,10 +72,13 @@ func _ready() -> void:
 	EventBus.region_restoration_changed.connect(_on_restoration_changed)
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.fish_escaped.connect(_on_fish_escaped)
+	EventBus.offline_time_elapsed.connect(func(_seconds: int) -> void: _handle_time_away())
 	# Keepsakes whose moment came while an older build was running arrive now.
 	loadout.grant_keepsakes()
 	# A fish caught but not released before the last exit is waiting to be inspected.
 	fishing.resume_pending_catch()
+	# Time away before this scene existed (the load) is handled now; later absences arrive as events.
+	_handle_time_away()
 
 ## KO and EN are translated; any other system language falls back to English until JA arrives (P1-013).
 func _pick_language() -> void:
@@ -83,6 +92,21 @@ func _on_fishing_state_changed(_previous: int, current: int) -> void:
 	var line_out := current in [FishingController.State.CAST, FishingController.State.WAIT, FishingController.State.BITE_HINT,
 		FishingController.State.HOOK, FishingController.State.FIGHT]
 	region.fish_presenter.focus = fishing.landing if line_out else Vector2(-100000, -100000)
+
+## Lets the pond catch up on the time away and, when something changed, tells the player (P1-007).
+func _handle_time_away() -> void:
+	var away := TimeService.claim_offline()
+	if away <= 0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(GameState.get_last_session_at())  # the same absence always gives the same summary
+	var summary := offline.apply(region_id, away, rng)
+	# The absence is used up the moment it is applied: saved at once (with the new session time), so a crash
+	# before the next autosave cannot hand out the same fish and Ripple again on the next start.
+	if save_hook.is_valid():
+		save_hook.call()
+	if not summary.is_empty():
+		ui.show_away_summary(summary)
 
 func _on_state_replaced() -> void:
 	settings.apply_all()

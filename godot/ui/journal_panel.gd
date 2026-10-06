@@ -239,7 +239,12 @@ func refresh() -> void:
 	_show_page(selected_id)
 	_all_dot.visible = GameState.has_unseen_journal_entries()
 	if _cards.has(selected_id):
-		_scroll.ensure_control_visible.call_deferred(_cards[selected_id])
+		_scroll_to_card.call_deferred(_cards[selected_id])
+
+## Deferred: by then the journal may have been closed (or the card rebuilt) in the same frame.
+func _scroll_to_card(card: Control) -> void:
+	if is_instance_valid(card) and card.is_inside_tree() and _scroll.is_ancestor_of(card):
+		_scroll.ensure_control_visible(card)
 
 func select_tab(tab_id: String) -> void:
 	tab = tab_id

@@ -181,5 +181,15 @@
       "camp_3": "deco_crate",
       "camp_6": "deco_lantern"
     }
+  },
+  "offline": {
+    "min_minutes": 10,
+    "cap_hours": 12,
+    "hours_per_fish": 4.0,
+    "level_speedup": 0.08,
+    "max_fish_per_species": 3,
+    "ripple_per_hour": 4.0,
+    "ripple_per_level_hour": 0.6,
+    "max_ripple": 120
   }
 }

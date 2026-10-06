@@ -478,6 +478,19 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 					file_name, pair[0], pair[1], var_to_str(equipped)])
 		_check_starting_baits(starting, baits, bags)
 
+	var offline: Variant = data.get("offline")
+	if typeof(offline) != TYPE_DICTIONARY:
+		_errors.append("%s.offline: must be an object" % file_name)
+	else:
+		_check_balance_number(offline, "offline", "min_minutes", 0, 600, true)
+		_check_balance_number(offline, "offline", "cap_hours", 1, 24)
+		_check_balance_number(offline, "offline", "hours_per_fish", 0.5, 48)
+		_check_balance_number(offline, "offline", "level_speedup", 0, 1)
+		_check_balance_number(offline, "offline", "max_fish_per_species", 0, 20, true)
+		_check_balance_number(offline, "offline", "ripple_per_hour", 0, 100)
+		_check_balance_number(offline, "offline", "ripple_per_level_hour", 0, 20)
+		_check_balance_number(offline, "offline", "max_ripple", 0, 10000, true)
+
 	var equipment: Variant = data.get("equipment")
 	if typeof(equipment) != TYPE_DICTIONARY:
 		_errors.append("%s.equipment: must be an object" % file_name)
