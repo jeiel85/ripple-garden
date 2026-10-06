@@ -117,6 +117,7 @@ godot/
   tests/     헤드리스 테스트 러너와 단위 테스트
 tools/       콘텐츠·버전 검증 스크립트
 assets/      에셋 (placeholder는 라이선스 확인된 정식 에셋으로 교체)
+  design/    UI 디자인 목업과 잘라 낸 조각 — 레퍼런스용, 런타임 미사용 (DECISIONS D-017)
 ```
 
 ## 문서
