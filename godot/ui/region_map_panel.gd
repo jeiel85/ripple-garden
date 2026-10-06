@@ -124,7 +124,7 @@ func _sign(region_id: String, state: String) -> Control:
 	var button := UiKit.icon_button(def["map"]["icon"] if state != RegionUnlocks.LOCKED else "lock", _name(region_id),
 		func() -> void: tap(region_id), "", 32.0, false)
 	button.add_theme_font_size_override("font_size", 26)
-	button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX * 0.9
+	button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
 	if state == RegionUnlocks.CURRENT:
 		button.theme_type_variation = "CardSelected"
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

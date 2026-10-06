@@ -52,6 +52,9 @@ func test_the_map_shows_every_island_and_says_what_each_needs() -> void:
 	panel.setup(RegionUnlocks.new(GameState), R1)
 	panel.refresh()
 	assert_eq(panel.sign_count(), ContentDB.regions.size())
+	for region_id in ContentDB.regions:
+		var button: Button = panel._signs[region_id].get_child(0)
+		assert_true(button.get_combined_minimum_size().y >= UiTheme.TOUCH_MIN_PX, "%s sign is a full touch target" % region_id)
 	assert_true(panel.tap(R1).contains(String(TranslationServer.translate("region.quiet_pond.name"))))
 	var locked_text := panel.tap(R2)
 	assert_true(locked_text.contains(String(TranslationServer.translate("region.quiet_pond.name"))), locked_text)

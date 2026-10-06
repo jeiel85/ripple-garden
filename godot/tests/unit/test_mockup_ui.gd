@@ -108,6 +108,7 @@ func test_the_bottom_row_turns_into_the_fishing_controls_while_a_line_is_out() -
 	assert_false(hud.action_button.disabled, "the reel button works during the fight")
 	assert_true(hud.fishing_journal_button.disabled, "the journal cannot be opened mid-fight")
 	assert_true(hud.settings_button.disabled, "nor the settings")
+	assert_true(hud.status_button.disabled, "nor the map")
 	assert_true(hud.restore_button.disabled, "restoration waits until the line is in")
 	hud.set_cta_for_state("wait")
 	assert_true(hud.action_button.disabled, "nothing to hook before a bite")
@@ -126,6 +127,9 @@ func test_a_bite_closes_the_journal_opened_while_waiting() -> void:
 	assert_true(root.ui.journal_panel.is_inside_tree())
 	EventBus.fishing_state_changed.emit("wait", "bite_hint")
 	assert_false(root.ui.journal_panel.is_inside_tree(), "the bite must be answerable")
+	root.ui._open(root.ui.map_panel)
+	EventBus.fishing_state_changed.emit("wait", "bite_hint")
+	assert_false(root.ui.map_panel.is_inside_tree(), "the map gives way to a bite too")
 	_stop(root)
 
 func test_cancel_reels_the_line_in() -> void:

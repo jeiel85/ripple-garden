@@ -76,6 +76,8 @@ var ripple_label: Label
 var memory_label: Label
 var currency_words: Array[Label] = []
 var settings_button: Button
+## The status pill itself: it opens the region map.
+var status_button: Button
 var water_mind_button: Button
 var journal_button: Button
 var gear_button: Button
@@ -164,7 +166,7 @@ func _build_top() -> Control:
 	status.add_child(weather_label)
 	status_pill.add_child(status)
 	# The whole pill is the way to the region map (P1-010).
-	var status_button := Button.new()
+	status_button = Button.new()
 	status_button.theme_type_variation = "FlatButton"
 	status_button.tooltip_text = tr("ui.map.open")
 	status_button.focus_mode = Control.FOCUS_ALL
@@ -340,6 +342,7 @@ func set_cta_for_state(state_name: String) -> void:
 	var fish_on := state_name in ["bite_hint", "hook", "fight", "land"]
 	fishing_journal_button.disabled = fish_on
 	settings_button.disabled = fish_on
+	status_button.disabled = fish_on
 	restore_button.disabled = fishing
 	cancel_button.disabled = state_name == "land"
 	_can_fade = state_name == "ready"

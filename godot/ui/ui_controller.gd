@@ -378,8 +378,8 @@ func _on_fishing_state_changed(_previous: String, current: String) -> void:
 		fight_meter.update_values(0.5, _fishing.fight.progress if _fishing.fight != null else 0.0)
 		_hint_once("hint_reel", "ui.hint.reel")
 	elif current == "bite_hint":
-		# A look opened while waiting (journal, settings) gives way to the bite, so it can still be hooked.
-		if _current_panel == journal_panel or _current_panel == settings_panel:
+		# A look opened while waiting (journal, settings, map) gives way to the bite, so it can still be hooked.
+		if _current_panel in [journal_panel, settings_panel, map_panel]:
 			close_panel()
 		_hint_once("hint_hook", "ui.hint.hook")
 	elif current == "inspect":
