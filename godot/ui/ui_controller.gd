@@ -622,7 +622,18 @@ static func safe_insets(safe: Rect2i, screen: Vector2i, window_height: float, mo
 func _apply_layout() -> void:
 	var insets := safe_insets(DisplayServer.get_display_safe_area(), DisplayServer.screen_get_size(),
 		get_viewport().get_visible_rect().size.y, OS.has_feature("mobile"))
-	hud.apply_layout(insets.x, insets.y, UiTheme.touch_min(GameState.get_setting("large_ui") == true))
+	apply_insets(insets.x, insets.y)
+
+## Keeps everything that is tapped or read out of a notch and the gesture bar (design pixels). Full-screen
+## panels are laid out for the status bar at the top, which moves down by the same inset; the overlays
+## move only their buttons, their pictures stay full screen. Found on a 20:9 emulator, where the map's
+## title sat on top of the status bar.
+func apply_insets(top: float, bottom: float) -> void:
+	hud.apply_layout(top, bottom, UiTheme.touch_min(GameState.get_setting("large_ui") == true))
+	_modal_full.offset_top = top
+	_modal_full.offset_bottom = -bottom
+	water_mind.apply_insets(top, bottom)
+	photo_mode.apply_insets(top, bottom)
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:

@@ -169,6 +169,11 @@ func show_chrome() -> void:
 	_chrome.visible = true
 	_menu_idle = 0.0
 
+## Moves the badge and buttons out of a notch and the gesture bar; the dimming stays full screen.
+func apply_insets(top: float, bottom: float) -> void:
+	_chrome.offset_top = top
+	_chrome.offset_bottom = -bottom
+
 ## Idle minutes before dimming (0 = never), from settings.
 func dim_after_sec() -> float:
 	return float(GameState.get_setting("water_mind_dim_minutes")) * 60.0

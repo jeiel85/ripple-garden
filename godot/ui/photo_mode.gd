@@ -124,6 +124,11 @@ func pan(screen_delta: Vector2) -> void:
 	center -= screen_delta / zoom
 	_apply_view()
 
+## Moves the controls out of a notch and the gesture bar; the frame stays on the screen's edges.
+func apply_insets(top: float, bottom: float) -> void:
+	_controls.offset_top = top
+	_controls.offset_bottom = -bottom
+
 ## The controls are hidden for the one captured frame; the frame and signature stay.
 func hide_controls() -> void:
 	_controls.visible = false
