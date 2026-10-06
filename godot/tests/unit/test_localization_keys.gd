@@ -53,6 +53,20 @@ func test_placeholders_must_match_the_korean_in_order() -> void:
 	assert_true(problems.contains("'dropped' ja placeholders"), problems)
 	assert_false(problems.contains("'fine'"), problems)
 
+func test_a_row_with_missing_columns_is_reported_not_skipped() -> void:
+	assert_eq(LocalizationCheck.malformed_lines(), PackedStringArray(), "the shipped CSV has no broken rows")
+	var path := "user://test_broken_localization.csv"
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string('key,ko,en,ja
+"a.name","가","A","あ"
+"b.name","나","B"
+')
+	file.close()
+	var problems := LocalizationCheck.malformed_lines(path)
+	assert_eq(problems.size(), 1, str(problems))
+	assert_true(problems[0].contains(":3:"), problems[0])
+	DirAccess.remove_absolute(path)
+
 func test_the_language_setting_picks_the_locale() -> void:
 	assert_eq(LocalizationCheck.locale_for("ja", "ko"), "ja", "an explicit choice wins over the device")
 	assert_eq(LocalizationCheck.locale_for("auto", "ja"), "ja")
@@ -74,6 +88,13 @@ func test_choosing_japanese_in_settings_switches_the_game() -> void:
 	assert_eq(String(TranslationServer.translate("ui.cta.cast")), "釣り")
 	GameState.set_setting("language", "ko")
 	assert_eq(String(TranslationServer.translate("ui.cta.cast")), "낚시")
+	# A real game whose save cannot be written keeps its scene (a reload would read the old save back).
+	root.load_save = true
+	GameState.set_setting("language", "en")
+	assert_true(root.is_inside_tree(), "the scene is not reloaded when the language could not be saved")
+	var told := String(TranslationServer.translate("ui.toast.language_unsaved"))
+	assert_true(root.ui.toast._label.text == told or told in root.ui.toast._queue, "the player is told why some text stays")
+	root.load_save = false
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()

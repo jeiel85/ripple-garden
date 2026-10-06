@@ -27,6 +27,7 @@ func _run() -> void:
 	var rows: Dictionary = localization.read_csv()
 	problems.append_array(localization.problems(rows, localization.references(content)))
 	problems.append_array(localization.row_problems(rows))
+	problems.append_array(localization.malformed_lines())
 
 	if problems.is_empty():
 		print("CONTENT OK: %d fish, %d regions, %d rods, %d baits, %d bags, %d accessories, %d decorations, %d behaviors, %d weather, %d layouts" % [

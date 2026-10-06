@@ -106,7 +106,11 @@ func _on_language_changed() -> void:
 	_pick_language()
 	if not load_save:
 		return
-	SaveService.save_game()
+	# The reload reads the save back: if writing failed, reloading would throw away everything since the
+	# last good save. Stay in this scene instead; the labels built earlier change on the next start.
+	if not SaveService.save_game():
+		ui.show_message(tr("ui.toast.language_unsaved"))
+		return
 	get_tree().reload_current_scene.call_deferred()
 
 func _fishing_context() -> Dictionary:

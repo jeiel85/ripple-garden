@@ -21,6 +21,24 @@ static func locale_for(setting: String, device_language: String) -> String:
 		return setting
 	return device_language if device_language in LANGUAGES else FALLBACK
 
+## Lines (1-based, header = 1) whose column count differs from the header's. read_csv() skips such a
+## line, so without this check a broken row would pass the all-row validation unseen.
+static func malformed_lines(path: String = CSV_PATH) -> PackedStringArray:
+	var found := PackedStringArray()
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return found
+	var columns := file.get_csv_line().size()
+	var line_number := 1
+	while not file.eof_reached():
+		var line := file.get_csv_line()
+		line_number += 1
+		if line.size() == 1 and line[0].is_empty():
+			continue  # the blank line at the end of the file
+		if line.size() != columns:
+			found.append("%s:%d: %d columns, the header has %d" % [path, line_number, line.size(), columns])
+	return found
+
 ## printf placeholders of `text` in order ("%s", "%d", "%.1f", "%02d"); "%%" is a literal percent sign.
 static func placeholders(text: String) -> PackedStringArray:
 	var found := PackedStringArray()

@@ -595,3 +595,4 @@ moment.waiting_pond.hint,"잠시 쉬었다가 돌아와 보세요.","Take a brea
 "ui.language.ko","한국어","한국어","한국어"
 "ui.language.en","English","English","English"
 "ui.language.ja","日本語","日本語","日本語"
+"ui.toast.language_unsaved","저장하지 못해 일부 글자는 다음에 시작할 때 바뀌어요.","Couldn't save, so some text will change next time you start.","保存できなかったため、一部の文字は次の起動時に変わります。"
