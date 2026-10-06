@@ -6,8 +6,10 @@
 - [x] P0-002 ContentDB JSON loader + validation errors
   - 런타임 검증: `godot/content/content_validator.gd` (DATA_SCHEMA §7). 로컬라이제이션 키 존재는 `tests/unit/test_localization_keys.gd`
   - behavior 값은 정의 목록이 아직 없어 비어 있지 않은 문자열만 검사 → P0-015(fight)에서 behavior 정의 시 참조 검사 추가
-- [ ] P0-003 EventBus typed event conventions
-- [ ] P0-004 GameState domain model
+- [x] P0-003 EventBus typed event conventions
+  - 규약은 D-006, 자동 검사는 `tests/unit/test_event_bus.gd`
+- [x] P0-004 GameState domain model
+  - 저장 형식 단일 출처 `godot/save/save_schema.gd`, 규칙은 D-007. 시작 인벤토리·슬라이스 범위는 `data/balance.json`
 - [ ] P0-005 SaveService atomic write + backup + load
 - [ ] P0-006 Save v1 migration framework
 - [ ] P0-007 TimeService session/game/offline clock

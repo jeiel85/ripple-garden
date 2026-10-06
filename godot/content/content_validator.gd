@@ -6,10 +6,11 @@ extends RefCounted
 ## code never sees malformed definitions; every problem is reported in `errors`.
 ##
 ## Input:  {"fish": Array, "regions": Array, "rods": Array, "baits": Array,
-##          "progression": Dictionary} — a value may be null when its file
+##          "progression": Dictionary, "balance": Dictionary} — a value may be null when its file
 ##          could not be read (the loader reports that error itself).
 ## Output: {"fish": {id: def}, "regions": {...}, "rods": {...}, "baits": {...},
-##          "progression": Dictionary (empty if invalid), "errors": PackedStringArray}
+##          "progression": Dictionary (empty if invalid), "balance": Dictionary (empty if invalid),
+##          "errors": PackedStringArray}
 
 const TIME_BANDS: PackedStringArray = preload("res://autoload/time_service.gd").TIME_BANDS
 
@@ -19,6 +20,7 @@ const FILE_NAMES := {
 	"rods": "rods.json",
 	"baits": "baits.json",
 	"progression": "progression.json",
+	"balance": "balance.json",
 }
 
 const ID_PATTERNS := {
@@ -39,12 +41,14 @@ static func validate(raw: Dictionary) -> Dictionary:
 	var rods := v._validate_list(raw.get("rods"), "rods", v._check_rod)
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
+	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
 	return {
 		"fish": fish,
 		"regions": regions,
 		"rods": rods,
 		"baits": baits,
 		"progression": progression,
+		"balance": balance,
 		"errors": v._errors,
 	}
 
@@ -249,6 +253,51 @@ func _validate_progression(data: Variant, regions: Dictionary, fish: Dictionary)
 				_errors.append("%s.region_unlocks: unlock chain of %s loops and never reaches the start region" % [file_name, region_id])
 
 	return data if _errors.size() == before else {}
+
+func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, baits: Dictionary) -> Dictionary:
+	var file_name: String = FILE_NAMES["balance"]
+	if data == null:
+		return {}
+	if typeof(data) != TYPE_DICTIONARY:
+		_errors.append("%s: top level must be an object" % file_name)
+		return {}
+	var before := _errors.size()
+
+	var starting: Variant = data.get("starting_inventory")
+	if typeof(starting) != TYPE_DICTIONARY:
+		_errors.append("%s.starting_inventory: must be an object" % file_name)
+	else:
+		_check_owned_list(starting, "rods", rods, "starting_inventory.rods")
+		_check_owned_list(starting, "baits", baits, "starting_inventory.baits")
+		for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"]]:
+			var equipped: Variant = starting.get(pair[0])
+			var owned: Variant = starting.get(pair[1])
+			if typeof(owned) == TYPE_ARRAY and (typeof(equipped) != TYPE_STRING or not equipped in owned):
+				_errors.append("%s.starting_inventory.%s: must be one of starting_inventory.%s (got %s)" % [
+					file_name, pair[0], pair[1], var_to_str(equipped)])
+
+	var slice: Variant = data.get("vertical_slice")
+	if typeof(slice) != TYPE_DICTIONARY:
+		_errors.append("%s.vertical_slice: must be an object" % file_name)
+	else:
+		var region_id: Variant = slice.get("region_id")
+		if not regions.has(region_id):
+			_errors.append("%s.vertical_slice.region_id: unknown or invalid region %s" % [file_name, var_to_str(region_id)])
+		elif not _is_int(slice.get("max_restoration_level")) 				or slice["max_restoration_level"] < 1 				or slice["max_restoration_level"] > regions[region_id]["restoration_levels"]:
+			_errors.append("%s.vertical_slice.max_restoration_level: must be an integer 1..%d" % [
+				file_name, int(regions[region_id]["restoration_levels"])])
+
+	return data if _errors.size() == before else {}
+
+func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:
+	var file_name: String = FILE_NAMES["balance"]
+	var value: Variant = section.get(field)
+	if typeof(value) != TYPE_ARRAY or value.is_empty():
+		_errors.append("%s.%s: must be a non-empty array" % [file_name, label])
+		return
+	for entry in value:
+		if not known.has(entry):
+			_errors.append("%s.%s: unknown or invalid id %s" % [file_name, label, var_to_str(entry)])
 
 # --- field helpers ---
 

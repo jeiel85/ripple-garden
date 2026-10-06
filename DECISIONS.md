@@ -37,3 +37,21 @@
   `ContentDB.errors`에 남긴다. 참조 대상이 제외되면 참조하는 쪽도 연쇄 제외된다(예: 잘못된 지역 → 그 지역 어종).
 - 이유: (b)는 잘못된 정의가 런타임 크래시로 이어지고, (a)는 출시 빌드에서 사소한 데이터 실수 하나로
   게임 전체가 막힌다. 출시 전 오류 0건은 CI 테스트(`test_shipped_content_is_valid`)가 강제한다.
+
+## D-006 EventBus 규약: 타입이 있는 사실 이벤트 (2026-10-06, P0-003)
+
+- 대안: Dictionary payload 이벤트(유연), 이벤트별 payload 클래스(`class FishCaught`).
+- 선택: 모든 시그널 파라미터에 명시 타입을 강제하고, Dictionary payload와 untyped 파라미터를 금지한다.
+  이름은 이미 일어난 사실(`fish_caught`) 또는 `*_changed`이며 명령형은 시그널이 아니라 서비스 메서드다.
+  콘텐츠는 문자열 id로만 참조한다. `tests/unit/test_event_bus.gd`가 이를 자동 검사한다.
+- 이유: payload 모양이 바뀌면 호출부가 런타임이 아니라 파싱 시점에 깨진다. 클래스형 payload는
+  현재 이벤트 수에서는 보일러플레이트가 이득보다 크다. 재검토 조건: 한 이벤트가 파라미터 5개를 넘기면 payload 클래스로 전환.
+- 프레임 단위 데이터(장력, 물고기 위치)는 버스를 거치지 않는다. 소유자가 자기 시그널을 그 View에만 노출한다.
+
+## D-007 세이브 v1: JSON + 로드 시 정규화 (2026-10-06, P0-004)
+
+- JSON(디버깅 가능)으로 고정하고 Variant binary와 혼용하지 않는다(TECH_SPEC §4).
+- Godot JSON은 모든 숫자를 float로 파싱한다(`1 != 1.0`). 따라서 `SaveSchema.normalize()`가 로드 직후
+  정수 필드를 int로 되돌리고, 누락 필드에 기본값을 넣으며, 알 수 없는 필드는 보존한다. 라운드트립 동등성은 이 정규화에 의존한다.
+- 저장 형식의 단일 출처는 `save/save_schema.gd`(기본값·정규화·정합성 검사). `GameState`는 그 위의 타입 있는 변경 API다.
+- `session.pending_catch`: 낚았지만 아직 방생하지 않은 물고기를 저장해, INSPECT 중 강제 종료돼도 다음 실행에서 이어 처리한다.

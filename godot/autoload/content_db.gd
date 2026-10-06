@@ -1,6 +1,6 @@
 extends Node
 
-## Read-only static content (fish, regions, rods, baits, progression) loaded
+## Read-only static content (fish, regions, rods, baits, progression, balance) loaded
 ## from JSON and validated by ContentValidator. Invalid entries are excluded and
 ## every problem is logged with push_error and kept in `errors` for diagnostics.
 
@@ -11,6 +11,7 @@ var regions: Dictionary = {}
 var rods: Dictionary = {}
 var baits: Dictionary = {}
 var progression: Dictionary = {}
+var balance: Dictionary = {}
 var errors := PackedStringArray()
 
 func _ready() -> void:
@@ -30,6 +31,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	rods = result["rods"]
 	baits = result["baits"]
 	progression = result["progression"]
+	balance = result["balance"]
 	errors = load_errors
 	errors.append_array(result["errors"])
 
