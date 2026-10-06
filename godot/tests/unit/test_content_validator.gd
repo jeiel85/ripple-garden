@@ -160,3 +160,47 @@ func test_progression_requires_one_start_and_unlock_per_region() -> void:
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "exactly one region must have condition type 'start' (found 2)")
 	_assert_error(result, "no unlock entry for region_05_moonlight_isle")
+
+func test_duplicate_of_rejected_entry_is_still_caught() -> void:
+	# Codex review PR #4: a rejected first entry must not let a later duplicate through.
+	var raw := _raw()
+	var valid_copy: Dictionary = _find(raw["fish"], "fish_crucian_carp").duplicate(true)
+	_find(raw["fish"], "fish_crucian_carp")["rarity"] = 9
+	raw["fish"].append(valid_copy)
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "[fish_crucian_carp].rarity: must be an integer 1..5")
+	_assert_error(result, "fish_catalog.json[fish_crucian_carp]: duplicate id")
+	assert_false(result["fish"].has("fish_crucian_carp"), "duplicate of a rejected entry was accepted")
+
+func test_unlock_cycle_is_rejected() -> void:
+	# Codex review PR #4: regions that depend on each other can never unlock.
+	var raw := _raw()
+	for entry in raw["progression"]["region_unlocks"]:
+		if entry["region_id"] == "region_02_forest_stream":
+			entry["condition"]["region"] = "region_03_reed_river"
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "unlock chain of region_02_forest_stream loops")
+	_assert_error(result, "unlock chain of region_03_reed_river loops")
+	assert_true(result["progression"].is_empty(), "cyclic progression kept")
+
+func test_unlock_self_dependency_is_rejected() -> void:
+	var raw := _raw()
+	for entry in raw["progression"]["region_unlocks"]:
+		if entry["region_id"] == "region_05_moonlight_isle":
+			entry["condition"]["region"] = "region_05_moonlight_isle"
+	_assert_error(ContentValidator.validate(raw), "unlock chain of region_05_moonlight_isle loops")
+
+func test_non_finite_numbers_are_rejected() -> void:
+	# Codex review PR #4: overflowing JSON literals parse to INF.
+	var parsed: Variant = JSON.parse_string('{"w": 1e999}')
+	assert_false(is_finite(parsed["w"]), "precondition: 1e999 parses to a non-finite float")
+	var raw := _raw()
+	var target := _find(raw["fish"], "fish_crucian_carp")
+	target["base_weight"] = parsed["w"]
+	target["fight"]["duration_sec"] = INF
+	target["time_bands"]["day"] = NAN
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "[fish_crucian_carp].base_weight: must be a number")
+	_assert_error(result, "[fish_crucian_carp].fight.duration_sec: must be a number")
+	_assert_error(result, "[fish_crucian_carp].time_bands.day: multiplier must be a number >= 0")
+	assert_false(result["fish"].has("fish_crucian_carp"))

@@ -62,6 +62,8 @@ func _validate_list(items: Variant, category: String, check: Callable) -> Dictio
 		_errors.append("%s: top level must be an array" % file_name)
 		return result
 	var id_regex := RegEx.create_from_string(ID_PATTERNS[category])
+	# Tracked separately from `result` so a duplicate of a rejected entry is still caught.
+	var seen_ids: Dictionary = {}
 	for i in items.size():
 		var item: Variant = items[i]
 		var label := "%s[%d]" % [file_name, i]
@@ -73,9 +75,10 @@ func _validate_list(items: Variant, category: String, check: Callable) -> Dictio
 			_errors.append("%s.id: must match %s (got %s)" % [label, ID_PATTERNS[category], var_to_str(item_id)])
 			continue
 		label = "%s[%s]" % [file_name, item_id]
-		if result.has(item_id):
+		if seen_ids.has(item_id):
 			_errors.append("%s: duplicate id" % label)
 			continue
+		seen_ids[item_id] = true
 		_item_errors.clear()
 		check.call(item)
 		if _item_errors.is_empty():
@@ -185,6 +188,7 @@ func _validate_progression(data: Variant, regions: Dictionary) -> Dictionary:
 	else:
 		var seen: Dictionary = {}
 		var start_count := 0
+		var prerequisite: Dictionary = {}  # region_id -> region that must progress first
 		for i in unlocks.size():
 			var label := "%s.region_unlocks[%d]" % [file_name, i]
 			var entry: Variant = unlocks[i]
@@ -206,11 +210,14 @@ func _validate_progression(data: Variant, regions: Dictionary) -> Dictionary:
 				var required_region: Variant = condition.get("region")
 				if not regions.has(required_region):
 					_errors.append("%s.condition.region: unknown or invalid region %s" % [label, var_to_str(required_region)])
-				elif not _is_int(condition.get("restoration_level")) \
-						or condition["restoration_level"] < 0 \
-						or condition["restoration_level"] > regions[required_region]["restoration_levels"]:
-					_errors.append("%s.condition.restoration_level: must be an integer 0..%d" % [
-						label, int(regions[required_region]["restoration_levels"])])
+				else:
+					if regions.has(region_id):
+						prerequisite[region_id] = required_region
+					if not _is_int(condition.get("restoration_level")) \
+							or condition["restoration_level"] < 0 \
+							or condition["restoration_level"] > regions[required_region]["restoration_levels"]:
+						_errors.append("%s.condition.restoration_level: must be an integer 0..%d" % [
+							label, int(regions[required_region]["restoration_levels"])])
 				if not _is_int(condition.get("unique_fish")) or condition["unique_fish"] < 0:
 					_errors.append("%s.condition.unique_fish: must be a non-negative integer" % label)
 		if start_count != 1:
@@ -219,6 +226,17 @@ func _validate_progression(data: Variant, regions: Dictionary) -> Dictionary:
 		for region_id in regions:
 			if not seen.has(region_id):
 				_errors.append("%s.region_unlocks: no unlock entry for %s" % [file_name, region_id])
+		# Prerequisite chains must not loop: a region in a cycle can never unlock
+		# (progression softlock, a QA release blocker). Chains that end anywhere
+		# other than a start region are already reported above as missing/invalid entries.
+		for region_id in prerequisite:
+			var visited: Dictionary = {}
+			var current: Variant = region_id
+			while prerequisite.has(current) and not visited.has(current):
+				visited[current] = true
+				current = prerequisite[current]
+			if prerequisite.has(current):
+				_errors.append("%s.region_unlocks: unlock chain of %s loops and never reaches the start region" % [file_name, region_id])
 
 	return data if _errors.size() == before else {}
 
@@ -273,9 +291,10 @@ func _require_modifier_map(d: Dictionary, field: String, allowed: PackedStringAr
 		elif not _is_number(value[key]) or value[key] < 0.0:
 			_item_errors.append("%s.%s: multiplier must be a number >= 0" % [field, key])
 
+## Finite numbers only: an overflowing JSON literal such as 1e999 parses to INF.
 static func _is_number(value: Variant) -> bool:
-	return typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT
+	return typeof(value) == TYPE_INT or (typeof(value) == TYPE_FLOAT and is_finite(value))
 
 ## JSON numbers arrive as floats; accept integral floats as integers.
 static func _is_int(value: Variant) -> bool:
-	return _is_number(value) and is_finite(float(value)) and float(value) == floorf(float(value))
+	return _is_number(value) and float(value) == floorf(float(value))
