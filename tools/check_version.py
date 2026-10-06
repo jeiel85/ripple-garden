@@ -29,8 +29,13 @@ def main() -> int:
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         errors.append(f"config/version '{version}' is not MAJOR.MINOR.PATCH")
 
+    # Every preset that carries a version key must match; at least one must carry it,
+    # otherwise a renamed/removed key would silently disable this check.
     for key in ("application/file_version", "application/product_version"):
-        for value in read_values(PRESETS, key):
+        values = read_values(PRESETS, key)
+        if not values:
+            errors.append(f"{PRESETS.name}: {key} not found")
+        for value in values:
             if value != version:
                 errors.append(f"{PRESETS.name}: {key}='{value}' != config/version '{version}'")
 
