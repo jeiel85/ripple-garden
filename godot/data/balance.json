@@ -1,12 +1,37 @@
 {
   "starting_inventory": {
-    "rods": ["rod_bamboo", "rod_light"],
-    "baits": ["bait_bread", "bait_worm", "bait_corn", "bait_insect"],
+    "rods": [
+      "rod_bamboo",
+      "rod_light"
+    ],
+    "baits": [
+      "bait_bread",
+      "bait_worm",
+      "bait_corn",
+      "bait_insect"
+    ],
     "equipped_rod": "rod_bamboo",
     "equipped_bait": "bait_bread"
   },
   "vertical_slice": {
     "region_id": "region_01_quiet_pond",
     "max_restoration_level": 5
+  },
+  "time": {
+    "day_length_real_sec": 1440.0,
+    "band_starts_hour": {
+      "dawn": 6.0,
+      "day": 9.0,
+      "dusk": 17.0,
+      "night": 20.0
+    }
+  },
+  "encounter": {
+    "bait_match_multiplier": 1.35,
+    "pity_step": 0.15,
+    "pity_cap": 1.0,
+    "pity_min_rarity": 3,
+    "ecosystem_rarity_bonus_per_level": 0.08,
+    "size_skew": 1.6
   }
 }

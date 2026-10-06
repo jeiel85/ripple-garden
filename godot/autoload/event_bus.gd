@@ -39,6 +39,9 @@ signal settings_changed(key: String)
 
 # --- world clock ---
 signal game_time_band_changed(time_band: String)
+## The player was away (closed the game or suspended the app) for `seconds`, already clamped
+## to the offline cap. Emitted once on load/resume so the world can show what changed.
+signal offline_time_elapsed(seconds: int)
 signal weather_changed(weather_id: String)
 
 # --- persistence ---

@@ -6,10 +6,11 @@ extends RefCounted
 ## code never sees malformed definitions; every problem is reported in `errors`.
 ##
 ## Input:  {"fish": Array, "regions": Array, "rods": Array, "baits": Array,
-##          "progression": Dictionary, "balance": Dictionary} — a value may be null when its file
+##          "progression": Dictionary, "balance": Dictionary, "aliases": Dictionary} — a value may be null when its file
 ##          could not be read (the loader reports that error itself).
 ## Output: {"fish": {id: def}, "regions": {...}, "rods": {...}, "baits": {...},
 ##          "progression": Dictionary (empty if invalid), "balance": Dictionary (empty if invalid),
+##          "aliases": Dictionary (empty if invalid),
 ##          "errors": PackedStringArray}
 
 const TIME_BANDS: PackedStringArray = preload("res://autoload/time_service.gd").TIME_BANDS
@@ -21,6 +22,7 @@ const FILE_NAMES := {
 	"baits": "baits.json",
 	"progression": "progression.json",
 	"balance": "balance.json",
+	"aliases": "content_aliases.json",
 }
 
 const ID_PATTERNS := {
@@ -42,6 +44,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
+	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
 	return {
 		"fish": fish,
 		"regions": regions,
@@ -49,6 +52,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"baits": baits,
 		"progression": progression,
 		"balance": balance,
+		"aliases": aliases,
 		"errors": v._errors,
 	}
 
@@ -276,6 +280,44 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 				_errors.append("%s.starting_inventory.%s: must be one of starting_inventory.%s (got %s)" % [
 					file_name, pair[0], pair[1], var_to_str(equipped)])
 
+	var time: Variant = data.get("time")
+	if typeof(time) != TYPE_DICTIONARY:
+		_errors.append("%s.time: must be an object" % file_name)
+	else:
+		var day_length: Variant = time.get("day_length_real_sec")
+		if not _is_number(day_length) or day_length < 60.0 or day_length > 86400.0:
+			_errors.append("%s.time.day_length_real_sec: must be a number in 60..86400 (got %s)" % [
+				file_name, var_to_str(day_length)])
+		var starts: Variant = time.get("band_starts_hour")
+		if typeof(starts) != TYPE_DICTIONARY:
+			_errors.append("%s.time.band_starts_hour: must be an object" % file_name)
+		else:
+			var previous := -1.0
+			for band in TIME_BANDS:
+				var hour: Variant = starts.get(band)
+				if not _is_number(hour) or hour < 0.0 or hour >= 24.0:
+					_errors.append("%s.time.band_starts_hour.%s: must be a number in 0..24 (got %s)" % [
+						file_name, band, var_to_str(hour)])
+				elif hour <= previous:
+					_errors.append("%s.time.band_starts_hour.%s: bands must start in order %s" % [
+						file_name, band, ", ".join(TIME_BANDS)])
+				else:
+					previous = hour
+			for band in starts:
+				if not band in TIME_BANDS:
+					_errors.append("%s.time.band_starts_hour: '%s' is not a known time band" % [file_name, band])
+
+	var encounter: Variant = data.get("encounter")
+	if typeof(encounter) != TYPE_DICTIONARY:
+		_errors.append("%s.encounter: must be an object" % file_name)
+	else:
+		_check_balance_number(encounter, "encounter", "bait_match_multiplier", 1.0, 10.0)
+		_check_balance_number(encounter, "encounter", "pity_step", 0.0, 1.0)
+		_check_balance_number(encounter, "encounter", "pity_cap", 0.0, 10.0)
+		_check_balance_number(encounter, "encounter", "pity_min_rarity", 1.0, 5.0, true)
+		_check_balance_number(encounter, "encounter", "ecosystem_rarity_bonus_per_level", 0.0, 2.0)
+		_check_balance_number(encounter, "encounter", "size_skew", 0.1, 10.0)
+
 	var slice: Variant = data.get("vertical_slice")
 	if typeof(slice) != TYPE_DICTIONARY:
 		_errors.append("%s.vertical_slice: must be an object" % file_name)
@@ -288,6 +330,46 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 				file_name, int(regions[region_id]["restoration_levels"])])
 
 	return data if _errors.size() == before else {}
+
+## Content id aliases for old saves (DATA_SCHEMA §6): {category: {old_id: new_id}}. An old id must
+## no longer exist, and following the chain must end at an existing id without looping.
+func _validate_aliases(data: Variant, current: Dictionary) -> Dictionary:
+	var file_name: String = FILE_NAMES["aliases"]
+	if data == null:
+		return {}
+	if typeof(data) != TYPE_DICTIONARY:
+		_errors.append("%s: top level must be an object" % file_name)
+		return {}
+	var before := _errors.size()
+	for category in current:
+		var table: Variant = data.get(category)
+		if typeof(table) != TYPE_DICTIONARY:
+			_errors.append("%s.%s: must be an object of old id -> new id" % [file_name, category])
+			continue
+		for old_id in table:
+			var label := "%s.%s[%s]" % [file_name, category, old_id]
+			if current[category].has(old_id):
+				_errors.append("%s: the old id still exists as content" % label)
+				continue
+			var target: Variant = table[old_id]
+			var hops := 0
+			while typeof(target) == TYPE_STRING and table.has(target) and hops <= table.size():
+				target = table[target]
+				hops += 1
+			if typeof(target) != TYPE_STRING or not current[category].has(target):
+				_errors.append("%s: must lead to an existing %s id without looping (ends at %s)" % [
+					label, category, var_to_str(target)])
+	return data if _errors.size() == before else {}
+
+## Appends an error unless `section[field]` is a finite number in [min_value, max_value]
+## (an integer when `integer` is set).
+func _check_balance_number(section: Dictionary, section_name: String, field: String,
+		min_value: float, max_value: float, integer: bool = false) -> void:
+	var value: Variant = section.get(field)
+	if not _is_number(value) or value < min_value or value > max_value or (integer and not _is_int(value)):
+		_errors.append("%s.%s.%s: must be %s in %s..%s (got %s)" % [
+			FILE_NAMES["balance"], section_name, field, "an integer" if integer else "a number",
+			min_value, max_value, var_to_str(value)])
 
 func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:
 	var file_name: String = FILE_NAMES["balance"]

@@ -244,3 +244,24 @@ func test_balance_starting_inventory_rejects_duplicate_ids() -> void:
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "balance.json.starting_inventory.baits: duplicate id")
 	assert_true(result["balance"].is_empty(), "balance with duplicates kept")
+
+func test_aliases_must_lead_to_existing_ids() -> void:
+	var raw := _raw()
+	raw["aliases"]["fish"] = {"fish_old_name": "fish_crucian_carp", "fish_older": "fish_old_name"}
+	var result := ContentValidator.validate(raw)
+	assert_eq(result["errors"], PackedStringArray(), "valid alias chain rejected")
+	assert_false(result["aliases"].is_empty())
+
+	raw = _raw()
+	raw["aliases"]["fish"] = {"fish_gone": "fish_never_existed"}
+	_assert_error(ContentValidator.validate(raw), "content_aliases.json.fish[fish_gone]: must lead to an existing fish id")
+
+func test_alias_cycles_and_live_ids_are_rejected() -> void:
+	var raw := _raw()
+	raw["aliases"]["baits"] = {"bait_a": "bait_b", "bait_b": "bait_a"}
+	_assert_error(ContentValidator.validate(raw), "without looping")
+	raw = _raw()
+	raw["aliases"]["rods"] = {"rod_bamboo": "rod_light"}
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "the old id still exists as content")
+	assert_true(result["aliases"].is_empty(), "invalid alias table kept")

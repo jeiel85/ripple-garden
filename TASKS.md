@@ -10,12 +10,16 @@
   - 규약은 D-006, 자동 검사는 `tests/unit/test_event_bus.gd`
 - [x] P0-004 GameState domain model
   - 저장 형식 단일 출처 `godot/save/save_schema.gd`, 규칙은 D-007. 시작 인벤토리·슬라이스 범위는 `data/balance.json`
-- [ ] P0-005 SaveService atomic write + backup + load
-- [ ] P0-006 Save v1 migration framework
-- [ ] P0-007 TimeService session/game/offline clock
+- [x] P0-005 SaveService atomic write + backup + load
+  - 정책은 D-008, 테스트 `tests/unit/test_save_service.gd`
+- [x] P0-006 Save v1 migration framework
+  - `save/save_migrator.gd` (운영 마이그레이션 테이블은 v1만 있어 비어 있음), id alias는 `data/content_aliases.json`
+- [x] P0-007 TimeService session/game/offline clock
+  - 정책은 D-009, 하루 길이·시간대 경계는 `data/balance.json`의 `time`
 - [ ] P0-008 Region 01 base scene
 - [ ] P0-009 Habitat zone component
-- [ ] P0-010 EncounterResolver seeded weighted random
+- [x] P0-010 EncounterResolver seeded weighted random
+  - 수치는 `data/balance.json`의 `encounter`. 테스트: 결정성·조건 필터·0 가중치·pity 상한/리셋·빈도 분포 (`test_encounter_resolver.gd`)
 - [ ] P0-011 Fishing state machine
 - [ ] P0-012 cast input
 - [ ] P0-013 bite timing + feedback hooks
@@ -33,7 +37,8 @@
 - [ ] P0-025 debug menu
 - [ ] P0-026 automated content validation
   - `tools/validate_content.py`(Python)와 ContentValidator(GDScript) 규칙이 중복됨 → 단일 출처로 정리
-- [ ] P0-027 save roundtrip/migration tests
+- [x] P0-027 save roundtrip/migration tests
+  - 라운드트립·3세대 백업·손상/절단 복구·중단된 tmp·정지/종료 저장·신버전 보호·마이그레이션 전 백업: `test_save_service.gd`, `test_save_migrator.gd`, `test_save_schema.gd`
 - [ ] P0-028 Android/Windows vertical slice builds
 
 ## P1 — Production Systems
