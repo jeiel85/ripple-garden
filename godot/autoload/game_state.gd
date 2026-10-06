@@ -36,8 +36,12 @@ func new_game() -> void:
 ## Replaces the whole state with a loaded save, filling defaults and fixing types.
 func load_data(loaded: Dictionary) -> void:
 	var raw_inventory: Variant = loaded.get("inventory")
-	var old_save: bool = typeof(raw_inventory) == TYPE_DICTIONARY and not raw_inventory.has("bait_counts")
+	# A save from before counted baits: either migrated from disk (the migrator left a marker, because it
+	# already normalized the save) or handed in raw (no stock field at all).
+	var old_save: bool = typeof(raw_inventory) == TYPE_DICTIONARY \
+		and (raw_inventory.get(SaveMigrator.LEGACY_BAIT_MARKER) == true or not raw_inventory.has("bait_counts"))
 	data = SaveSchema.normalize(loaded, _now())
+	data["inventory"].erase(SaveMigrator.LEGACY_BAIT_MARKER)
 	_fill_starting_equipment(old_save)
 	_replaced()
 

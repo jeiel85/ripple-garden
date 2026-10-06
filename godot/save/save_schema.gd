@@ -10,7 +10,7 @@ extends RefCounted
 ## numbers are coerced to their declared type. JSON parses every number as float, so
 ## normalization is also what makes a save round-trip equal to the in-memory state.
 
-const CURRENT_VERSION := 1
+const CURRENT_VERSION := 2
 ## Upper bounds so a damaged or hand-edited save cannot hold values the game would later
 ## clamp downward (which would make an award reduce a balance).
 const MAX_CURRENCY := 999_999_999

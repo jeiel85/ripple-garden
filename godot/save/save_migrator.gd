@@ -10,21 +10,36 @@ extends RefCounted
 ##    content id aliases are applied, and the result must pass SaveSchema.validate().
 ##  - The caller (SaveService) backs the original file up before it is replaced by a migrated one.
 ##
-## Production migrations go in MIGRATIONS. The table is empty while v1 is the only version;
-## tests inject their own table through the constructor.
+## Production migrations are listed by production_migrations(); tests inject their own table through
+## the constructor.
+##
+##   1 -> 2 (D-019)  Saves from before counted baits get a marker so GameState can give their owned
+##                   baits the starting stock (the starting numbers are content, which a migration does
+##                   not read). The marker is the only change; everything else is filled by normalize.
+
+## Set by the 1 -> 2 migration on inventories that had no bait stock yet; GameState consumes it.
+const LEGACY_BAIT_MARKER := "needs_starting_bait_stock"
 
 ## from_version -> Callable(save: Dictionary) -> Dictionary (the save at from_version + 1).
-const MIGRATIONS := {}
+static func production_migrations() -> Dictionary:
+	return {1: _v1_to_v2}
+
+static func _v1_to_v2(save: Dictionary) -> Dictionary:
+	var inventory: Variant = save.get("inventory")
+	if typeof(inventory) == TYPE_DICTIONARY and not inventory.has("bait_counts"):
+		inventory[LEGACY_BAIT_MARKER] = true
+	return save
 
 var current_version: int
 var _migrations: Dictionary
 var _aliases: Dictionary
 
 ## `aliases` is {"fish": {old_id: new_id}, "rods": ..., "baits": ..., "regions": ...}.
-func _init(version: int = SaveSchema.CURRENT_VERSION, migrations: Dictionary = MIGRATIONS,
+## `migrations` defaults to production_migrations() when null.
+func _init(version: int = SaveSchema.CURRENT_VERSION, migrations: Variant = null,
 		aliases: Dictionary = {}) -> void:
 	current_version = version
-	_migrations = migrations
+	_migrations = migrations if migrations is Dictionary else production_migrations()
 	_aliases = aliases
 
 ## Returns {"ok": bool, "save": Dictionary, "from_version": int, "error": String, "newer": bool}.

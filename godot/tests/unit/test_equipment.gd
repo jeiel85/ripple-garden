@@ -200,25 +200,28 @@ func test_an_empty_counted_bait_attracts_nothing_special() -> void:
 
 func test_rod_character_reads_from_its_play_values() -> void:
 	var bamboo := LoadoutService.rod_stats(ContentDB.get_rod("rod_bamboo"))
-	assert_deep_eq(bamboo, {"control": 43, "sensitivity": 50, "durability": 30})
+	assert_deep_eq(bamboo, {"control": 43, "sensitivity": 50, "durability": 50})
 	for rod_id in ContentDB.rods:
 		var stats := LoadoutService.rod_stats(ContentDB.get_rod(rod_id))
 		for key in stats:
 			assert_true(stats[key] >= 0 and stats[key] <= 100, "%s %s out of range" % [rod_id, key])
 
 func test_no_rod_is_simply_better_than_another() -> void:
-	# GDD §12: a different rod, not a stronger one. No rod beats another on every bar and reach.
+	# GDD §12: a different rod, not a stronger one. No rod is at least as good as another in every play value
+	# (reach, bite speed, tension assist, line strength) and better in one: a tie is not a trade-off.
+	var fields: PackedStringArray = ["range", "bite_speed", "tension_assist", "line_strength"]
 	for a in ContentDB.rods:
 		for b in ContentDB.rods:
 			if a == b:
 				continue
-			var sa := LoadoutService.rod_stats(ContentDB.get_rod(a))
-			var sb := LoadoutService.rod_stats(ContentDB.get_rod(b))
-			var ra := float(ContentDB.get_rod(a)["range"])
-			var rb := float(ContentDB.get_rod(b)["range"])
-			var dominates: bool = sa["control"] > sb["control"] and sa["sensitivity"] > sb["sensitivity"] \
-				and sa["durability"] > sb["durability"] and ra > rb
-			assert_false(dominates, "%s is better than %s at everything" % [a, b])
+			var never_worse := true
+			var once_better := false
+			for field in fields:
+				var va := float(ContentDB.get_rod(a)[field])
+				var vb := float(ContentDB.get_rod(b)[field])
+				never_worse = never_worse and va >= vb
+				once_better = once_better or va > vb
+			assert_false(never_worse and once_better, "%s is at least as good as %s at everything" % [a, b])
 
 func test_a_stronger_line_takes_longer_to_snap() -> void:
 	var config: Dictionary = ContentDB.balance["fishing"]["fight"].duplicate(true)
@@ -259,3 +262,27 @@ func test_equipment_content_rules() -> void:
 	assert_true(errors.contains("event items (and only they)"), errors)
 	assert_true(errors.contains("do not fit the starting bag"), errors)
 	assert_true(errors.contains("needs an endless"), errors)
+
+func test_a_version_1_save_from_disk_gets_the_starting_bait_stock() -> void:
+	# The real loading path: the migrator normalizes first, so the old-save signal must survive it.
+	GameState.new_game()
+	var old := GameState.snapshot()
+	old["save_version"] = 1
+	old["inventory"] = {"rods": ["rod_bamboo"], "baits": ["bait_bread", "bait_worm", "bait_corn"], "equipped_rod": "rod_bamboo", "equipped_bait": "bait_worm"}
+	var result := SaveMigrator.new().migrate(JSON.parse_string(JSON.stringify(old)), 0)
+	assert_true(result["ok"], result["error"])
+	assert_eq(result["save"]["save_version"], SaveSchema.CURRENT_VERSION)
+	GameState.load_data(result["save"])
+	assert_eq(GameState.get_bait_count("bait_worm"), 6, "owned counted baits get the starting stock")
+	assert_eq(GameState.get_bait_count("bait_corn"), 4)
+	assert_false(GameState.snapshot()["inventory"].has(SaveMigrator.LEGACY_BAIT_MARKER), "the marker never reaches a written save")
+	GameState.new_game()
+
+func test_a_version_2_save_keeps_its_empty_stock() -> void:
+	GameState.new_game()
+	while GameState.take_bait("bait_worm"):
+		pass
+	var result := SaveMigrator.new().migrate(JSON.parse_string(JSON.stringify(GameState.snapshot())), 0)
+	GameState.load_data(result["save"])
+	assert_eq(GameState.get_bait_count("bait_worm"), 0, "a used-up bait is not refilled on load")
+	GameState.new_game()
