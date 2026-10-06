@@ -55,6 +55,9 @@ func test_the_map_shows_every_island_and_says_what_each_needs() -> void:
 	assert_true(panel.tap(R1).contains(String(TranslationServer.translate("region.quiet_pond.name"))))
 	var locked_text := panel.tap(R2)
 	assert_true(locked_text.contains(String(TranslationServer.translate("region.quiet_pond.name"))), locked_text)
+	assert_eq(panel.note_text(), locked_text, "the answer shows on the map itself: the toast is under this screen")
+	panel.refresh()
+	assert_eq(panel.note_text(), "", "a fresh visit starts without an old answer")
 	panel.free()
 
 func test_the_region_pill_opens_the_map() -> void:

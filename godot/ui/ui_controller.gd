@@ -188,7 +188,6 @@ func _build_panels(deps: Dictionary) -> void:
 	map_panel = RegionMapPanel.new()
 	map_panel.setup(RegionUnlocks.new(GameState), _region_id)
 	map_panel.close_pressed.connect(close_panel)
-	map_panel.message.connect(show_message)
 	settings_panel = SettingsPanel.new()
 	settings_panel.close_pressed.connect(close_panel)
 	settings_panel.message.connect(show_message)

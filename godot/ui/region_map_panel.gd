@@ -5,12 +5,12 @@ extends Control
 ## dotted route. Each island carries a cream name sign and a dark pill with the species met there; the
 ## current island glows, locked ones are dimmed with a lock. Tapping a sign says where you are, what a
 ## locked island needs (its real condition and how far along you are), or that an open island's world
-## comes in a later update. Opened from the region pill of the status bar.
+## comes in a later update — in a pill at the bottom of the map (the global toast sits under open screens,
+## and the map covers it). Opened from the region pill of the status bar.
 ##
 ## The islands are painted from shapes (MapView) until the map art of ASSET_REQUESTS §7 arrives.
 
 signal close_pressed
-signal message(text: String)
 
 const FULLSCREEN := true
 const KEEPS_STATUS := true
@@ -22,6 +22,8 @@ var _unlocks: RegionUnlocks
 var _map: MapView
 var _signs: Dictionary = {}
 var _signs_layer: Control
+var _note: PanelContainer
+var _note_label: Label
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -54,6 +56,19 @@ func _init() -> void:
 	back.offset_bottom = -28
 	back.custom_minimum_size = Vector2(120, 120)
 	add_child(back)
+
+	_note = PanelContainer.new()
+	_note.theme_type_variation = "PillPanel"
+	_note.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_note.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_note.offset_left = 160
+	_note.offset_right = -24
+	_note.offset_bottom = -40
+	_note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_note_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
+	_note.add_child(_note_label)
+	_note.visible = false
+	add_child(_note)
 	resized.connect(_place_signs)
 
 func setup(unlocks: RegionUnlocks, p_current_region: String) -> void:
@@ -63,6 +78,7 @@ func setup(unlocks: RegionUnlocks, p_current_region: String) -> void:
 func refresh() -> void:
 	if _unlocks == null:
 		return
+	_note.visible = false
 	var states := {}
 	for region_id in ContentDB.regions:
 		states[region_id] = _unlocks.state_of(region_id, current_region)
@@ -93,8 +109,13 @@ func tap(region_id: String) -> String:
 			var condition := _unlocks.condition_of(region_id)
 			text = tr("ui.map.locked") % [_name(condition["region"]), condition["level"], condition["level_now"],
 				condition["fish"], condition["fish_now"]]
-	message.emit(text)
+	_note_label.text = text
+	_note.visible = not text.is_empty()
 	return text
+
+## The answer shown at the bottom of the map ("" when nothing was tapped yet).
+func note_text() -> String:
+	return _note_label.text if _note.visible else ""
 
 func _sign(region_id: String, state: String) -> Control:
 	var def := ContentDB.get_region(region_id)
