@@ -131,3 +131,12 @@
   가로/세로는 프로젝트 설정(세로). 권한은 요청하지 않는다(오프라인 게임, INTERNET 없음). 버전 이름은 `config/version`과 같아야 하며 `tools/check_version.py`가 검사한다.
 - 이번 빌드는 편집기의 디버그 키스토어로 서명한 **디버그 APK**다. 배포용 키스토어·AAB·Play 정책 대응은 구매 연동과 함께 P3-001/P3-009에서 한다.
 - Android CI 빌드는 SDK/JDK/키스토어 준비가 필요해 아직 CI에 넣지 않았다(→ Backlog). 로컬에서는 README의 명령으로 만든다.
+
+## D-017 디자인 목업은 저장소 루트 `assets/design/`에 레퍼런스로 둔다 (2026-10-06)
+
+- 대안: 목업 조각을 `godot/assets/`에 넣어 `res://`로 바로 쓰기.
+- 선택: 목업 8장과 조각 82개를 `assets/design/`(Godot 프로젝트 밖)에 둔다. 런타임 UI는 여전히 절차적 placeholder(D-011)다.
+- 이유: 내보내기 프리셋이 `all_resources`라 `godot/` 아래에 두면 쓰지 않는 약 25 MB가 빌드에 들어간다. 조각은 배경·한글이 구워져 있고
+  일부가 잘려 있어 로컬라이제이션·Text Scale·반응형 레이아웃(UI_UX_SPEC §10)을 지킬 수 없다. 화면을 실제로 바꿀 때 해당 요소를
+  투명 배경 아이콘 + StyleBox/9-patch + Label로 다시 만들어 `godot/` 아래에 넣는다.
+- 목업과 기획이 다른 점(알림 점, 포획 CTA, 가방·악세서리, 지역명 등)은 `assets/design/README.md`에 정리했고, 스펙이 우선한다.
