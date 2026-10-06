@@ -349,6 +349,8 @@ func _on_cta_down() -> void:
 	# The fishing button stays on screen under the journal: it leaves the journal and casts.
 	if _current_panel != null and _fishing.state in [FishingController.State.READY, FishingController.State.AIM]:
 		close_panel()
+		if _current_panel != null:
+			return  # closing it brought up a waiting card (time away): read that first, cast after
 	match _fishing.state:
 		FishingController.State.READY, FishingController.State.AIM:
 			world_input.cast_quick()

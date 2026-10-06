@@ -93,6 +93,21 @@ func test_returning_shows_one_short_card() -> void:
 	root.fishing.cancel()
 	assert_eq(root.ui.current_panel(), root.ui.away_panel, "shown when the line is back in")
 	root.ui.away_panel.close_pressed.emit()
+	# The fishing button pressed over the journal while a card waits: the card shows and nothing is cast
+	# behind it.
+	root.ui.open_journal()
+	TimeService._announce_offline(3 * 3600)
+	root.ui._on_cta_down()
+	assert_eq(root.ui.current_panel(), root.ui.away_panel)
+	assert_eq(root.fishing.state, FishingController.State.READY, "no line goes out behind the card")
+	root.ui.away_panel.close_pressed.emit()
+	# The applied absence is saved at once.
+	var saves := [0]
+	root.save_hook = func() -> bool:
+		saves[0] += 1
+		return true
+	TimeService._announce_offline(3 * 3600)
+	assert_eq(saves[0], 1, "a crash after the card must not replay the same absence")
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()

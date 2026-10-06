@@ -9,6 +9,9 @@ extends Node
 ## Tests and tools turn this off: the scene then starts from whatever GameState already holds
 ## (a new game if none) and never touches the player's save file.
 var load_save := true
+## Writes the save now (set with `load_save`; tests may set their own). Used where waiting for the
+## autosave would let a crash replay a reward.
+var save_hook := Callable()
 
 var region_id := ""
 var restoration: RestorationService
@@ -49,6 +52,7 @@ func _ready() -> void:
 	if load_save:
 		# A landed fish and its release reach the disk at once (tests and tools leave this unset).
 		fishing.save_hook = SaveService.save_if_dirty
+		save_hook = SaveService.save_game
 	region.fishing_view.setup(fishing, region.rod_origin(), region.angler_position())
 	ambient_audio.setup(region_id, region.weather)
 	fishing.state_changed.connect(_on_fishing_state_changed)
@@ -97,6 +101,10 @@ func _handle_time_away() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(GameState.get_last_session_at())  # the same absence always gives the same summary
 	var summary := offline.apply(region_id, away, rng)
+	# The absence is used up the moment it is applied: saved at once (with the new session time), so a crash
+	# before the next autosave cannot hand out the same fish and Ripple again on the next start.
+	if save_hook.is_valid():
+		save_hook.call()
 	if not summary.is_empty():
 		ui.show_away_summary(summary)
 
