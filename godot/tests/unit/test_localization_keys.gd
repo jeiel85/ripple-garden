@@ -60,11 +60,15 @@ func test_a_row_with_missing_columns_is_reported_not_skipped() -> void:
 	file.store_string('key,ko,en,ja
 "a.name","가","A","あ"
 "b.name","나","B"
+"","다","C","う"
+"a.name","라","D","え"
 ')
 	file.close()
 	var problems := LocalizationCheck.malformed_lines(path)
-	assert_eq(problems.size(), 1, str(problems))
+	assert_eq(problems.size(), 3, str(problems))
 	assert_true(problems[0].contains(":3:"), problems[0])
+	assert_true(problems[1].contains(":4: the key is empty"), problems[1])
+	assert_true(problems[2].contains(":5: key 'a.name' is already on line 2"), problems[2])
 	DirAccess.remove_absolute(path)
 
 func test_the_language_setting_picks_the_locale() -> void:
