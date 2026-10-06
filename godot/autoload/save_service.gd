@@ -37,7 +37,7 @@ func load_game() -> bool:
 	for path in [SAVE_PATH, BACKUP_1, BACKUP_2]:
 		var loaded := _load_candidate(path)
 		if not loaded.is_empty():
-			GameState.data = _migrate(loaded)
+			GameState.load_data(_migrate(loaded))
 			return true
 	GameState.new_game()
 	return false

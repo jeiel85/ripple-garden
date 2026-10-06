@@ -45,3 +45,37 @@ func assert_eq(actual: Variant, expected: Variant, message: String = "") -> void
 func assert_not_null(value: Variant, message: String = "expected non-null") -> void:
 	if value == null:
 		fail(message)
+
+## Recursive, type-strict comparison: 1 and 1.0 differ, as do arrays with different order.
+## Reports the path of the first difference, which is what makes save round-trip failures readable.
+func assert_deep_eq(actual: Variant, expected: Variant, message: String = "") -> void:
+	var difference := _first_difference(actual, expected, "$")
+	if not difference.is_empty():
+		fail("%s%s" % ["" if message.is_empty() else message + ": ", difference])
+
+func _first_difference(actual: Variant, expected: Variant, path: String) -> String:
+	if typeof(actual) != typeof(expected):
+		return "%s: type %s != %s (%s vs %s)" % [path, type_string(typeof(actual)), type_string(typeof(expected)),
+			var_to_str(actual), var_to_str(expected)]
+	if typeof(actual) == TYPE_DICTIONARY:
+		for key in expected:
+			if not actual.has(key):
+				return "%s.%s: missing" % [path, key]
+		for key in actual:
+			if not expected.has(key):
+				return "%s.%s: unexpected" % [path, key]
+			var nested := _first_difference(actual[key], expected[key], "%s.%s" % [path, key])
+			if not nested.is_empty():
+				return nested
+		return ""
+	if typeof(actual) == TYPE_ARRAY:
+		if actual.size() != expected.size():
+			return "%s: array size %d != %d" % [path, actual.size(), expected.size()]
+		for i in actual.size():
+			var nested := _first_difference(actual[i], expected[i], "%s[%d]" % [path, i])
+			if not nested.is_empty():
+				return nested
+		return ""
+	if actual != expected:
+		return "%s: %s != %s" % [path, var_to_str(actual), var_to_str(expected)]
+	return ""

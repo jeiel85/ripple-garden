@@ -33,6 +33,7 @@ func test_shipped_content_is_valid() -> void:
 	assert_eq(result["rods"].size(), 12, "rod count")
 	assert_eq(result["baits"].size(), 16, "bait count")
 	assert_false(result["progression"].is_empty(), "progression dropped")
+	assert_false(result["balance"].is_empty(), "balance dropped")
 
 func test_duplicate_id_keeps_first_entry() -> void:
 	var raw := _raw()
@@ -215,3 +216,31 @@ func test_unreachable_unique_fish_threshold_is_rejected() -> void:
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "condition.unique_fish: 11 exceeds the 10 species that live in region_01_quiet_pond")
 	assert_true(result["progression"].is_empty(), "unreachable progression kept")
+
+func test_balance_starting_inventory_must_reference_known_items() -> void:
+	var raw := _raw()
+	raw["balance"]["starting_inventory"]["rods"].append("rod_nonexistent")
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "balance.json.starting_inventory.rods: unknown or invalid id")
+	assert_true(result["balance"].is_empty(), "invalid balance kept")
+
+func test_balance_equipped_items_must_be_owned() -> void:
+	var raw := _raw()
+	raw["balance"]["starting_inventory"]["equipped_bait"] = "bait_squid"
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "starting_inventory.equipped_bait: must be one of starting_inventory.baits")
+
+func test_balance_vertical_slice_region_and_level_range() -> void:
+	var raw := _raw()
+	raw["balance"]["vertical_slice"]["region_id"] = "region_09_nowhere"
+	_assert_error(ContentValidator.validate(raw), "balance.json.vertical_slice.region_id: unknown or invalid region")
+	raw = _raw()
+	raw["balance"]["vertical_slice"]["max_restoration_level"] = 11
+	_assert_error(ContentValidator.validate(raw), "vertical_slice.max_restoration_level: must be an integer 1..10")
+
+func test_balance_starting_inventory_rejects_duplicate_ids() -> void:
+	var raw := _raw()
+	raw["balance"]["starting_inventory"]["baits"].append("bait_bread")
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "balance.json.starting_inventory.baits: duplicate id")
+	assert_true(result["balance"].is_empty(), "balance with duplicates kept")
