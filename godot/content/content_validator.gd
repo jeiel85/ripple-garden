@@ -809,6 +809,9 @@ func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, 
 		var angler: Variant = layout["angler"]
 		if typeof(angler) != TYPE_DICTIONARY or not _is_point_within([angler.get("x"), angler.get("y")], width, height):
 			_errors.append("%s.angler: must be {x, y} inside the viewport" % label)
+	# The file-name prefix of the region's drawn art (ArtLibrary: world/<art>_scene.png ...).
+	if layout.has("art") and (typeof(layout["art"]) != TYPE_STRING or RegEx.create_from_string("^[a-z0-9_]+$").search(layout["art"]) == null):
+		_errors.append("%s.art: must be a lowercase file-name prefix such as \"r01\"" % label)
 	if layout.has("waterfall"):
 		var fall: Variant = layout["waterfall"]
 		if typeof(fall) != TYPE_DICTIONARY or not _is_point_within_bleed([fall.get("x"), fall.get("y")], width, height) \

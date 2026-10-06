@@ -80,6 +80,7 @@
 - [x] P1-015 battery saver
 
 ## P2 — Content Expansion
+- [x] P2-000 drawn-art pipeline: `godot/art/`의 그림이 절차적 그림을 대신한다 (D-029). 그림 요청은 `assets/design/ASSET_REQUESTS.md` 1차 묶음
 - [ ] P2-001 Region 02 production
 - [ ] P2-002 Region 03 production
 - [ ] P2-003 Region 04 production

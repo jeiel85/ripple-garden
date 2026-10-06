@@ -28,7 +28,15 @@ const ROPE := Color("#c9b083")
 const LAMP := Color("#ffd27a")
 const SOIL := Color("#b39566")
 
-static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: float, level: int, palette: Dictionary) -> void:
+## Draws a prop at `at` (its foot). Drawn art (`props/<kind>.png`, ArtLibrary) wins over the shapes;
+## `variant` picks among `<kind>_02`, `<kind>_03`, ... so the same spot always shows the same one.
+static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: float, level: int, palette: Dictionary, variant: int = 0) -> void:
+	var art := ArtLibrary.variant("props", kind, variant)
+	if art != null:
+		var data := ArtLibrary.meta("props", kind)
+		canvas.draw_texture_rect(art, ArtLibrary.placed_rect(art, at, float(data.get("width", 60.0)) * scale,
+			ArtLibrary.point(data, "anchor", Vector2(0.5, 0.92))), false)
+		return
 	match kind:
 		"tree": _tree(canvas, at, scale, level, palette)
 		"bush": _bush(canvas, at, scale, level, palette)

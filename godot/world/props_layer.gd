@@ -7,6 +7,9 @@ extends Node2D
 ## appear. The camp comes from the save: each placed decoration is drawn at its slot, turned if the
 ## player turned it. Everything is drawn back to front by y. Props are static, so the layer only
 ## redraws when the level, the palette or the camp changes.
+##
+## With a painted scene (ArtLibrary, D-029) the props that exist at every level (trees, rocks, the dock)
+## are part of the painting, so only the ones that come and go with restoration and the camp are drawn.
 
 var layout: Dictionary = {}
 var environment: RegionEnvironment = null
@@ -50,6 +53,18 @@ func camp_props() -> Array:
 			"flip": camp[slot["id"]]["flip"] == true, "camp": true})
 	return result
 
+## True for scenery that is in the region at every restoration level.
+static func is_permanent(prop: Dictionary) -> bool:
+	return not prop.has("min_level") and not prop.has("max_level")
+
+## Layout props drawn on top of the backdrop at `level`: all of them over the drawn-shape backdrop,
+## only the level-dependent ones over a painted scene.
+func drawn_props(level: int) -> Array:
+	var shown := visible_props(level)
+	if environment != null and environment.has_scene_art():
+		shown = shown.filter(func(prop: Dictionary) -> bool: return not is_permanent(prop))
+	return shown
+
 func refresh() -> void:
 	queue_redraw()
 
@@ -61,7 +76,7 @@ func _draw() -> void:
 	# While a restoration blends, show the props of the old level too, fading the old ones out.
 	var from_level := environment.previous_level()
 	var blend := environment.palette_blend
-	var everything := visible_props(level) + camp_props()
+	var everything := drawn_props(level) + camp_props()
 	everything.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["y"]) < float(b["y"]))
 	for prop in everything:
 		var at := Vector2(float(prop["x"]), float(prop["y"]))
@@ -69,12 +84,13 @@ func _draw() -> void:
 		var fade := blend if is_new else 1.0
 		var grow := 0.4 + 0.6 * fade
 		var mirror := -1.0 if prop.get("flip", false) == true else 1.0
+		var variant := int(PropPainter.noise(at, 11) * 1000.0)
 		if fade < 1.0 or mirror < 0.0:
 			draw_set_transform(at, 0.0, Vector2(grow * mirror, grow))
-			PropPainter.draw_prop(self, prop["kind"], Vector2.ZERO, float(prop.get("scale", 1.0)), level, palette)
+			PropPainter.draw_prop(self, prop["kind"], Vector2.ZERO, float(prop.get("scale", 1.0)), level, palette, variant)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
-			PropPainter.draw_prop(self, prop["kind"], at, float(prop.get("scale", 1.0)), level, palette)
+			PropPainter.draw_prop(self, prop["kind"], at, float(prop.get("scale", 1.0)), level, palette, variant)
 
 func _process(_delta: float) -> void:
 	# Only while a palette transition is running; a settled level costs nothing.

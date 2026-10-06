@@ -42,6 +42,12 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[importer_defaults]
+
+texture={
+"mipmaps/generate": true
+}
+
 [input_devices]
 
 pointing/android/enable_pan_and_scale_gestures=true
@@ -55,4 +61,5 @@ locale/fallback="en"
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=3
 textures/vram_compression/import_etc2_astc=true

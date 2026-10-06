@@ -244,6 +244,8 @@ class NoticeDot extends Control:
 
 ## Stable icon-free portrait of a fish for the journal and inspect screens: draws the same
 ## silhouette the agents swim as, tinted from the species colour, or a dark outline when unseen.
+## Drawn art (`fish/<id>_side.png`, head to the left, D-029) replaces the shapes; an unmet species
+## then shows that picture as a dark silhouette.
 class FishPortrait extends Control:
 	var fish_id := ""
 	var known := true
@@ -262,6 +264,10 @@ class FishPortrait extends Control:
 	func _draw() -> void:
 		var def := ContentDB.get_fish(fish_id)
 		if def.is_empty():
+			return
+		var art := ArtLibrary.texture("fish", fish_id + "_side")
+		if art != null:
+			_draw_art(art)
 			return
 		var colors := species_colors(fish_id, int(def["rarity"]))
 		var body: Color = colors["body"]
@@ -315,6 +321,20 @@ class FishPortrait extends Control:
 		draw_circle(eye, maxf(2.5, height * 0.17), Color(0.98, 0.95, 0.85))
 		draw_circle(eye, maxf(2.0, height * 0.12), Color(0.1, 0.08, 0.06))
 		draw_circle(eye + Vector2(-1, -1) * height * 0.04, maxf(1.0, height * 0.04), Color.WHITE)
+
+	func has_art() -> bool:
+		return ArtLibrary.has("fish", fish_id + "_side")
+
+	func _draw_art(art: Texture2D) -> void:
+		var box_size := size * Vector2(0.92, 0.9) * length_scale
+		var rect := ArtLibrary.fit_rect(art, Rect2((size - box_size) / 2.0, box_size))
+		if known:
+			draw_texture_rect(art, rect, false)
+			return
+		draw_texture_rect(art, rect, false, Color(0.3, 0.27, 0.24, 0.6))
+		var font_size := int(clampf(rect.size.y * 0.5, 14.0, 64.0))
+		draw_string(ThemeDB.fallback_font, rect.get_center() + Vector2(-font_size * 0.28, font_size * 0.35), "?",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(1, 1, 1, 0.75))
 
 	## Stable colours for a species until drawn art arrives (shared with the swimming agents).
 	static func species_colors(id: String, rarity: int) -> Dictionary:

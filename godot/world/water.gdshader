@@ -11,6 +11,8 @@ uniform float shimmer : hint_range(0.0, 1.0) = 0.6;
 uniform float motion : hint_range(0.0, 1.0) = 1.0;
 // Low quality and Battery Saver skip the glint waves entirely (GraphicsProfile water_glints).
 uniform bool glints = true;
+// Over a painted scene (D-029) the painting has the water's colour: only the light on it moves.
+uniform bool overlay = false;
 
 varying vec2 world_pos;
 
@@ -31,5 +33,9 @@ void fragment() {
 		glint = smoothstep(0.78, 0.96, wave_a * wave_b) * 0.11 * shimmer;
 	}
 	float soft = (sin(world_pos.y * 0.16 - t * 0.7 + world_pos.x * 0.05) * 0.5 + 0.5) * 0.025 * shimmer;
-	COLOR = vec4(base + vec3(glint + soft), 1.0);
+	if (overlay) {
+		COLOR = vec4(vec3(1.0), clamp((glint + soft) * 2.2, 0.0, 1.0));
+	} else {
+		COLOR = vec4(base + vec3(glint + soft), 1.0);
+	}
 }

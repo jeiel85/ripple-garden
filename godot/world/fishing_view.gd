@@ -7,6 +7,10 @@ extends Node2D
 ##
 ## Tension is shown by colour *and* thickness/shape of the line plus the HUD meter, so the state
 ## is never colour-only. With Reduced Motion the bobber stops bobbing and ripples are fewer.
+##
+## The angler is drawn art when ArtLibrary has `character/angler_<pose>.png` (D-029): one picture per
+## fishing state, the idle one standing in for poses not drawn yet, and the rod held from the picture's
+## hands (`art.json`). Without any picture the angler is drawn from shapes.
 
 const BOBBER_RADIUS := 9.0
 const RING_LIFETIME := 1.6
@@ -139,9 +143,49 @@ func _process(delta: float) -> void:
 func has_angler() -> bool:
 	return angler.x >= 0.0 and angler.y >= 0.0
 
+## The angler's pose for the current fishing state (the name part of `angler_<pose>.png`).
+func angler_pose() -> String:
+	match _state:
+		FishingController.State.CAST:
+			return "cast"
+		FishingController.State.BITE_HINT, FishingController.State.HOOK:
+			return "bite"
+		FishingController.State.FIGHT:
+			return "reel"
+		FishingController.State.LAND, FishingController.State.INSPECT:
+			return "hold"
+	return "idle"
+
+## The angler's picture right now: {"texture", "rect", "hands"} in world space, or {} when the angler is
+## drawn from shapes (no layout seat or no picture).
+func angler_art() -> Dictionary:
+	if not has_angler():
+		return {}
+	var pose := "angler_" + angler_pose()
+	var tex := ArtLibrary.texture("character", pose)
+	if tex == null:
+		pose = "angler_idle"
+		tex = ArtLibrary.texture("character", pose)
+	if tex == null:
+		return {}
+	var data := ArtLibrary.meta("character", pose, "angler")
+	var height := float(data.get("height", 150.0))
+	var rect := ArtLibrary.placed_rect(tex, angler, height * tex.get_width() / maxf(1.0, tex.get_height()),
+		ArtLibrary.point(data, "anchor", Vector2(0.5, 0.9)))
+	return {"texture": tex, "rect": rect, "hands": rect.position + ArtLibrary.point(data, "hands", Vector2(0.62, 0.42)) * rect.size}
+
+## Where the rod leaves the angler's hands.
+func current_rod_base() -> Vector2:
+	var art := angler_art()
+	return art["hands"] if not art.is_empty() else rod_base
+
 func _draw() -> void:
-	if has_angler():
+	var art := angler_art()
+	if not art.is_empty():
+		draw_texture_rect(art["texture"], art["rect"], false)
+	elif has_angler():
 		_draw_angler()
+	var base: Vector2 = art["hands"] if not art.is_empty() else rod_base
 	# Rod: a curve from the hands to the tip, bending towards the fish while fighting.
 	var bend := Vector2(10, 0)
 	if _state == FishingController.State.FIGHT:
@@ -149,11 +193,11 @@ func _draw() -> void:
 	var rod := PackedVector2Array()
 	for i in 9:
 		var t := i / 8.0
-		rod.append(rod_base.lerp(origin, t) + bend * sin(t * PI) * t)
+		rod.append(base.lerp(origin, t) + bend * sin(t * PI) * t)
 	draw_polyline(rod, Color("#3f3022"), 7.0, true)
 	draw_polyline(rod, Color("#8a6440"), 4.0, true)
-	draw_circle(rod_base + (origin - rod_base).normalized() * 18.0, 8.0, Color("#c9c4b8"))  # reel
-	draw_circle(rod_base + (origin - rod_base).normalized() * 18.0, 3.0, Color("#6c675e"))
+	draw_circle(base + (origin - base).normalized() * 18.0, 8.0, Color("#c9c4b8"))  # reel
+	draw_circle(base + (origin - base).normalized() * 18.0, 3.0, Color("#6c675e"))
 
 	if _aim_active:
 		var pulse := 1.0 if reduced_motion else 1.0 + sin(_clock * 4.0) * 0.08

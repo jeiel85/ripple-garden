@@ -378,8 +378,13 @@ class DecoArt extends Control:
 		var radius := minf(size.x, size.y) * 0.46
 		draw_circle(size / 2.0, radius, Color("#e7efd9"))
 		var palette := {"grass": Color("#76bf62"), "canopy": Color("#45a650"), "water_deep": Color("#16788f"), "water_shallow": Color("#5cc4b2")}
-		var fit := clampf(radius / 60.0, 0.4, 1.4) * art_scale / float(KIND_SIZE.get(kind, 1.0))
-		PropPainter.draw_prop(self, kind, size / 2.0 + Vector2(0, radius * 0.55), fit, 5, palette)
+		var art := ArtLibrary.texture("props", kind)
+		if art != null:  # drawn art fills the round backdrop whatever its size in the world
+			var box := Rect2(size / 2.0 - Vector2.ONE * radius * 0.72, Vector2.ONE * radius * 1.44)
+			draw_texture_rect(art, ArtLibrary.fit_rect(art, box), false)
+		else:
+			var fit := clampf(radius / 60.0, 0.4, 1.4) * art_scale / float(KIND_SIZE.get(kind, 1.0))
+			PropPainter.draw_prop(self, kind, size / 2.0 + Vector2(0, radius * 0.55), fit, 5, palette)
 		if faded:
 			draw_circle(size / 2.0, radius, Color(0.95, 0.92, 0.86, 0.6))
 			draw_texture_rect(UiIcons.texture("lock"), Rect2(size / 2.0 - Vector2(20, 20), Vector2(40, 40)), false, Color(UiTheme.INK, 0.8))

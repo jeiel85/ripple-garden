@@ -1,0 +1,35 @@
+{
+  "props": {
+    "*": {"width": 60, "anchor": [0.5, 0.92]},
+    "tree": {"width": 170},
+    "bush": {"width": 100},
+    "rock": {"width": 72},
+    "stump": {"width": 50},
+    "junk": {"width": 52, "anchor": [0.5, 0.7]},
+    "grass_tuft": {"width": 46},
+    "reed": {"width": 52},
+    "lily_pad": {"width": 66, "anchor": [0.5, 0.5]},
+    "flower": {"width": 40},
+    "camp_ground": {"width": 260, "anchor": [0.5, 0.5]},
+    "tent": {"width": 190},
+    "camp_chair": {"width": 64},
+    "crate": {"width": 84},
+    "lantern": {"width": 30},
+    "signboard": {"width": 78},
+    "birdhouse": {"width": 56},
+    "stepping_stone": {"width": 52, "anchor": [0.5, 0.5]},
+    "dock": {"width": 430, "anchor": [0.0, 0.5]},
+    "cat": {"width": 76},
+    "frog": {"width": 36},
+    "wood_table": {"width": 92},
+    "flower_pot": {"width": 44},
+    "campfire": {"width": 64},
+    "bench": {"width": 100}
+  },
+  "character": {
+    "*": {"height": 150, "anchor": [0.5, 0.9], "hands": [0.62, 0.42]}
+  },
+  "fish": {
+    "*": {"top_length": 1.3, "underwater_alpha": 0.88}
+  }
+}
