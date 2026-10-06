@@ -84,7 +84,9 @@ static func icon_button(icon_name: String, text: String, callback: Callable, var
 	node.add_theme_constant_override("icon_max_width", int(icon_px))
 	node.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
 	node.focus_mode = Control.FOCUS_ALL
-	if vertical:
+	if text.is_empty():
+		node.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER  # an icon-only button keeps its icon in the middle
+	elif vertical:
 		node.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		node.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
@@ -142,6 +144,29 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 		node.custom_minimum_size = Vector2(maxf(needed.x + 20.0, UiTheme.TOUCH_MIN_PX), maxf(needed.y + 24.0, UiTheme.TOUCH_MIN_PX))
 	column.minimum_size_changed.connect(fit)
 	fit.call()
+	node.pressed.connect(callback)
+	return node
+
+## A wide button whose icon and word sit centred together (the mockups' wooden "낚시" / "완료"): a Button
+## alone pins its icon to an edge. The label is returned through the button's "label" meta.
+static func centered_button(icon_name: String, text: String, callback: Callable, variation: String, icon_px: float = 44.0) -> Button:
+	var node := Button.new()
+	node.theme_type_variation = variation
+	node.focus_mode = Control.FOCUS_ALL
+	node.tooltip_text = text
+	var content := hbox(14)
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.set_anchors_preset(Control.PRESET_FULL_RECT)
+	if variation == "WaterButton":
+		content.offset_bottom = -20  # above the band of water
+	var on_wood := variation in ["PrimaryButton", "WaterButton"]
+	content.add_child(icon(icon_name, icon_px, UiTheme.WOOD_TEXT if on_wood else UiTheme.GREEN_TEXT))
+	var word := label(text, "CtaLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	content.add_child(word)
+	node.add_child(content)
+	node.set_meta("label", word)
+	node.custom_minimum_size = Vector2(maxf(content.get_combined_minimum_size().x + 48.0, 200.0), UiTheme.TOUCH_MIN_PX)
 	node.pressed.connect(callback)
 	return node
 

@@ -32,7 +32,7 @@ static func references(content: Dictionary) -> Array:
 	for fish_def in content["fish"].values():
 		refs.append([fish_def["id"], fish_def["name_key"]])
 		refs.append([fish_def["id"], fish_def["journal_key"]])
-	for category in ["regions", "rods", "baits", "weather", "bags", "accessories"]:
+	for category in ["regions", "rods", "baits", "weather", "bags", "accessories", "decorations"]:
 		for definition in content.get(category, {}).values():
 			refs.append([definition["id"], definition["name_key"]])
 			if definition.has("desc_key"):

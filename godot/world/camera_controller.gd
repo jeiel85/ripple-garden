@@ -16,6 +16,7 @@ var shake_enabled := true
 
 var _tween: Tween
 var _shake_tween: Tween
+var _focus_tween: Tween
 
 func _ready() -> void:
 	position = DESIGN_CENTER
@@ -31,6 +32,26 @@ func restoration_pulse(duration: float = 3.0) -> void:
 	_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_tween.tween_property(self, "zoom", Vector2.ONE * 1.07, duration * 0.5)
 	_tween.tween_property(self, "zoom", Vector2.ONE, duration * 0.5)
+
+## Moves in on a point of the world (the camp while decorating, mockup 06). Reduced Motion jumps.
+func focus_on(point: Vector2, zoom_level: float, duration: float = 0.6) -> void:
+	_move_to(point, Vector2.ONE * zoom_level, duration)
+
+## Back to the whole diorama.
+func clear_focus(duration: float = 0.5) -> void:
+	_move_to(DESIGN_CENTER, Vector2.ONE, duration)
+
+func _move_to(point: Vector2, zoom_level: Vector2, duration: float) -> void:
+	if _focus_tween != null:
+		_focus_tween.kill()
+	if reduced_motion or duration <= 0.0:
+		position = point
+		zoom = zoom_level
+		return
+	_focus_tween = create_tween().set_parallel(true)
+	_focus_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_focus_tween.tween_property(self, "position", point, duration)
+	_focus_tween.tween_property(self, "zoom", zoom_level, duration)
 
 ## A short, small jolt. No-op when disabled or with Reduced Motion.
 func shake(strength: float = 6.0, duration: float = 0.25) -> void:

@@ -50,6 +50,10 @@ static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: floa
 		"dock": _dock(canvas, at, scale)
 		"cat": _cat(canvas, at, scale)
 		"frog": _frog(canvas, at, scale)
+		"wood_table": _wood_table(canvas, at, scale)
+		"flower_pot": _flower_pot(canvas, at, scale)
+		"campfire": _campfire(canvas, at, scale)
+		"bench": _bench(canvas, at, scale)
 
 ## Stable 0..1 value for (position, index).
 static func noise(at: Vector2, index: int) -> float:
@@ -303,3 +307,56 @@ static func _frog(canvas: CanvasItem, at: Vector2, scale: float) -> void:
 		canvas.draw_circle(p.call(side * 7, -17), 4.5 * scale, Color("#6aa84f"))
 		canvas.draw_circle(p.call(side * 7, -17), 2.0 * scale, Color("#1f2a14"))
 		canvas.draw_colored_polygon(_ellipse(p.call(side * 13, -2), Vector2(6, 3) * scale, 8), Color("#5a9441"))
+
+# --- camp decorations (P1-002) ---
+
+static func _wood_table(canvas: CanvasItem, at: Vector2, scale: float) -> void:
+	var p := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * scale
+	canvas.draw_colored_polygon(_ellipse(p.call(2, 4), Vector2(44, 11) * scale), Color(0, 0, 0, 0.2))
+	for leg in [Vector2(-30, -2), Vector2(28, -8), Vector2(-14, 6), Vector2(36, 2)]:
+		canvas.draw_line(at + leg * scale, at + (leg + Vector2(0, -26)) * scale, PLANK_DARK, 5.0 * scale)
+	_quad(canvas, p.call(-40, -32), p.call(14, -48), p.call(48, -34), p.call(-6, -18), PLANK.lightened(0.1))
+	_quad(canvas, p.call(-40, -32), p.call(-6, -18), p.call(-6, -12), p.call(-40, -26), PLANK_DARK)
+	_quad(canvas, p.call(-6, -18), p.call(48, -34), p.call(48, -28), p.call(-6, -12), PLANK_DARK.darkened(0.1))
+	for i in 3:
+		canvas.draw_line(p.call(-30 + i * 14, -28 - i * 4), p.call(4 + i * 14, -42 - i * 2), Color(0, 0, 0, 0.12), 1.2 * scale)
+	# A mug and a little lamp on top.
+	canvas.draw_rect(Rect2(p.call(-14, -40), Vector2(9, 10) * scale), Color("#6f8a5a"))
+	canvas.draw_circle(p.call(16, -46), 7.0 * scale, Color(LAMP, 0.35))
+	canvas.draw_rect(Rect2(p.call(12, -52), Vector2(8, 10) * scale), LAMP)
+
+static func _flower_pot(canvas: CanvasItem, at: Vector2, scale: float) -> void:
+	var p := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * scale
+	canvas.draw_colored_polygon(_ellipse(p.call(0, 3), Vector2(22, 7) * scale), Color(0, 0, 0, 0.2))
+	canvas.draw_colored_polygon(PackedVector2Array([p.call(-18, -26), p.call(18, -26), p.call(14, 0), p.call(-14, 0)]), PLANK)
+	for i in 3:
+		canvas.draw_line(p.call(-17 + i * 0.5, -18 + i * 8), p.call(17 - i * 0.5, -18 + i * 8), PLANK_DARK, 2.0 * scale)
+	canvas.draw_colored_polygon(_ellipse(p.call(0, -27), Vector2(19, 6) * scale), Color("#5a4630"))
+	for i in 7:
+		var angle := TAU * i / 7.0
+		var head: Vector2 = p.call(cos(angle) * 12.0, -40.0 + sin(angle) * 7.0)
+		canvas.draw_line(p.call(0, -27), head, Color("#4d8a4a"), 2.0 * scale)
+		for k in 5:
+			canvas.draw_circle(head + Vector2.from_angle(TAU * k / 5.0) * 3.2 * scale, 2.6 * scale, Color("#fbf8ef"))
+		canvas.draw_circle(head, 1.8 * scale, Color("#f3c84b"))
+
+static func _campfire(canvas: CanvasItem, at: Vector2, scale: float) -> void:
+	var p := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * scale
+	canvas.draw_circle(p.call(0, -12), 34.0 * scale, Color(LAMP, 0.16))
+	for i in 8:
+		var angle := TAU * i / 8.0
+		canvas.draw_colored_polygon(_ellipse(p.call(cos(angle) * 22.0, sin(angle) * 9.0), Vector2(8, 5) * scale, 8), ROCK)
+	canvas.draw_line(p.call(-16, 2), p.call(14, -8), PLANK_DARK, 6.0 * scale)
+	canvas.draw_line(p.call(-14, -8), p.call(16, 2), WOOD, 6.0 * scale)
+	canvas.draw_colored_polygon(PackedVector2Array([p.call(-12, -4), p.call(0, -34), p.call(12, -4)]), Color("#f0883e"))
+	canvas.draw_colored_polygon(PackedVector2Array([p.call(-6, -4), p.call(0, -22), p.call(6, -4)]), Color("#ffd27a"))
+
+static func _bench(canvas: CanvasItem, at: Vector2, scale: float) -> void:
+	var p := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * scale
+	canvas.draw_colored_polygon(_ellipse(p.call(0, 4), Vector2(48, 9) * scale), Color(0, 0, 0, 0.18))
+	for leg in [-36.0, 34.0]:
+		canvas.draw_line(p.call(leg, 2), p.call(leg, -18), PLANK_DARK, 6.0 * scale)
+	_quad(canvas, p.call(-46, -22), p.call(44, -30), p.call(46, -20), p.call(-44, -12), PLANK)
+	_quad(canvas, p.call(-46, -50), p.call(44, -58), p.call(44, -44), p.call(-46, -36), PLANK.lightened(0.08))
+	canvas.draw_line(p.call(-40, -36), p.call(-40, -20), PLANK_DARK, 4.0 * scale)
+	canvas.draw_line(p.call(38, -44), p.call(38, -28), PLANK_DARK, 4.0 * scale)

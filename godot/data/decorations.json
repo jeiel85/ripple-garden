@@ -1,0 +1,122 @@
+[
+  {
+    "id": "deco_tent",
+    "category": "furniture",
+    "prop": "tent",
+    "scale": 1.0,
+    "name_key": "deco.tent.name",
+    "desc_key": "deco.tent.desc"
+  },
+  {
+    "id": "deco_camp_chair",
+    "category": "furniture",
+    "prop": "camp_chair",
+    "scale": 1.0,
+    "name_key": "deco.camp_chair.name",
+    "desc_key": "deco.camp_chair.desc"
+  },
+  {
+    "id": "deco_crate",
+    "category": "furniture",
+    "prop": "crate",
+    "scale": 0.9,
+    "name_key": "deco.crate.name",
+    "desc_key": "deco.crate.desc"
+  },
+  {
+    "id": "deco_lantern",
+    "category": "ornament",
+    "prop": "lantern",
+    "scale": 1.0,
+    "name_key": "deco.lantern.name",
+    "desc_key": "deco.lantern.desc"
+  },
+  {
+    "id": "deco_wood_table",
+    "category": "furniture",
+    "prop": "wood_table",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 120
+    },
+    "name_key": "deco.wood_table.name",
+    "desc_key": "deco.wood_table.desc"
+  },
+  {
+    "id": "deco_signboard",
+    "category": "ornament",
+    "prop": "signboard",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 60
+    },
+    "name_key": "deco.signboard.name",
+    "desc_key": "deco.signboard.desc"
+  },
+  {
+    "id": "deco_flower_pot",
+    "category": "ornament",
+    "prop": "flower_pot",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 80
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 1
+    },
+    "name_key": "deco.flower_pot.name",
+    "desc_key": "deco.flower_pot.desc"
+  },
+  {
+    "id": "deco_bench",
+    "category": "furniture",
+    "prop": "bench",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 140
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 2
+    },
+    "name_key": "deco.bench.name",
+    "desc_key": "deco.bench.desc"
+  },
+  {
+    "id": "deco_campfire",
+    "category": "furniture",
+    "prop": "campfire",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 200
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 2
+    },
+    "name_key": "deco.campfire.name",
+    "desc_key": "deco.campfire.desc"
+  },
+  {
+    "id": "deco_birdhouse",
+    "category": "ornament",
+    "prop": "birdhouse",
+    "scale": 0.9,
+    "price": {
+      "currency": "ripple",
+      "amount": 150
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 3
+    },
+    "name_key": "deco.birdhouse.name",
+    "desc_key": "deco.birdhouse.desc"
+  }
+]

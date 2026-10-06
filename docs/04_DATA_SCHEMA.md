@@ -62,6 +62,8 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
 - 가방 칸(장착한 가방의 `capacity`)을 넘는 재고는 서비스가 막는다. 세이브 자체는 숫자만 검사한다.
 - 이 필드가 없는 예전 세이브(v1)는 불러올 때 시작 가방·모자를 받고, 가진 미끼는 시작 재고를 받는다
   (세이브 v2, 1 → 2 마이그레이션이 표시를 남긴다 — D-019).
+- `decorations` / `decorations_seen` (P1-002): 가진 캠프 꾸밈, 캠프 화면에서 이미 본 꾸밈(알림 점).
+  예전 세이브는 시작 꾸밈을 받아 시작 캠프대로 놓인다.
 
 ## 4. Collection Record
 ```json
@@ -90,7 +92,8 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
   "restoration_points": 0,
   "species_population": {},
   "unlocked_spots": [],
-  "seen_events": []
+  "seen_events": [],
+  "camp": {"camp_1": {"item": "deco_tent", "flip": false}}
 }
 ```
 
@@ -102,6 +105,8 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
   `accessories` [{id `acc_*`, name_key, desc_key, hat, band (색), price?, unlock?}]
 - `balance.json`: `starting_inventory`에 bags·accessories·equipped_*·bait_counts, `equipment.bait_pack_size`
 - 시작 미끼에는 끝없는 미끼가 하나 이상 있어야 하고, 시작 재고는 시작 가방에 들어가야 한다(검증기가 강제)
+- `decorations.json` (P1-002): [{id `deco_*`, name_key, desc_key, category furniture | ornament, prop(PropKinds), scale, price?, unlock?}]
+- `region_layouts.json`: `camp_slots` [{id, x, y}], `camp_focus` {x, y, zoom}; `balance.json` `starting_camp` {region: {slot: deco}}
 
 ## 6. Migration Rules
 - migration은 한 버전씩 순서대로 수행

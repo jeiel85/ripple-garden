@@ -24,7 +24,13 @@
     "accessories": [
       "acc_straw_hat"
     ],
-    "equipped_accessory": "acc_straw_hat"
+    "equipped_accessory": "acc_straw_hat",
+    "decorations": [
+      "deco_tent",
+      "deco_camp_chair",
+      "deco_crate",
+      "deco_lantern"
+    ]
   },
   "vertical_slice": {
     "region_id": "region_01_quiet_pond",
@@ -166,5 +172,13 @@
   },
   "equipment": {
     "bait_pack_size": 10
+  },
+  "starting_camp": {
+    "region_01_quiet_pond": {
+      "camp_1": "deco_tent",
+      "camp_2": "deco_camp_chair",
+      "camp_3": "deco_crate",
+      "camp_6": "deco_lantern"
+    }
   }
 }

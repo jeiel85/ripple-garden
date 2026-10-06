@@ -29,6 +29,7 @@ const FILE_NAMES := {
 	"layouts": "region_layouts.json",
 	"audio": "audio.json",
 	"equipment": "equipment.json",
+	"decorations": "decorations.json",
 }
 
 const ID_PATTERNS := {
@@ -40,7 +41,9 @@ const ID_PATTERNS := {
 	"weather": "^[a-z][a-z0-9_]*$",
 	"bags": "^bag_[a-z0-9_]+$",
 	"accessories": "^acc_[a-z0-9_]+$",
+	"decorations": "^deco_[a-z0-9_]+$",
 }
+const DECORATION_CATEGORIES: PackedStringArray = ["furniture", "ornament"]
 ## Lists that live inside another file (equipment.json holds bags and accessories).
 const LIST_FILES := {"bags": "equipment.json", "accessories": "equipment.json"}
 ## Equipment grades (GDD §12, D-019). "event" items are granted by a moment, never sold.
@@ -78,8 +81,10 @@ static func validate(raw: Dictionary) -> Dictionary:
 	elif equipment_raw != null:
 		bags = v._validate_list(equipment_raw.get("bags"), "bags", v._check_bag)
 		accessories = v._validate_list(equipment_raw.get("accessories"), "accessories", v._check_accessory)
+	var decorations := v._validate_list(raw.get("decorations"), "decorations", v._check_decoration)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits, bags, accessories)
 	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
+	v._check_starting_camp(balance, layouts, decorations)
 	var audio := v._validate_audio(raw.get("audio"))
 	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
 	return {
@@ -96,6 +101,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"audio": audio,
 		"bags": bags,
 		"accessories": accessories,
+		"decorations": decorations,
 		"errors": v._errors,
 	}
 
@@ -205,6 +211,48 @@ func _check_acquisition(d: Dictionary, has_grade: bool) -> void:
 	if has_grade and typeof(d.get("grade")) == TYPE_STRING:
 		if (d["grade"] == "event") != d.has("granted_by"):
 			_item_errors.append("grade: event items (and only they) are granted_by a moment")
+
+## Camp decorations (P1-002): drawn as a known prop kind, bought like equipment.
+func _check_decoration(d: Dictionary) -> void:
+	_require_string(d, "name_key")
+	_require_string(d, "desc_key")
+	if typeof(d.get("category")) != TYPE_STRING or not d["category"] in DECORATION_CATEGORIES:
+		_item_errors.append("category: must be one of %s" % ", ".join(DECORATION_CATEGORIES))
+	if typeof(d.get("prop")) != TYPE_STRING or not d["prop"] in PROP_KINDS:
+		_item_errors.append("prop: unknown prop kind %s" % var_to_str(d.get("prop")))
+	_require_number(d, "scale", 0.2, 3.0, true)
+	_check_acquisition(d, false)
+
+## The starting decorations must be known, and the starting camp may only put owned decorations, each
+## once, into slots its region's layout has.
+func _check_starting_camp(balance: Dictionary, layouts: Dictionary, decorations: Dictionary) -> void:
+	if balance.is_empty():
+		return
+	var file_name: String = FILE_NAMES["balance"]
+	var starting: Dictionary = balance.get("starting_inventory", {})
+	_check_owned_list(starting, "decorations", decorations, "starting_inventory.decorations")
+	var camps: Variant = balance.get("starting_camp")
+	if typeof(camps) != TYPE_DICTIONARY:
+		_errors.append("%s.starting_camp: must be an object {region_id: {slot_id: decoration_id}}" % file_name)
+		return
+	for region_id in camps:
+		var slots := {}
+		for slot in layouts.get(region_id, {}).get("camp_slots", []):
+			slots[slot["id"]] = true
+		var placed := {}
+		var camp: Variant = camps[region_id]
+		if typeof(camp) != TYPE_DICTIONARY:
+			_errors.append("%s.starting_camp.%s: must be an object {slot_id: decoration_id}" % [file_name, region_id])
+			continue
+		for slot_id in camp:
+			var deco: Variant = camp[slot_id]
+			if not slots.has(slot_id):
+				_errors.append("%s.starting_camp.%s: '%s' is not a camp slot of the region's layout" % [file_name, region_id, slot_id])
+			if typeof(deco) != TYPE_STRING or not deco in starting.get("decorations", []):
+				_errors.append("%s.starting_camp.%s.%s: must be a starting decoration" % [file_name, region_id, slot_id])
+			elif placed.has(deco):
+				_errors.append("%s.starting_camp.%s: %s is placed twice" % [file_name, region_id, deco])
+			placed[deco] = true
 
 func _require_color(d: Dictionary, field: String) -> void:
 	if typeof(d.get(field)) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(d[field]) == null:
@@ -745,6 +793,27 @@ func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, 
 					_errors.append("%s.%s: must be an integer >= 0" % [prop_label, field])
 			if min_level > max_level:
 				_errors.append("%s: min_level must not exceed max_level" % prop_label)
+
+	if layout.has("camp_slots"):
+		var camp_slots: Variant = layout["camp_slots"]
+		var slot_ids := {}
+		if typeof(camp_slots) != TYPE_ARRAY:
+			_errors.append("%s.camp_slots: must be an array" % label)
+		else:
+			for i in camp_slots.size():
+				var slot: Variant = camp_slots[i]
+				if typeof(slot) != TYPE_DICTIONARY or typeof(slot.get("id")) != TYPE_STRING or slot["id"].is_empty() \
+						or not _is_point_within([slot.get("x"), slot.get("y")], width, height):
+					_errors.append("%s.camp_slots[%d]: must be {id, x, y} inside the viewport" % [label, i])
+				elif slot_ids.has(slot["id"]):
+					_errors.append("%s.camp_slots[%d]: duplicate id %s" % [label, i, slot["id"]])
+				else:
+					slot_ids[slot["id"]] = true
+	if layout.has("camp_focus"):
+		var focus: Variant = layout["camp_focus"]
+		if typeof(focus) != TYPE_DICTIONARY or not _is_point_within([focus.get("x"), focus.get("y")], width, height) \
+				or not _is_number(focus.get("zoom")) or focus["zoom"] < 1.0 or focus["zoom"] > 3.0:
+			_errors.append("%s.camp_focus: must be {x, y} inside the viewport and zoom 1..3" % label)
 
 	var animals: Variant = layout.get("ambient_animals")
 	if typeof(animals) != TYPE_ARRAY:

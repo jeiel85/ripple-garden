@@ -34,7 +34,7 @@ func setup(p_region_id: String, level: int, time_band: String) -> bool:
 	for zone in zone_nodes:
 		zones_root.add_child(zone)
 	environment.setup(region_id, layout, weather, level)
-	props.setup(layout, environment)
+	props.setup(layout, environment, region_id)
 	fish_presenter.setup(region_id, habitat_map)
 	animals.setup(layout, level, time_band)
 	weather_presenter.setup(weather, habitat_map.pond)

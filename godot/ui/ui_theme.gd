@@ -157,6 +157,25 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	_icon_colors(theme, "RoundButton", PILL_TEXT)
 	theme.set_font_size("font_size", "RoundButton", roundi(font * 0.75))
 
+	# Green circle: "done / confirm" floating over the world (camp slot, mockup 06).
+	theme.set_type_variation("GreenCircle", "Button")
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var green := GREEN
+		match state:
+			"hover": green = GREEN.lightened(0.08)
+			"pressed": green = GREEN_PRESSED
+			"disabled": green = GREEN.lerp(DISABLED, 0.5)
+		var green_disc := _box(green, Color.WHITE, border_width + 2, 999)
+		_shadow(green_disc, 4)
+		var green_style := InsetStyle.new(green_disc, Vector2(4, 4), true)
+		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+			green_style.set_content_margin(side, 4)
+		theme.set_stylebox(state, "GreenCircle", green_style)
+	theme.set_stylebox("focus", "GreenCircle", InsetStyle.new(_focus_box(999), Vector2(2, 2), true))
+	_font_colors(theme, "GreenCircle", GREEN_TEXT)
+	_icon_colors(theme, "GreenCircle", GREEN_TEXT)
+	theme.set_font_size("font_size", "GreenCircle", roundi(font * 0.6))
+
 	# Cream circle with a dark rim: "back" on full-screen pages.
 	theme.set_type_variation("CircleButton", "Button")
 	for state in ["normal", "hover", "pressed", "disabled"]:

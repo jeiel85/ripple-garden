@@ -24,14 +24,26 @@ func new_game() -> void:
 	data = SaveSchema.default_save(_now())
 	var starting: Dictionary = ContentDB.balance.get("starting_inventory", {})
 	var inventory: Dictionary = data["inventory"]
-	for key in ["rods", "baits", "bags", "accessories"]:
+	for key in ["rods", "baits", "bags", "accessories", "decorations"]:
 		inventory[key] = starting.get(key, []).duplicate()
+	inventory["decorations_seen"] = inventory["decorations"].duplicate()
 	for key in ["equipped_rod", "equipped_bait", "equipped_bag", "equipped_accessory"]:
 		inventory[key] = starting.get(key, "")
 	var stock: Dictionary = starting.get("bait_counts", {})
 	for bait_id in stock:
 		inventory["bait_counts"][bait_id] = int(stock[bait_id])  # JSON numbers arrive as floats
+	_place_starting_camps()
 	_replaced()
+
+## Puts the starting decorations into each region's camp (balance.json starting_camp).
+func _place_starting_camps() -> void:
+	var camps: Dictionary = ContentDB.balance.get("starting_camp", {})
+	for region_id in camps:
+		var region := _region(region_id)
+		if not region["camp"].is_empty():
+			continue
+		for slot_id in camps[region_id]:
+			region["camp"][slot_id] = {"item": camps[region_id][slot_id], "flip": false}
 
 ## Replaces the whole state with a loaded save, filling defaults and fixing types.
 func load_data(loaded: Dictionary) -> void:
@@ -54,6 +66,11 @@ func _fill_starting_equipment(old_save: bool) -> void:
 		if inventory[pair[0]].is_empty():
 			inventory[pair[0]] = starting.get(pair[0], []).duplicate()
 			inventory[pair[1]] = starting.get(pair[1], "")
+	if inventory["decorations"].is_empty():
+		# Saves from before the camp (P1-002) get the starting decorations, already placed.
+		inventory["decorations"] = starting.get("decorations", []).duplicate()
+		inventory["decorations_seen"] = inventory["decorations"].duplicate()
+		_place_starting_camps()
 	if old_save:
 		var stock: Dictionary = starting.get("bait_counts", {})
 		for bait_id in inventory["baits"]:
@@ -395,6 +412,67 @@ func take_bait(bait_id: String) -> bool:
 	counts[bait_id] -= 1
 	_inventory_changed()
 	return true
+
+# --- camp (P1-002) ---
+
+func get_owned_decorations() -> Array:
+	ensure_initialized()
+	return data["inventory"]["decorations"].duplicate()
+
+func grant_decoration(decoration_id: String) -> void:
+	_grant("decorations", decoration_id)
+
+func has_seen_decoration(decoration_id: String) -> bool:
+	ensure_initialized()
+	return data["inventory"]["decorations_seen"].has(decoration_id)
+
+func mark_decorations_seen(decoration_ids: Array) -> void:
+	ensure_initialized()
+	var seen: Array = data["inventory"]["decorations_seen"]
+	var changed := false
+	for decoration_id in decoration_ids:
+		if not seen.has(decoration_id):
+			seen.append(decoration_id)
+			changed = true
+	if changed:
+		_changed()
+
+## Copy of the region's camp: {slot_id: {"item": decoration_id, "flip": bool}}.
+func get_camp(region_id: String) -> Dictionary:
+	ensure_initialized()
+	if not data["regions"].has(region_id):
+		return {}
+	return data["regions"][region_id]["camp"].duplicate(true)
+
+## Puts an owned decoration into a slot (moving it if it stood elsewhere). Returns false otherwise.
+func place_decoration(region_id: String, slot_id: String, decoration_id: String, flip: bool = false) -> bool:
+	ensure_initialized()
+	if not data["inventory"]["decorations"].has(decoration_id) or slot_id.is_empty():
+		return false
+	var camp: Dictionary = _region(region_id)["camp"]
+	for other in camp.keys():
+		if camp[other]["item"] == decoration_id:
+			camp.erase(other)
+	camp[slot_id] = {"item": decoration_id, "flip": flip}
+	_camp_changed(region_id)
+	return true
+
+func clear_camp_slot(region_id: String, slot_id: String) -> void:
+	ensure_initialized()
+	if data["regions"].has(region_id) and data["regions"][region_id]["camp"].has(slot_id):
+		data["regions"][region_id]["camp"].erase(slot_id)
+		_camp_changed(region_id)
+
+func flip_camp_slot(region_id: String, slot_id: String) -> void:
+	ensure_initialized()
+	if data["regions"].has(region_id) and data["regions"][region_id]["camp"].has(slot_id):
+		var entry: Dictionary = data["regions"][region_id]["camp"][slot_id]
+		entry["flip"] = not entry["flip"]
+		_camp_changed(region_id)
+
+func _camp_changed(region_id: String) -> void:
+	_changed()
+	EventBus.camp_changed.emit(region_id)
 
 func _grant(list_key: String, item_id: String) -> void:
 	ensure_initialized()

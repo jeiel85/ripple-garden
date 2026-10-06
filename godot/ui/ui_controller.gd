@@ -23,6 +23,7 @@ var inspect_panel: InspectPanel
 var journal_panel: JournalPanel
 var gear_panel: GearPanel
 var restoration_panel: RestorationPanel
+var camp_panel: CampPanel
 var settings_panel: SettingsPanel
 var licenses_panel: TextPanel
 var debug_menu: DebugMenu = null
@@ -37,6 +38,8 @@ var _fishing: FishingController
 var _region: RegionRuntime
 var _restoration: RestorationService
 var _hints: TutorialHints
+var _camp: CampService
+var _camera: CameraController
 var _region_id := ""
 ## Set by "다시 낚시": cast again as soon as the released fish is gone.
 var _recast_after_release := false
@@ -44,13 +47,15 @@ var _recast_after_release := false
 func _init() -> void:
 	layer = 10
 
-## `deps`: fishing, region, restoration, journal, loadout, hints, debug (nullable), region_id.
+## `deps`: fishing, region, restoration, journal, loadout, camp, camera, hints, debug (nullable), region_id.
 func setup(deps: Dictionary) -> void:
 	game = deps
 	_fishing = deps["fishing"]
 	_region = deps["region"]
 	_restoration = deps["restoration"]
 	_hints = deps["hints"]
+	_camp = deps["camp"]
+	_camera = deps.get("camera")
 	_region_id = deps["region_id"]
 
 	root = Control.new()
@@ -101,6 +106,7 @@ func setup(deps: Dictionary) -> void:
 	hud.journal_pressed.connect(_on_journal_pressed)
 	hud.gear_pressed.connect(open_gear)
 	hud.restore_pressed.connect(func() -> void: _toggle(restoration_panel))
+	hud.camp_pressed.connect(open_camp)
 	hud.settings_pressed.connect(func() -> void: _toggle(settings_panel))
 	hud.water_mind_pressed.connect(enter_water_mind)
 	hud.cta_down.connect(_on_cta_down)
@@ -119,6 +125,8 @@ func setup(deps: Dictionary) -> void:
 	EventBus.fishing_cancelled.connect(func() -> void: show_message(tr("ui.toast.cancelled")))
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.collection_changed.connect(func(_fish_id: String) -> void: _refresh_journal_notice())
+	EventBus.region_restoration_changed.connect(func(_changed: String, _level: int) -> void: _refresh_camp_notice())
+	EventBus.economy_changed.connect(func(_ripple: int, _memory: int) -> void: _refresh_camp_notice())
 	EventBus.bait_ran_out.connect(func(bait_id: String, replacement_id: String) -> void:
 		show_message(tr("ui.toast.bait_out") % [tr(ContentDB.get_bait(bait_id).get("name_key", "")), tr(ContentDB.get_bait(replacement_id).get("name_key", ""))]))
 	EventBus.item_granted.connect(func(category: String, item_id: String) -> void:
@@ -133,6 +141,7 @@ func setup(deps: Dictionary) -> void:
 	_apply_theme()
 	_refresh_restore_hint()
 	_refresh_journal_notice()
+	_refresh_camp_notice()
 	_show_first_hint()
 
 func _build_modal_host() -> void:
@@ -171,6 +180,10 @@ func _build_panels(deps: Dictionary) -> void:
 	restoration_panel.setup(_restoration, _region_id)
 	restoration_panel.close_pressed.connect(close_panel)
 	restoration_panel.confirmed.connect(_on_restore_confirmed)
+	camp_panel = CampPanel.new()
+	camp_panel.setup(_camp, deps["loadout"], _region_id)
+	camp_panel.close_pressed.connect(close_panel)
+	camp_panel.message.connect(show_message)
 	settings_panel = SettingsPanel.new()
 	settings_panel.close_pressed.connect(close_panel)
 	settings_panel.message.connect(show_message)
@@ -194,8 +207,11 @@ static func fit_width(design_width: float, available_width: float) -> float:
 
 ## A layout constant a panel script declares (FULLSCREEN, KEEPS_STATUS, KEEPS_NAV); false if absent.
 static func panel_flag(panel: Control, flag: String) -> bool:
+	return script_constant(panel, flag) == true
+
+static func script_constant(panel: Control, constant: String) -> Variant:
 	var script := panel.get_script() as Script
-	return script != null and script.get_script_constant_map().get(flag, false) == true
+	return script.get_script_constant_map().get(constant) if script != null else null
 
 func _open(panel: Control) -> void:
 	if water_mind.active:
@@ -210,6 +226,7 @@ func _open(panel: Control) -> void:
 	_current_panel = panel
 	(_modal_full if fullscreen else _modal_center).add_child(panel)
 	_set_backdrop(fullscreen)
+	_backdrop.visible = not (script_constant(panel, "BACKDROP") == "none")
 	if panel.has_method("refresh"):
 		panel.refresh()
 	_modal_host.visible = true
@@ -237,6 +254,8 @@ func _toggle(panel: Control) -> void:
 		_open(panel)
 
 func close_panel() -> void:
+	if _current_panel == camp_panel and _camera != null:
+		_camera.clear_focus()
 	if _current_panel != null:
 		_current_panel.get_parent().remove_child(_current_panel)
 		_current_panel = null
@@ -267,6 +286,23 @@ func _on_journal_pressed() -> void:
 		close_panel()
 	else:
 		open_journal()
+
+## Opens the camp screen: the camera moves in on the clearing and what is new there counts as seen.
+func open_camp() -> void:
+	if _current_panel == camp_panel:
+		close_panel()
+		return
+	_open(camp_panel)
+	if _current_panel != camp_panel:
+		return
+	var focus: Dictionary = ContentDB.get_layout(_region_id).get("camp_focus", {})
+	if _camera != null and not focus.is_empty():
+		_camera.focus_on(Vector2(float(focus["x"]), float(focus["y"])), float(focus["zoom"]))
+	_camp.mark_seen()
+	_refresh_camp_notice()
+
+func _refresh_camp_notice() -> void:
+	hud.set_camp_notice(_camp.has_news())
 
 ## Opens the equipment screen on the rods tab with the equipped rod chosen.
 func open_gear() -> void:

@@ -15,7 +15,7 @@ extends RefCounted
 ## Equipment changes how and where you fish, never how strong you are: rods trade control,
 ## sensitivity and durability against each other.
 
-const CATEGORIES: PackedStringArray = ["rod", "bait", "bag", "accessory"]
+const CATEGORIES: PackedStringArray = ["rod", "bait", "bag", "accessory", "decoration"]
 
 ## Offer states.
 const OWNED := "owned"
@@ -81,6 +81,7 @@ func owned(category: String) -> Array:
 		"bait": return _state.get_owned_baits()
 		"bag": return _state.get_owned_bags()
 		"accessory": return _state.get_owned_accessories()
+		"decoration": return _state.get_owned_decorations()
 	return []
 
 func is_owned(category: String, item_id: String) -> bool:
@@ -93,6 +94,7 @@ static func catalog(category: String) -> Array:
 		"bait": return ContentDB.baits.keys()
 		"bag": return ContentDB.bags.keys()
 		"accessory": return ContentDB.accessories.keys()
+		"decoration": return ContentDB.decorations.keys()
 	return []
 
 # --- bag and baits ---
@@ -195,6 +197,7 @@ func buy(category: String, item_id: String) -> bool:
 			_state.add_baits(item_id, deal["pack"])
 		"bag": _state.grant_bag(item_id)
 		"accessory": _state.grant_accessory(item_id)
+		"decoration": _state.grant_decoration(item_id)
 	return true
 
 ## Whether an item's unlock condition (a restoration stage of a region) is met.
@@ -219,6 +222,7 @@ func grant_keepsakes() -> Array:
 				"bait": _state.grant_bait(item_id)
 				"bag": _state.grant_bag(item_id)
 				"accessory": _state.grant_accessory(item_id)
+				"decoration": _state.grant_decoration(item_id)
 			granted.append([category, item_id])
 			EventBus.item_granted.emit(category, item_id)
 	return granted
