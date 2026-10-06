@@ -44,6 +44,8 @@ func clear_focus(duration: float = 0.5) -> void:
 func _move_to(point: Vector2, zoom_level: Vector2, duration: float) -> void:
 	if _focus_tween != null:
 		_focus_tween.kill()
+	if _tween != null:
+		_tween.kill()  # an explicit framing (camp, photo mode) wins over the restoration pulse
 	if reduced_motion or duration <= 0.0:
 		position = point
 		zoom = zoom_level

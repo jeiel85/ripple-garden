@@ -183,7 +183,6 @@ func _build_panels(deps: Dictionary) -> void:
 	camp_panel = CampPanel.new()
 	camp_panel.setup(_camp, deps["loadout"], _region_id)
 	camp_panel.close_pressed.connect(close_panel)
-	camp_panel.message.connect(show_message)
 	settings_panel = SettingsPanel.new()
 	settings_panel.close_pressed.connect(close_panel)
 	settings_panel.message.connect(show_message)
@@ -222,6 +221,8 @@ func _open(panel: Control) -> void:
 			panel.set_meta("design_width", panel.custom_minimum_size.x)
 		panel.custom_minimum_size.x = fit_width(float(panel.get_meta("design_width")), get_viewport().get_visible_rect().size.x)
 	if _current_panel != null:
+		if _current_panel == camp_panel and panel != camp_panel and _camera != null:
+			_camera.clear_focus()  # the camp gave way to another screen: the world zooms back out
 		_current_panel.get_parent().remove_child(_current_panel)
 	_current_panel = panel
 	(_modal_full if fullscreen else _modal_center).add_child(panel)

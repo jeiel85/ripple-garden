@@ -95,6 +95,20 @@ func test_the_world_draws_the_camp() -> void:
 	assert_false(root.camp.has_news())
 	root.ui.close_panel()
 	assert_eq(root.camera.zoom, Vector2.ONE, "and back out after")
+	# Another screen taking the camp's place (settings from the status bar) also zooms back out.
+	root.ui.open_camp()
+	root.ui._open(root.ui.settings_panel)
+	assert_eq(root.camera.zoom, Vector2.ONE, "settings opened over the camp must not leave the world zoomed")
+	root.ui.close_panel()
+	assert_eq(root.camera.position, CameraController.DESIGN_CENTER)
+	# A restoration pulse still running when the camp opens must not pull the camera back out.
+	GameState.set_setting("reduced_motion", false)
+	root.camera.restoration_pulse(3.0)
+	var pulse: Tween = root.camera._tween
+	root.camera.focus_on(Vector2(200, 400), 1.5, 0.0)
+	if pulse.is_valid():
+		pulse.custom_step(3.0)
+	assert_true(root.camera.zoom.is_equal_approx(Vector2.ONE * 1.5), "the camp focus wins over the pulse (zoom %s)" % root.camera.zoom)
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()
@@ -119,6 +133,8 @@ func test_the_camp_screen_buys_through_the_done_button() -> void:
 	assert_eq(panel.pending, "deco_wood_table")
 	panel.choose("deco_birdhouse")  # still locked at restoration 0
 	assert_eq(panel.pending, "", "the latest tap wins: a locked pick drops the earlier offer")
+	assert_true(panel.note_text().contains(String(TranslationServer.translate(ContentDB.get_region(R1)["name_key"]))),
+		"the sheet itself says what opens it (the toast is under the sheet): %s" % panel.note_text())
 	panel._confirm()
 	assert_eq(camp.item_in(R1, "camp_5"), "", "the done button did not buy the earlier offer")
 	assert_false(parts[1].is_owned("decoration", "deco_wood_table"))

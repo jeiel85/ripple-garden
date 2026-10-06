@@ -9,9 +9,11 @@ extends Control
 ## Choosing a card puts an owned decoration into the chosen slot at once. A decoration not owned yet is
 ## offered: its price appears on the done button and pressing it buys and places it. Locked ones say which
 ## restoration opens them. The screen only asks; CampService and LoadoutService decide.
+##
+## Its own answers (price, locked, not enough, bought) appear in the pill under the title: the global
+## toast sits under open screens, and this sheet covers it.
 
 signal close_pressed
-signal message(text: String)
 
 const FULLSCREEN := true
 const KEEPS_STATUS := true
@@ -39,6 +41,7 @@ var _remove_button: Button
 var _tabs: Dictionary = {}
 var _cards: HBoxContainer
 var _card_nodes: Dictionary = {}
+var _note: Label
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -59,7 +62,8 @@ func _init() -> void:
 	titles.add_child(UiKit.sign_board("camp", tr("ui.camp.title")))
 	var hint := PanelContainer.new()
 	hint.theme_type_variation = "PillPanel"
-	hint.add_child(UiKit.label(tr("ui.camp.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false))
+	_note = UiKit.label(tr("ui.camp.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
+	hint.add_child(_note)
 	titles.add_child(hint)
 	header.add_child(titles)
 	add_child(header)
@@ -107,6 +111,16 @@ func _init() -> void:
 	box.add_child(done)
 	sheet.add_child(UiKit.margin(box, 14))
 	add_child(sheet)
+
+func _enter_tree() -> void:
+	_note.text = tr("ui.camp.subtitle")  # every visit starts with the instructions
+
+## The line under the title (instructions, or the answer to the last choice).
+func note_text() -> String:
+	return _note.text
+
+func _say(text: String) -> void:
+	_note.text = text
 
 func setup(camp: CampService, loadout: LoadoutService, p_region_id: String) -> void:
 	_camp = camp
@@ -163,11 +177,11 @@ func choose(decoration_id: String) -> void:
 			pending = decoration_id
 			_fill_cards()
 			_place_buttons()
-			message.emit(tr("ui.camp.buy_hint") % [tr(ContentDB.get_decoration(decoration_id)["name_key"]), tr("ui.currency." + String(deal["currency"])), deal["amount"]])
+			_say(tr("ui.camp.buy_hint") % [tr(ContentDB.get_decoration(decoration_id)["name_key"]), tr("ui.currency." + String(deal["currency"])), deal["amount"]])
 		LoadoutService.TOO_DEAR:
-			message.emit(tr("ui.gear.not_enough") % tr("ui.currency." + String(deal["currency"])))
+			_say(tr("ui.gear.not_enough") % tr("ui.currency." + String(deal["currency"])))
 		LoadoutService.LOCKED:
-			message.emit(tr("ui.gear.locked") % [tr(ContentDB.get_region(deal["region"]).get("name_key", "")), deal["level"]])
+			_say(tr("ui.gear.locked") % [tr(ContentDB.get_region(deal["region"]).get("name_key", "")), deal["level"]])
 
 func card_count() -> int:
 	return _card_nodes.size()
@@ -237,7 +251,7 @@ func _confirm() -> void:
 	var decoration_id := pending
 	pending = ""
 	if _camp.buy_and_place(region_id, selected_slot, decoration_id):
-		message.emit(tr("ui.toast.bought") % tr(ContentDB.get_decoration(decoration_id)["name_key"]))
+		_say(tr("ui.toast.bought") % tr(ContentDB.get_decoration(decoration_id)["name_key"]))
 	refresh()
 
 func _turn() -> void:
