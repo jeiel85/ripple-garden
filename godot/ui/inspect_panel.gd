@@ -6,7 +6,7 @@ extends Control
 ## with a pinned note naming its rarity, and a wooden frame holds the name, size, a short
 ## observational line and where/when it was met. There is no sell or keep button (GDD §11):
 ##   방생 (release)       let it go and stay
-##   기록 (record)        look at it in the journal (it was recorded the moment it was caught, D-010)
+##   기록 (record)        let it go and open its journal page (it was recorded when caught, D-010)
 ##   다시 낚시 (fish again) let it go and cast again right away — the emphasised wooden action
 ## Unmet species show their name only once caught, because the catch itself is the discovery.
 

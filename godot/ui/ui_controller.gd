@@ -154,7 +154,7 @@ func _build_modal_host() -> void:
 func _build_panels(deps: Dictionary) -> void:
 	inspect_panel = InspectPanel.new()
 	inspect_panel.release_pressed.connect(func() -> void: _fishing.release_catch())
-	inspect_panel.journal_pressed.connect(func() -> void: open_journal(_fishing.encounter.fish_id if _fishing.encounter != null else ""))
+	inspect_panel.journal_pressed.connect(record_catch)
 	inspect_panel.fish_again_pressed.connect(fish_again)
 	journal_panel = JournalPanel.new()
 	journal_panel.setup(deps["journal"], _region_id)
@@ -300,6 +300,13 @@ func _on_cta_up() -> void:
 	if _fishing.state == FishingController.State.FIGHT:
 		_fishing.set_reeling(false)
 
+## "기록": the catch is already in the journal (D-010); let the fish go and open its page. Like the other
+## two actions it releases, so nothing is left pending behind the journal.
+func record_catch() -> void:
+	var fish_id: String = GameState.get_pending_catch().get("fish_id", "")
+	if _fishing.release_catch() and not fish_id.is_empty():
+		open_journal(fish_id)
+
 ## "다시 낚시": let the fish go and cast again at the same spot as soon as it is back in the water.
 func fish_again() -> void:
 	if _fishing.release_catch():
@@ -432,15 +439,24 @@ static func preview_hour(band: String) -> float:
 
 ## Saves a picture of the scene without the overlay (water-mind "저장").
 func save_photo() -> void:
-	var chrome_was_visible := water_mind.is_chrome_visible()
-	water_mind.hide_chrome()
-	toast.visible = false
+	var hidden := hide_for_photo()
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
-	if chrome_was_visible:
-		water_mind.show_chrome()
+	restore_after_photo(hidden)
 	var path := PhotoSaver.save(image)
 	show_message(tr("ui.photo.saved") % path if not path.is_empty() else tr("ui.photo.failed"))
+
+## Hides the overlay and any message for the one captured frame; returns what to bring back.
+func hide_for_photo() -> Dictionary:
+	var shown := {"chrome": water_mind.is_chrome_visible(), "toast": toast.visible}
+	water_mind.hide_chrome()
+	toast.visible = false
+	return shown
+
+func restore_after_photo(shown: Dictionary) -> void:
+	toast.visible = shown.get("toast", false)
+	if shown.get("chrome", false):
+		water_mind.show_chrome()
 
 # --- settings: theme, layout ---
 

@@ -199,6 +199,20 @@ func test_the_overlay_hides_and_comes_back_with_a_tap() -> void:
 	assert_false(overlay.is_chrome_visible(), "the overlay tucks itself away when idle")
 	_stop(root)
 
+func test_saving_a_photo_leaves_a_showing_message_on_screen() -> void:
+	var root := _start()
+	root.ui.enter_water_mind()  # shows the water-mind hint
+	assert_true(root.ui.toast.visible)
+	assert_true(root.ui.water_mind.is_chrome_visible())
+	# The capture itself waits for a drawn frame (not available headless); its hide/restore pair is tested.
+	var hidden := root.ui.hide_for_photo()
+	assert_false(root.ui.toast.visible, "nothing covers the picture")
+	assert_false(root.ui.water_mind.is_chrome_visible())
+	root.ui.restore_after_photo(hidden)
+	assert_true(root.ui.toast.visible, "the message hidden for the picture comes back")
+	assert_true(root.ui.water_mind.is_chrome_visible())
+	_stop(root)
+
 func test_photos_are_saved_as_png_with_a_time_stamped_name() -> void:
 	var dir := "user://test_photos"
 	var image := Image.create(8, 8, false, Image.FORMAT_RGBA8)
