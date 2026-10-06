@@ -16,6 +16,7 @@ var aliases: Dictionary = {}
 var behaviors: Dictionary = {}
 var weather: Dictionary = {}
 var layouts: Dictionary = {}
+var audio: Dictionary = {}
 var errors := PackedStringArray()
 
 var _fish_by_region: Dictionary = {}
@@ -42,6 +43,7 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	behaviors = result["behaviors"]
 	weather = result["weather"]
 	layouts = result["layouts"]
+	audio = result["audio"]
 	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://world/game_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://world/region_runtime.gd" id="2_region"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://fishing/fishing_feedback.gd" id="11_fb"]
 [ext_resource type="Script" path="res://world/camera_controller.gd" id="12_cam"]
 [ext_resource type="Script" path="res://ui/ui_controller.gd" id="13_ui"]
+[ext_resource type="Script" path="res://audio/ambient_audio.gd" id="14_audio"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_root")
@@ -50,6 +51,9 @@ script = ExtResource("10_ctrl")
 
 [node name="FishingFeedback" type="Node" parent="."]
 script = ExtResource("11_fb")
+
+[node name="AmbientAudio" type="Node" parent="."]
+script = ExtResource("14_audio")
 
 [node name="CameraController" type="Camera2D" parent="."]
 script = ExtResource("12_cam")

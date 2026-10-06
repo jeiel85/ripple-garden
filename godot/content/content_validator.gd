@@ -27,6 +27,7 @@ const FILE_NAMES := {
 	"behaviors": "behaviors.json",
 	"weather": "weather.json",
 	"layouts": "region_layouts.json",
+	"audio": "audio.json",
 }
 
 const ID_PATTERNS := {
@@ -38,6 +39,8 @@ const ID_PATTERNS := {
 	"weather": "^[a-z][a-z0-9_]*$",
 }
 
+const AUDIO_BUSES: PackedStringArray = preload("res://autoload/audio_service.gd").REQUIRED_BUSES
+const AUDIO_CUES: PackedStringArray = ["cast", "landed", "bite", "hooked", "caught", "released", "escaped"]
 const PROP_KINDS: PackedStringArray = PropKinds.PROPS
 const ANIMAL_KINDS: PackedStringArray = PropKinds.ANIMALS
 const HEX_COLOR := "^#[0-9a-fA-F]{6}$"
@@ -59,6 +62,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 	v._check_weather_links(weather)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
 	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
+	var audio := v._validate_audio(raw.get("audio"))
 	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
 	return {
 		"fish": fish,
@@ -71,6 +75,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"behaviors": behaviors,
 		"weather": weather,
 		"layouts": layouts,
+		"audio": audio,
 		"errors": v._errors,
 	}
 
@@ -675,6 +680,99 @@ func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, 
 					if not band in TIME_BANDS:
 						_errors.append("%s.time_bands: '%s' is not a known time band" % [animal_label, band])
 
+## Audio mix (data/audio.json): loops, how weather/time shape them, wildlife one-shots and the
+## fishing cues. Every stream must exist and every bus must be one of the project's buses.
+func _validate_audio(data: Variant) -> Dictionary:
+	var file_name: String = FILE_NAMES["audio"]
+	if data == null:
+		return {}
+	if typeof(data) != TYPE_DICTIONARY:
+		_errors.append("%s: top level must be an object" % file_name)
+		return {}
+	var before := _errors.size()
+
+	var loops: Variant = data.get("loops")
+	var loop_ids: Dictionary = {}
+	if typeof(loops) != TYPE_ARRAY or loops.is_empty():
+		_errors.append("%s.loops: must be a non-empty array" % file_name)
+	else:
+		for i in loops.size():
+			var loop: Variant = loops[i]
+			var label := "%s.loops[%d]" % [file_name, i]
+			if typeof(loop) != TYPE_DICTIONARY or typeof(loop.get("id")) != TYPE_STRING:
+				_errors.append("%s: needs an id, stream and bus" % label)
+				continue
+			if loop_ids.has(loop["id"]):
+				_errors.append("%s.id: duplicate '%s'" % [label, loop["id"]])
+			loop_ids[loop["id"]] = true
+			_check_audio_source(loop, label)
+
+	var mix: Variant = data.get("mix")
+	if typeof(mix) != TYPE_DICTIONARY:
+		_errors.append("%s.mix: must be an object" % file_name)
+	else:
+		for loop_id in loop_ids:
+			if typeof(mix.get(loop_id)) != TYPE_DICTIONARY:
+				_errors.append("%s.mix.%s: every loop needs mix settings" % [file_name, loop_id])
+		for loop_id in mix:
+			if not loop_ids.has(loop_id):
+				_errors.append("%s.mix.%s: no such loop" % [file_name, loop_id])
+			elif typeof(mix[loop_id]) == TYPE_DICTIONARY:
+				for key in mix[loop_id]:
+					_check_balance_number(mix[loop_id], "mix." + loop_id, key, 0.0, 1.0, false, "audio")
+	_check_balance_number(data, "mix", "fade_per_sec", 0.01, 5.0, false, "audio")
+
+	var wildlife: Variant = data.get("wildlife")
+	if typeof(wildlife) != TYPE_DICTIONARY:
+		_errors.append("%s.wildlife: must be an object" % file_name)
+	else:
+		if not wildlife.get("bus") in AUDIO_BUSES:
+			_errors.append("%s.wildlife.bus: must be one of %s" % [file_name, ", ".join(AUDIO_BUSES)])
+		_check_balance_range(wildlife, "wildlife", "interval_sec", 0.5, 600.0, false, "audio")
+		_check_balance_range(wildlife, "wildlife", "volume", 0.0, 1.0, false, "audio")
+		_check_balance_number(wildlife, "wildlife", "level_speedup", 0.0, 2.0, false, "audio")
+		var clips: Variant = wildlife.get("clips")
+		if typeof(clips) != TYPE_ARRAY or clips.is_empty():
+			_errors.append("%s.wildlife.clips: must be a non-empty array" % file_name)
+		else:
+			for i in clips.size():
+				var clip: Variant = clips[i]
+				var label := "%s.wildlife.clips[%d]" % [file_name, i]
+				if typeof(clip) != TYPE_DICTIONARY:
+					_errors.append("%s: must be an object" % label)
+					continue
+				if typeof(clip.get("stream")) != TYPE_STRING or not ResourceLoader.exists(clip["stream"]):
+					_errors.append("%s.stream: file not found (%s)" % [label, var_to_str(clip.get("stream"))])
+				if not _is_int(clip.get("min_level")) or clip["min_level"] < 0:
+					_errors.append("%s.min_level: must be an integer >= 0" % label)
+				if not _is_number(clip.get("weight")) or clip["weight"] <= 0.0:
+					_errors.append("%s.weight: must be a number > 0" % label)
+				var bands: Variant = clip.get("bands")
+				if typeof(bands) != TYPE_ARRAY or bands.is_empty():
+					_errors.append("%s.bands: must be a non-empty array" % label)
+				else:
+					for band in bands:
+						if not band in TIME_BANDS:
+							_errors.append("%s.bands: '%s' is not a known time band" % [label, band])
+
+	var cues: Variant = data.get("cues")
+	if typeof(cues) != TYPE_DICTIONARY:
+		_errors.append("%s.cues: must be an object" % file_name)
+	else:
+		for cue_id in AUDIO_CUES:
+			if typeof(cues.get(cue_id)) != TYPE_DICTIONARY:
+				_errors.append("%s.cues.%s: missing" % [file_name, cue_id])
+			else:
+				_check_audio_source(cues[cue_id], "%s.cues.%s" % [file_name, cue_id])
+				_check_balance_number(cues[cue_id], "cues." + cue_id, "volume", 0.0, 1.0, false, "audio")
+	return data if _errors.size() == before else {}
+
+func _check_audio_source(entry: Dictionary, label: String) -> void:
+	if typeof(entry.get("stream")) != TYPE_STRING or not ResourceLoader.exists(entry["stream"]):
+		_errors.append("%s.stream: file not found (%s)" % [label, var_to_str(entry.get("stream"))])
+	if not entry.get("bus") in AUDIO_BUSES:
+		_errors.append("%s.bus: must be one of %s (got %s)" % [label, ", ".join(AUDIO_BUSES), var_to_str(entry.get("bus"))])
+
 func _check_polygon(points: Variant, width: float, height: float, label: String) -> void:
 	if typeof(points) != TYPE_ARRAY or points.size() < 3:
 		_errors.append("%s: must be a polygon with at least 3 points" % label)
@@ -692,9 +790,9 @@ static func _is_point_within(value: Variant, width: float, height: float) -> boo
 
 ## `section[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
 func _check_balance_range(section: Dictionary, section_name: String, field: String,
-		lo: float, hi: float, integer: bool = false) -> void:
+		lo: float, hi: float, integer: bool = false, file_key: String = "balance") -> void:
 	var value: Variant = section.get(field)
-	var label := "%s.%s.%s" % [FILE_NAMES["balance"], section_name, field]
+	var label := "%s.%s.%s" % [FILE_NAMES[file_key], section_name, field]
 	if typeof(value) != TYPE_DICTIONARY or not _is_number(value.get("min")) or not _is_number(value.get("max")):
 		_errors.append("%s: must be an object with numeric min and max" % label)
 		return
@@ -706,11 +804,11 @@ func _check_balance_range(section: Dictionary, section_name: String, field: Stri
 ## Appends an error unless `section[field]` is a finite number in [min_value, max_value]
 ## (an integer when `integer` is set).
 func _check_balance_number(section: Dictionary, section_name: String, field: String,
-		min_value: float, max_value: float, integer: bool = false) -> void:
+		min_value: float, max_value: float, integer: bool = false, file_key: String = "balance") -> void:
 	var value: Variant = section.get(field)
 	if not _is_number(value) or value < min_value or value > max_value or (integer and not _is_int(value)):
 		_errors.append("%s.%s.%s: must be %s in %s..%s (got %s)" % [
-			FILE_NAMES["balance"], section_name, field, "an integer" if integer else "a number",
+			FILE_NAMES[file_key], section_name, field, "an integer" if integer else "a number",
 			min_value, max_value, var_to_str(value)])
 
 func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:

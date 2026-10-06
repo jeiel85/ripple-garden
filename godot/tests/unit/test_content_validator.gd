@@ -345,3 +345,29 @@ func test_journal_information_must_unlock_in_order() -> void:
 	var raw := _raw()
 	raw["balance"]["journal"]["reveal_at_encounters"]["habitats"] = 2
 	_assert_error(ContentValidator.validate(raw), "information must unlock in the order")
+
+# --- audio ---
+
+func test_audio_streams_buses_and_cues_are_checked() -> void:
+	var raw := _raw()
+	raw["audio"]["loops"][0]["stream"] = "res://audio/streams/missing.wav"
+	_assert_error(ContentValidator.validate(raw), "audio.json.loops[0].stream: file not found")
+	raw = _raw()
+	raw["audio"]["loops"][1]["bus"] = "Reverb"
+	_assert_error(ContentValidator.validate(raw), "audio.json.loops[1].bus: must be one of")
+	raw = _raw()
+	raw["audio"]["cues"].erase("caught")
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "audio.json.cues.caught: missing")
+	assert_true(result["audio"].is_empty(), "invalid audio kept")
+
+func test_audio_wildlife_and_mix_rules_are_checked() -> void:
+	var raw := _raw()
+	raw["audio"]["wildlife"]["clips"][0]["bands"] = ["midnight"]
+	_assert_error(ContentValidator.validate(raw), "'midnight' is not a known time band")
+	raw = _raw()
+	raw["audio"]["mix"]["water"]["base"] = 3.0
+	_assert_error(ContentValidator.validate(raw), "audio.json.mix.water.base")
+	raw = _raw()
+	raw["audio"]["mix"].erase("rain")
+	_assert_error(ContentValidator.validate(raw), "audio.json.mix.rain: every loop needs mix settings")

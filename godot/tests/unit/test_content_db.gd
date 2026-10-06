@@ -23,11 +23,11 @@ func test_missing_and_malformed_files_are_reported() -> void:
 	assert_false(content_db.fish.is_empty())
 
 	expect_engine_error("fish_catalog.json: invalid JSON at line")
-	for file_name in ["regions.json", "rods.json", "baits.json", "progression.json", "balance.json", "content_aliases.json", "behaviors.json", "weather.json", "region_layouts.json"]:
+	for file_name in ["regions.json", "rods.json", "baits.json", "progression.json", "balance.json", "content_aliases.json", "behaviors.json", "weather.json", "region_layouts.json", "audio.json"]:
 		expect_engine_error("%s: file not found" % file_name)
 	assert_false(content_db.load_all(MALFORMED_DIR), "malformed content reported valid")
 	assert_false(content_db.is_valid())
-	assert_eq(content_db.errors.size(), 10, "error count: %s" % content_db.errors)
+	assert_eq(content_db.errors.size(), 11, "error count: %s" % content_db.errors)
 	assert_true(content_db.fish.is_empty(), "previous content must be replaced")
 	assert_true(content_db.regions.is_empty())
 	assert_true(content_db.progression.is_empty())

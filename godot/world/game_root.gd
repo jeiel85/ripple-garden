@@ -19,6 +19,7 @@ var settings: SettingsApplier
 @onready var region: RegionRuntime = $World/RegionRuntime
 @onready var fishing: FishingController = $FishingController
 @onready var feedback: FishingFeedback = $FishingFeedback
+@onready var ambient_audio: AmbientAudio = $AmbientAudio
 @onready var camera: CameraController = $CameraController
 @onready var ui: UIController = $UIController
 
@@ -36,7 +37,11 @@ func _ready() -> void:
 		return
 	fishing.region_id = region_id
 	fishing.context_provider = _fishing_context
+	if load_save:
+		# A landed fish and its release reach the disk at once (tests and tools leave this unset).
+		fishing.save_hook = SaveService.save_if_dirty
 	region.fishing_view.setup(fishing, region.rod_origin())
+	ambient_audio.setup(region_id, region.weather)
 	fishing.state_changed.connect(_on_fishing_state_changed)
 
 	if BuildProfile.debug_tools_enabled():
