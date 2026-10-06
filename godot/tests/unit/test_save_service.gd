@@ -314,3 +314,25 @@ func test_about_to_save_lets_services_sync_state_first() -> void:
 	var parsed: Variant = JSON.parse_string(_read(SaveService.SAVE_FILE))
 	assert_eq(parsed["profile"]["game_minutes"], 600.0)
 	_end()
+
+func test_clock_only_progress_still_gets_saved() -> void:
+	_begin("clock_only")
+	_service.save_game()
+	var clock := {"minutes": 480.0}
+	var sync := func() -> void: _state.set_game_minutes(clock["minutes"])
+	_service.about_to_save.connect(sync)
+	assert_false(_service.save_if_dirty(), "nothing changed yet")
+	clock["minutes"] = 555.0  # the game clock advanced; no other state was touched
+	assert_true(_service.save_if_dirty(), "a moved clock must count as a change")
+	assert_eq(JSON.parse_string(_read(SaveService.SAVE_FILE))["profile"]["game_minutes"], 555.0)
+	assert_false(_service.save_if_dirty(), "and be clean afterwards")
+	_end()
+
+func test_pause_saves_clock_progress_without_other_changes() -> void:
+	_begin("pause_clock")
+	_service.save_game()
+	var sync := func() -> void: _state.set_game_minutes(900.0)
+	_service.about_to_save.connect(sync)
+	_service._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	assert_eq(JSON.parse_string(_read(SaveService.SAVE_FILE))["profile"]["game_minutes"], 900.0)
+	_end()

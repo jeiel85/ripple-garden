@@ -63,8 +63,13 @@ func _now() -> int:
 func has_unsaved_changes() -> bool:
 	return _state().revision != _last_saved_revision
 
+## Saves when something changed since the last write. Services that keep state outside GameState
+## (the game clock) are synced first, otherwise a clock that only moved forward would look clean.
 func save_if_dirty() -> bool:
-	if write_blocked or not has_unsaved_changes() or _state().data.is_empty():
+	if write_blocked or _state().data.is_empty():
+		return false
+	about_to_save.emit()
+	if not has_unsaved_changes():
 		return false
 	return save_game()
 
