@@ -11,7 +11,12 @@ extends CanvasLayer
 ## status bar (`KEEPS_STATUS`), the journal keeps the navigation row (`KEEPS_NAV`). Small panels
 ## (settings, restoration) are centred over a dimmed scene and hide both.
 
-## Messages sit above photo mode's buttons (and the polaroid strip under them) while it is open.
+## Where messages sit (design pixels above the bottom edge, plus the gesture bar): just above whatever
+## occupies the bottom — the navigation row, the fishing row, the water-mind buttons, photo mode's buttons
+## (and the polaroid strip under them).
+const TOAST_BOTTOM := 196.0
+const FISHING_TOAST_BOTTOM := 470.0
+const WATER_MIND_TOAST_BOTTOM := 230.0
 const PHOTO_TOAST_BOTTOM := PhotoMode.POLAROID_STRIP + 210.0
 
 var game: Dictionary = {}
@@ -51,6 +56,8 @@ var _region_id := ""
 var _recast_after_release := false
 ## An away summary that arrived while something else was on screen (shown once things are quiet).
 var _pending_away: OfflineService.Summary = null
+## The gesture bar's height (design pixels), kept so messages can sit above it.
+var _bottom_inset := 0.0
 
 func _init() -> void:
 	layer = 10
@@ -92,7 +99,7 @@ func setup(deps: Dictionary) -> void:
 	toast.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	toast.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	toast.offset_bottom = -196  # just above the navigation row, like the mockups' tip pill
+	toast.offset_bottom = -TOAST_BOTTOM  # just above the navigation row, like the mockups' tip pill
 	root.add_child(toast)
 	_build_modal_host()
 	_chrome = Control.new()
@@ -391,7 +398,7 @@ func fish_again() -> void:
 
 func _on_fishing_state_changed(_previous: String, current: String) -> void:
 	# Messages sit above whatever occupies the bottom: the navigation row, or the meter and reel button.
-	toast.offset_bottom = -470.0 if current in Hud.FISHING_STATES else -196.0
+	_place_toast()
 	var fighting := current == "fight"
 	fight_meter.visible = fighting  # the meter means nothing before the fish is hooked
 	if fighting:
@@ -503,10 +510,12 @@ func enter_water_mind() -> void:
 	fight_meter.visible = false
 	world_input.enabled = false
 	water_mind.enter()
+	_place_toast()
 
 func exit_water_mind() -> void:
 	if photo_mode.active:
 		photo_mode.exit()
+	_place_toast()
 	hud.visible = true
 	hud.allow_top = true
 	hud.allow_bottom = true
@@ -553,11 +562,11 @@ func open_photo_mode() -> void:
 	water_mind.hide_chrome()
 	water_mind.pause_idle(true)
 	var region_name := tr(ContentDB.get_region(_region_id).get("name_key", ""))
-	toast.offset_bottom = -PHOTO_TOAST_BOTTOM  # above the photo controls
 	photo_mode.enter(_camera, "%s · %s" % [region_name, InspectPanel.date_text(int(Time.get_unix_time_from_system()), false)])
+	_place_toast()  # above the photo controls
 
 func _on_photo_mode_closed() -> void:
-	toast.offset_bottom = -196.0
+	_place_toast()
 	water_mind.pause_idle(false)
 	if water_mind.active:
 		water_mind.show_chrome()
@@ -624,11 +633,23 @@ func _apply_layout() -> void:
 		get_viewport().get_visible_rect().size.y, OS.has_feature("mobile"))
 	apply_insets(insets.x, insets.y)
 
+func _place_toast() -> void:
+	var base := TOAST_BOTTOM
+	if photo_mode != null and photo_mode.active:
+		base = PHOTO_TOAST_BOTTOM
+	elif water_mind != null and water_mind.active:
+		base = WATER_MIND_TOAST_BOTTOM
+	elif _fishing != null and FishingController.State.keys()[_fishing.state].to_lower() in Hud.FISHING_STATES:
+		base = FISHING_TOAST_BOTTOM
+	toast.offset_bottom = -(base + _bottom_inset)
+
 ## Keeps everything that is tapped or read out of a notch and the gesture bar (design pixels). Full-screen
 ## panels are laid out for the status bar at the top, which moves down by the same inset; the overlays
 ## move only their buttons, their pictures stay full screen. Found on a 20:9 emulator, where the map's
 ## title sat on top of the status bar.
 func apply_insets(top: float, bottom: float) -> void:
+	_bottom_inset = bottom
+	_place_toast()
 	hud.apply_layout(top, bottom, UiTheme.touch_min(GameState.get_setting("large_ui") == true))
 	_modal_full.offset_top = top
 	_modal_full.offset_bottom = -bottom
