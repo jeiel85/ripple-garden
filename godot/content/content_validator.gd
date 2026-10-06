@@ -286,12 +286,19 @@ func _check_moment(d: Dictionary) -> void:
 	for key in when:
 		if not key in MOMENT_CONDITIONS:
 			_item_errors.append("when.%s: unknown condition (known: %s)" % [key, ", ".join(MOMENT_CONDITIONS)])
-	for weather_id in when.get("weather", []):
-		if not _weather_ids.has(weather_id):
-			_item_errors.append("when.weather: unknown weather '%s'" % weather_id)
-	for band in when.get("band", []):
-		if not band in TIME_BANDS:
-			_item_errors.append("when.band: unknown time band '%s'" % band)
+	# A list condition must be a non-empty list of names: an empty one could never be met.
+	for list_key in ["weather", "band"]:
+		if not when.has(list_key):
+			continue
+		var names: Variant = when[list_key]
+		if typeof(names) != TYPE_ARRAY or names.is_empty() or names.any(func(entry: Variant) -> bool: return typeof(entry) != TYPE_STRING):
+			_item_errors.append("when.%s: must be a non-empty array of names" % list_key)
+			continue
+		for entry in names:
+			if list_key == "weather" and not _weather_ids.has(entry):
+				_item_errors.append("when.weather: unknown weather '%s'" % entry)
+			elif list_key == "band" and not entry in TIME_BANDS:
+				_item_errors.append("when.band: unknown time band '%s'" % entry)
 	for number_key in ["min_level", "caught_rarity", "camp_filled"]:
 		if when.has(number_key) and (not _is_int(when[number_key]) or when[number_key] < 0):
 			_item_errors.append("when.%s: must be an integer >= 0" % number_key)

@@ -245,6 +245,7 @@ func refresh() -> void:
 	for tab_id in _tabs:
 		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
 	_sort_button.text = tr("ui.journal.sort." + sort_mode)
+	_sort_button.visible = true
 	if selected_id.is_empty() or not _cards.has(selected_id):
 		selected_id = _first_interesting(entries)
 	_show_page(selected_id)
@@ -504,6 +505,7 @@ func _refresh_moments() -> void:
 		_cards[moment_id] = card
 		_list.add_child(card)
 	_progress.text = tr("ui.journal.progress") % [seen, ContentDB.moments.size()]
+	_sort_button.visible = false  # moments keep the order they are listed in; there is nothing to sort
 	for tab_id in _tabs:
 		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
 	if selected_id.is_empty() or not _cards.has(selected_id):

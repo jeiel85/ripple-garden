@@ -82,8 +82,10 @@ func test_the_journal_lists_moments_with_hints_until_seen() -> void:
 	assert_eq(panel._page_line.text, String(TranslationServer.translate("moment.sunshower.hint")), "an unseen moment shows its hint")
 	panel._show_moment("moment_rain_rings")
 	assert_eq(panel._page_line.text, String(TranslationServer.translate("moment.rain_rings.desc")))
+	assert_false(panel._sort_button.visible, "no sort control where there is nothing to sort")
 	panel.select_tab("all")
 	assert_true(panel._page_portrait.get_parent().visible, "fish pages show their picture again")
+	assert_true(panel._sort_button.visible)
 	panel.free()
 	GameState.new_game()
 
@@ -102,3 +104,31 @@ func test_watching_the_pond_at_night_is_a_moment() -> void:
 	root.free()
 	save_service.write_blocked = was_blocked
 	GameState.new_game()
+
+func test_a_moment_seen_with_the_journal_open_appears_at_once() -> void:
+	GameState.new_game()
+	var save_service: Node = tree.root.get_node("SaveService")
+	var was_blocked: bool = save_service.write_blocked
+	save_service.write_blocked = true
+	var root: GameRoot = (load("res://world/game_root.tscn") as PackedScene).instantiate()
+	root.load_save = false
+	tree.root.add_child(root)
+	root.ui.open_journal()
+	root.ui.journal_panel.select_tab("moments")
+	var before: String = root.ui.journal_panel._progress.text
+	GameState.record_moment("moment_rain_rings")
+	EventBus.moment_recorded.emit("moment_rain_rings")
+	assert_true(root.ui.journal_panel._progress.text != before, "the open journal counts the new moment")
+	root.free()
+	save_service.write_blocked = was_blocked
+	GameState.new_game()
+
+func test_moment_lists_must_hold_names() -> void:
+	for bad in [[], "rain", [3]]:
+		var raw: Dictionary = {}
+		for category in ContentValidator.FILE_NAMES:
+			raw[category] = JSON.parse_string(FileAccess.get_file_as_string("res://data".path_join(ContentValidator.FILE_NAMES[category])))
+		raw["moments"][0]["when"]["weather"] = bad
+		var errors := "
+".join(ContentValidator.validate(raw)["errors"])
+		assert_true(errors.contains("when.weather: must be a non-empty array of names"), "%s: %s" % [bad, errors])
