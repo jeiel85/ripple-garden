@@ -221,7 +221,7 @@ func test_no_panel_is_wider_than_its_design_width_in_korean_or_english() -> void
 	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
 	# Measured with the real UI theme (30 px text): the default theme's 16 px text would hide the problem.
 	var theme := UiTheme.build(1.0, false, false)
-	for locale in ["ko", "en"]:
+	for locale in ["ko", "en", "ja"]:
 		TranslationServer.set_locale(locale)
 		var panels: Array = []
 		var settings := SettingsPanel.new()

@@ -124,6 +124,11 @@ func pan(screen_delta: Vector2) -> void:
 	center -= screen_delta / zoom
 	_apply_view()
 
+## Moves the controls out of a notch and the gesture bar; the frame stays on the screen's edges.
+func apply_insets(top: float, bottom: float) -> void:
+	_controls.offset_top = top
+	_controls.offset_bottom = -bottom
+
 ## The controls are hidden for the one captured frame; the frame and signature stay.
 func hide_controls() -> void:
 	_controls.visible = false
@@ -158,6 +163,8 @@ func _refresh() -> void:
 	_frame_button.tooltip_text = tr("ui.photo.frame") + " · " + _frame_button.text
 	_logo_button.text = tr("ui.photo.logo_on") if logo else tr("ui.photo.logo_off")
 	_logo_button.tooltip_text = _logo_button.text
+	UiKit.fit_caption(_frame_button)
+	UiKit.fit_caption(_logo_button)
 	_zoom_in.disabled = zoom >= MAX_ZOOM - 0.001
 	_zoom_out.disabled = zoom <= MIN_ZOOM + 0.001
 

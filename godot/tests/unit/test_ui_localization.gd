@@ -1,6 +1,6 @@
 extends TestCase
 
-## Every string the interface shows must exist in the localization CSV in Korean and English
+## Every string the interface shows must exist in the localization CSV in Korean, English and Japanese
 ## (UI_UX §12, DATA_SCHEMA §7). Literal `tr("key")` calls are found by scanning the source;
 ## keys built at runtime (`"ui.time." + band`, settings, habitats...) are checked by expanding
 ## the data that feeds them.
@@ -25,7 +25,7 @@ func _require(rows: Dictionary, key: String, where: String) -> void:
 	if not rows.has(key):
 		fail("%s: localization key '%s' is missing" % [where, key])
 		return
-	for locale in ["ko", "en"]:
+	for locale in ["ko", "en", "ja"]:
 		if str(rows[key].get(locale, "")).strip_edges().is_empty():
 			fail("%s: '%s' has no %s text" % [where, key, locale])
 
@@ -93,7 +93,7 @@ func test_format_strings_take_the_expected_arguments() -> void:
 		"ui.support.diagnostics_saved": 1,
 	}
 	for key in expectations:
-		for locale in ["ko", "en"]:
+		for locale in ["ko", "en", "ja"]:
 			var text: String = rows[key][locale]
 			var placeholders := RegEx.create_from_string("%[-+0-9.]*[sdf]").search_all(text).size()
 			assert_eq(placeholders, int(expectations[key]), "%s (%s) has %d placeholders" % [key, locale, placeholders])

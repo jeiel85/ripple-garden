@@ -136,3 +136,44 @@ func test_framing_wins_over_a_restoration_pulse() -> void:
 		camera._tween.custom_step(3.0)  # play the pulse to its end
 	assert_true(camera.zoom.is_equal_approx(Vector2.ONE * 2.0), "the pulse must not pull the photo's zoom back (zoom %s)" % camera.zoom)
 	camera.free()
+
+# Found on the emulator: Japanese captions spilled out of the round buttons. Fonts differ by platform and
+# device, so the buttons fit their caption to the circle; the text must also be short enough that it never
+# has to shrink much.
+func test_round_button_captions_fit_their_circle_in_every_language() -> void:
+	var previous := TranslationServer.get_locale()
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	var natural: int = host.theme.get_font_size("font_size", "RoundButton")
+	for locale in ["ko", "en", "ja"]:
+		TranslationServer.set_locale(locale)
+		var keys: Array = ["ui.photo.back", "ui.photo.shutter", "ui.photo.logo_on", "ui.photo.logo_off",
+			"ui.water_mind.save", "ui.water_mind.time", "ui.water_mind.weather", "ui.water_mind.bgm"]
+		for frame_id in PhotoMode.FRAMES:
+			keys.append("ui.photo.frame." + frame_id)
+		for key in keys:
+			var button := UiKit.round_button("camera", String(TranslationServer.translate(key)), func() -> void: pass, true, 120.0)
+			host.add_child(button)
+			var size := button.get_theme_font_size("font_size")
+			var width := button.get_theme_font("font").get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+			assert_true(width <= 120.0 - UiKit.CAPTION_PADDING, "%s %s '%s' is %.0f px wide at %d px" % [locale, key, button.text, width, size])
+			assert_true(size >= natural * 0.8, "%s %s '%s' had to shrink to %d px (from %d): shorten the text" % [locale, key, button.text, size, natural])
+			button.free()
+	host.free()
+	TranslationServer.set_locale(previous)
+
+# Found on the emulator: the water-mind hint lay over the water-mind buttons.
+func test_messages_sit_above_whatever_holds_the_bottom() -> void:
+	var root := _start()
+	root.ui.apply_insets(0.0, 40.0)
+	assert_eq(root.ui.toast.offset_bottom, -(UIController.TOAST_BOTTOM + 40.0), "above the navigation row and the gesture bar")
+	root.ui.enter_water_mind()
+	assert_eq(root.ui.toast.offset_bottom, -(UIController.WATER_MIND_TOAST_BOTTOM + 40.0))
+	root.ui.open_photo_mode()
+	assert_eq(root.ui.toast.offset_bottom, -(UIController.PHOTO_TOAST_BOTTOM + 40.0))
+	root.ui.photo_mode.exit()
+	assert_eq(root.ui.toast.offset_bottom, -(UIController.WATER_MIND_TOAST_BOTTOM + 40.0))
+	root.ui.water_mind.exit()
+	assert_eq(root.ui.toast.offset_bottom, -(UIController.TOAST_BOTTOM + 40.0))
+	_stop(root)

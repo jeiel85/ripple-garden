@@ -348,7 +348,7 @@ func test_full_screen_panels_stay_inside_a_phone_screen() -> void:
 	var previous := TranslationServer.get_locale()
 	GameState.new_game()
 	GameState.record_encounter("fish_crucian_carp", 12.0, "steady", "clear")
-	for locale in ["ko", "en"]:
+	for locale in ["ko", "en", "ja"]:
 		TranslationServer.set_locale(locale)
 		var host := Control.new()
 		host.size = Vector2(720, 1280)
@@ -371,6 +371,22 @@ func test_full_screen_panels_stay_inside_a_phone_screen() -> void:
 		host.free()
 	TranslationServer.set_locale(previous)
 	GameState.new_game()
+
+func test_a_notch_pushes_screens_and_overlays_down_together() -> void:
+	var root := _start()
+	root.ui.apply_insets(90.0, 60.0)
+	root.ui._open(root.ui.map_panel)
+	await tree.process_frame
+	await tree.process_frame
+	var status_bottom := root.ui.hud.top_bar.get_global_rect().end.y
+	var title: Control = root.ui.map_panel.get_child(2)
+	assert_true(title.get_global_rect().position.y >= status_bottom - 1.0,
+		"the map title (%.0f) must start below the status bar (%.0f)" % [title.get_global_rect().position.y, status_bottom])
+	root.ui.close_panel()
+	root.ui.enter_water_mind()
+	await tree.process_frame
+	assert_true(root.ui.water_mind._badge.get_global_rect().position.y >= 90.0, "the water-mind badge clears the notch")
+	_stop(root)
 
 ## Checks every visible control. Content that scrolls sideways is clipped by its ScrollContainer, so
 ## only the container has to fit; a container that only scrolls vertically must fit its content too.

@@ -103,7 +103,31 @@ static func round_button(icon_name: String, label: String, callback: Callable, c
 	var node := icon_button(icon_name, label if caption else "", callback, "RoundButton", size_px * (0.34 if caption else 0.42), true)
 	node.tooltip_text = label
 	node.custom_minimum_size = Vector2(size_px, size_px)
+	if caption:
+		# The caption must stay inside the circle whatever the language and the device's font.
+		node.set_meta("caption_width", size_px - CAPTION_PADDING)
+		node.theme_changed.connect(func() -> void: fit_caption(node))
 	return node
+
+## Room left on each side of a round button's caption.
+const CAPTION_PADDING := 20.0
+const MIN_CAPTION_PX := 12
+
+## Shrinks a round button's caption until it fits its circle (call again after changing the text).
+static func fit_caption(button: Button) -> void:
+	if not button.has_meta("caption_width") or button.get_meta("fitting", false):
+		return
+	button.set_meta("fitting", true)  # the override below notifies a theme change: do not recurse
+	button.remove_theme_font_size_override("font_size")
+	var font := button.get_theme_font("font")
+	var natural := button.get_theme_font_size("font_size")
+	var size := natural
+	var width: float = button.get_meta("caption_width")
+	while size > MIN_CAPTION_PX and font.get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+		size -= 1
+	if size != natural:
+		button.add_theme_font_size_override("font_size", size)
+	button.set_meta("fitting", false)
 
 ## A large card-like button with an icon, a title and a smaller line under it (the catch-result
 ## actions: "방생 / 다음에도 또 만나길"). The labels are children of the button, so its minimum

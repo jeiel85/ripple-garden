@@ -155,6 +155,8 @@ static func _name(region_id: String) -> String:
 
 ## The painted map: sea, clouds, the dotted route and five islands in their own styles.
 class MapView extends Control:
+	const SEA_BLEED := 300.0
+
 	## {region_id: state} from RegionUnlocks.
 	var states: Dictionary = {}
 
@@ -174,7 +176,8 @@ class MapView extends Control:
 		return minf(area().size.x, area().size.y) * 0.18
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Color("#2a86ad"))
+		# The sea runs on past the panel, under a notch and the gesture bar the panel keeps clear of.
+		draw_rect(Rect2(Vector2(0, -SEA_BLEED), size + Vector2(0, SEA_BLEED * 2.0)), Color("#2a86ad"))
 		var deep := Color("#1d6f96")
 		for i in 6:
 			draw_rect(Rect2(0, size.y * (0.5 + i * 0.08), size.x, size.y * 0.08), Color(deep, 0.1 * i))

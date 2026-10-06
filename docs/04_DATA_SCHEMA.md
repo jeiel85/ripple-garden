@@ -129,4 +129,5 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
 - min/max size
 - weight > 0
 - referenced rod/bait/behavior
-- localization key presence
+- localization key presence — 그리고 `localization.csv`의 모든 행에 ko·en·ja가 있고, en·ja의 서식 자리(`%s`, `%d`, `%.1f`…)가
+  ko와 종류·개수·순서까지 같아야 한다(Godot는 자리 순서대로 채운다). `tools/validate_content.gd`가 검사
