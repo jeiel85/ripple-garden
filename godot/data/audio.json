@@ -1,0 +1,35 @@
+{
+  "loops": [
+    {"id": "water", "stream": "res://audio/streams/water_loop.wav", "bus": "Water"},
+    {"id": "wind", "stream": "res://audio/streams/wind_loop.wav", "bus": "Wind"},
+    {"id": "rain", "stream": "res://audio/streams/rain_loop.wav", "bus": "Weather"}
+  ],
+  "mix": {
+    "water": {"base": 0.55, "rain_boost": 0.15},
+    "wind": {"base": 0.2, "cloud_boost": 0.45, "night_factor": 0.6},
+    "rain": {"gain": 0.9}
+  },
+  "fade_per_sec": 0.25,
+  "wildlife": {
+    "bus": "Wildlife",
+    "interval_sec": {"min": 6.0, "max": 16.0},
+    "level_speedup": 0.15,
+    "volume": {"min": 0.35, "max": 0.8},
+    "clips": [
+      {"id": "bird_a", "stream": "res://audio/streams/bird_a.wav", "bands": ["dawn", "day", "dusk"], "min_level": 0, "weight": 3},
+      {"id": "bird_b", "stream": "res://audio/streams/bird_b.wav", "bands": ["dawn", "day"], "min_level": 2, "weight": 2},
+      {"id": "frog", "stream": "res://audio/streams/frog.wav", "bands": ["dusk", "night"], "min_level": 1, "weight": 2},
+      {"id": "cricket", "stream": "res://audio/streams/cricket.wav", "bands": ["dusk", "night"], "min_level": 2, "weight": 3},
+      {"id": "fish_jump", "stream": "res://audio/streams/fish_jump.wav", "bands": ["dawn", "day", "dusk", "night"], "min_level": 1, "weight": 1}
+    ]
+  },
+  "cues": {
+    "cast": {"stream": "res://audio/streams/cast.wav", "bus": "Fishing", "volume": 0.8},
+    "landed": {"stream": "res://audio/streams/plop.wav", "bus": "Fishing", "volume": 0.8},
+    "bite": {"stream": "res://audio/streams/bite.wav", "bus": "Fishing", "volume": 0.7},
+    "hooked": {"stream": "res://audio/streams/hooked.wav", "bus": "Fishing", "volume": 0.8},
+    "caught": {"stream": "res://audio/streams/caught.wav", "bus": "Fishing", "volume": 0.8},
+    "released": {"stream": "res://audio/streams/released.wav", "bus": "Fishing", "volume": 0.8},
+    "escaped": {"stream": "res://audio/streams/escaped.wav", "bus": "Fishing", "volume": 0.6}
+  }
+}
