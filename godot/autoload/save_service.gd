@@ -230,6 +230,17 @@ func _backup_before_migration(path: String, from_version: int) -> void:
 func _aliases() -> Dictionary:
 	return aliases_override if not aliases_override.is_empty() else ContentDB.aliases
 
+## QA hook: keeps a copy of the primary save as save_qa_backup.json, then truncates the primary to
+## simulate corruption so recovery from the backups can be exercised. Returns whether it did.
+func qa_corrupt_primary() -> bool:
+	var primary := _path(SAVE_FILE)
+	if not FileAccess.file_exists(primary):
+		return false
+	if DirAccess.copy_absolute(primary, _path("save_qa_backup.json")) != OK:
+		return false
+	var text := FileAccess.get_file_as_string(primary)
+	return _write_text(primary, text.substr(0, text.length() / 2)) == OK
+
 ## Reads and parses a save file. Returns {"data": Variant} or {"problem": String}.
 func _read_candidate(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)

@@ -47,6 +47,10 @@ signal game_time_band_changed(time_band: String)
 signal offline_time_elapsed(seconds: int)
 signal weather_changed(weather_id: String)
 
+# --- interface ---
+## Water-mind mode was entered (true) or left (false); audio and presenters may adapt.
+signal water_mind_changed(active: bool)
+
 # --- persistence ---
 signal save_completed()
 signal save_failed(message: String)

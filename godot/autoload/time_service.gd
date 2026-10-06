@@ -114,6 +114,15 @@ func on_app_resumed() -> void:
 		_advance_game(away)
 		EventBus.offline_time_elapsed.emit(away)
 
+## Pretends the player was away for `seconds` (clamped like a real absence): the game clock catches
+## up and the offline event fires. Used by the QA debug menu; returns the seconds applied.
+func skip_time(seconds: int) -> int:
+	var away := clampi(seconds, 0, OFFLINE_CAP_SEC)
+	if away > 0:
+		_advance_game(away)
+		EventBus.offline_time_elapsed.emit(away)
+	return away
+
 # --- persistence ---
 
 ## Writes the game clock into GameState (called right before every save).

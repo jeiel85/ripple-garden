@@ -16,8 +16,10 @@
   - `save/save_migrator.gd` (운영 마이그레이션 테이블은 v1만 있어 비어 있음), id alias는 `data/content_aliases.json`
 - [x] P0-007 TimeService session/game/offline clock
   - 정책은 D-009, 하루 길이·시간대 경계는 `data/balance.json`의 `time`
-- [ ] P0-008 Region 01 base scene
-- [ ] P0-009 Habitat zone component
+- [x] P0-008 Region 01 base scene
+  - `world/game_root.tscn`(GameRoot→World/RegionRuntime→Environment·Props·FishingView·WeatherPresenter…), 데이터 `region_layouts.json`, 정책 D-011
+- [x] P0-009 Habitat zone component
+  - `world/habitat_zone.gd` + `habitat_map.gd` (겹침은 위의 존이 우선), 모든 서식지가 낚시 가능함을 테스트로 보장
 - [x] P0-010 EncounterResolver seeded weighted random
   - 수치는 `data/balance.json`의 `encounter`. 테스트: 결정성·조건 필터·0 가중치·pity 상한/리셋·빈도 분포 (`test_encounter_resolver.gd`)
 - [x] P0-011 Fishing state machine
@@ -32,15 +34,23 @@
   - `fishing/fight_simulation.gd` + `data/behaviors.json`(어종 behavior 참조 검증 추가)
 - [x] P0-016 catch inspect/release flow
   - `fishing/catch_service.gd` (보상·반복 감소·pending_catch 복구), 판매 경로 없음
-- [ ] P0-017 collection journal state
-- [ ] P0-018 region population state
-- [ ] P0-019 visible fish presenter + pool
-- [ ] P0-020 restoration levels 0~5
-- [ ] P0-021 weather clear/cloudy/rain
+- [x] P0-017 collection journal state
+  - `world/journal_model.gd` 공개 단계(1/3/5/10회) + `ui/journal_panel.gd`(미발견은 실루엣+힌트)
+- [x] P0-018 region population state
+  - 개체 수는 방생 시 저장(`CatchService`), 표시는 `world/population_model.gd`(1~10→1마리…, 품질별 상한)
+- [x] P0-019 visible fish presenter + pool
+  - `world/fish_population_presenter.gd` + `fish_agent.gd`: 풀링, 근/원거리 AI 틱, 노드 수 불변 테스트
+- [x] P0-020 restoration levels 0~5
+  - `world/restoration_service.gd`(포인트로 얻고 플레이어가 선택해 적용), 단계별 팔레트·소품·동물 변화, 슬라이스 상한 5
+- [x] P0-021 weather clear/cloudy/rain
+  - `world/weather_service.gd` + `data/weather.json`(최소 체류 ≥ 전환×2), `weather_presenter.gd`
 - [ ] P0-022 ambient audio layering
-- [ ] P0-023 water-mind mode
-- [ ] P0-024 settings/accessibility baseline
-- [ ] P0-025 debug menu
+- [x] P0-023 water-mind mode
+  - `ui/water_mind_overlay.gd`: HUD 전체 숨김, 탭 시 종료/믹서, N분 후 어둡게, 배터리 절약 안내 1회
+- [x] P0-024 settings/accessibility baseline
+  - `ui/settings_panel.gd`(스키마 전 설정 노출 보장), 텍스트 크기·큰 UI·움직임 줄이기·고대비 미터·시각 입질 신호, 진단 정보 내보내기
+- [x] P0-025 debug menu
+  - `debug/debug_service.gd`(릴리스에서는 모든 명령 거부) + `debug_menu.gd`(F12), 빌드 프로필 `ui/build_profile.gd`
 - [ ] P0-026 automated content validation
   - `tools/validate_content.py`(Python)와 ContentValidator(GDScript) 규칙이 중복됨 → 단일 출처로 정리
 - [x] P0-027 save roundtrip/migration tests

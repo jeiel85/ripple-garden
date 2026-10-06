@@ -1,0 +1,58 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://world/game_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://world/region_runtime.gd" id="2_region"]
+[ext_resource type="Script" path="res://world/region_environment.gd" id="3_env"]
+[ext_resource type="Script" path="res://world/fish_population_presenter.gd" id="4_fish"]
+[ext_resource type="Script" path="res://world/props_layer.gd" id="5_props"]
+[ext_resource type="Script" path="res://world/ambient_animal_presenter.gd" id="6_animals"]
+[ext_resource type="Script" path="res://world/fishing_view.gd" id="7_view"]
+[ext_resource type="Script" path="res://world/weather_presenter.gd" id="8_weather"]
+[ext_resource type="Script" path="res://world/weather_service.gd" id="9_wsvc"]
+[ext_resource type="Script" path="res://fishing/fishing_controller.gd" id="10_ctrl"]
+[ext_resource type="Script" path="res://fishing/fishing_feedback.gd" id="11_fb"]
+[ext_resource type="Script" path="res://world/camera_controller.gd" id="12_cam"]
+[ext_resource type="Script" path="res://ui/ui_controller.gd" id="13_ui"]
+
+[node name="GameRoot" type="Node"]
+script = ExtResource("1_root")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="RegionRuntime" type="Node2D" parent="World"]
+script = ExtResource("2_region")
+
+[node name="Environment" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("3_env")
+
+[node name="HabitatZones" type="Node2D" parent="World/RegionRuntime"]
+
+[node name="FishPopulationPresenter" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("4_fish")
+
+[node name="Props" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("5_props")
+
+[node name="AmbientAnimalPresenter" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("6_animals")
+
+[node name="FishingView" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("7_view")
+
+[node name="WeatherPresenter" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("8_weather")
+
+[node name="WeatherService" type="Node" parent="World/RegionRuntime"]
+script = ExtResource("9_wsvc")
+
+[node name="FishingController" type="Node" parent="."]
+script = ExtResource("10_ctrl")
+
+[node name="FishingFeedback" type="Node" parent="."]
+script = ExtResource("11_fb")
+
+[node name="CameraController" type="Camera2D" parent="."]
+script = ExtResource("12_cam")
+
+[node name="UIController" type="CanvasLayer" parent="."]
+script = ExtResource("13_ui")
