@@ -36,6 +36,7 @@ var _to_palette: Dictionary = {}
 var _sky: Node2D
 var _ground: Node2D
 var _water: Polygon2D
+var _waterfall: WaterfallView = null
 var _modulate: CanvasModulate
 var _pond: PackedVector2Array
 var _bank: PackedVector2Array
@@ -74,6 +75,12 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 	material.set_shader_parameter("pond_bottom", _bounds_y(false))
 	_water.material = material
 	add_child(_water)
+	var fall: Variant = layout.get("waterfall")
+	if typeof(fall) == TYPE_DICTIONARY:
+		_waterfall = WaterfallView.new()
+		_waterfall.name = "Waterfall"
+		_waterfall.setup(Rect2(float(fall["x"]), float(fall["y"]), float(fall["width"]), float(fall["height"])))
+		add_child(_waterfall)
 	_modulate = CanvasModulate.new()
 	_modulate.name = "Lighting"
 	add_child(_modulate)
@@ -130,11 +137,16 @@ func _apply_palette() -> void:
 	material.set_shader_parameter("deep_color", palette["water_deep"])
 	material.set_shader_parameter("shallow_color", palette["water_shallow"])
 	material.set_shader_parameter("shimmer", clampf(0.25 + 0.75 * _level_progress(), 0.0, 1.0))
+	if _waterfall != null:
+		_waterfall.flow = _level_progress()
+		_waterfall.queue_redraw()
 	_ground.queue_redraw()
 
 ## Reduced Motion stops the water's drift; the surface stays a still picture.
 func set_reduced_motion(on: bool) -> void:
 	(_water.material as ShaderMaterial).set_shader_parameter("motion", 0.0 if on else 1.0)
+	if _waterfall != null:
+		_waterfall.set_reduced_motion(on)
 
 ## The level the current transition started from (equals `level` once settled).
 func previous_level() -> int:
@@ -164,6 +176,11 @@ func _update_lighting() -> void:
 		weather_light.a = 1.0
 	_modulate.color = _time_light * weather_light
 	_sky.queue_redraw()
+
+## Re-reads the clock and weather at once (water-mind previews change them between light steps).
+func refresh_lighting() -> void:
+	_light_timer = 0.0
+	_update_lighting()
 
 ## The color the world is multiplied by right now (for tests and other presenters).
 func current_light() -> Color:

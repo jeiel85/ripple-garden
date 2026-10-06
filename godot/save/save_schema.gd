@@ -103,6 +103,10 @@ static func default_collection_record() -> Dictionary:
 		"first_seen_at": 0,
 		"last_seen_at": 0,
 		"observed_behaviors": [],
+		# Weather id when the species was first met ("" = not recorded; saves before D-018).
+		"first_weather": "",
+		# Whether the player has looked at the species in the journal since meeting it (the NEW badge).
+		"journal_seen": false,
 	}
 
 static func default_save(now: int) -> Dictionary:
@@ -305,6 +309,10 @@ static func _normalize_collection_record(raw: Variant) -> Dictionary:
 	record["first_seen_at"] = maxi(0, _int_or(raw.get("first_seen_at"), 0))
 	record["last_seen_at"] = maxi(0, _int_or(raw.get("last_seen_at"), 0))
 	record["observed_behaviors"] = _string_list(raw.get("observed_behaviors"))
+	record["first_weather"] = _string_or(raw.get("first_weather"), "")
+	# Records written before the NEW badge existed count as already seen, so an old save does not
+	# light up every species at once.
+	record["journal_seen"] = raw.get("journal_seen") if typeof(raw.get("journal_seen")) == TYPE_BOOL else true
 	return record
 
 ## Copies a known section from `input` over the default, keeping unknown keys inside it.

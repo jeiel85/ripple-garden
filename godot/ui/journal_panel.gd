@@ -1,99 +1,488 @@
 class_name JournalPanel
-extends PanelContainer
+extends Control
 
-## The fish journal (UI_UX §5). Species you have not met are a dark silhouette with a gentle
-## hint, never a "???": ignorance is not punished. What is shown about a met species grows with
-## how often you have met it (JournalModel), and the card says when more will be revealed.
+## The fish journal (UI_UX §5, mockup 04): a wooden "도감" sign, the count of species met, tabs, a
+## notebook of fish cards on the left and the page of the chosen fish on the right.
+##
+## What a card and a page show grows with how often the fish was met (JournalModel): an unmet species
+## is a silhouette named "???", a met one shows its name and size, and the page opens its preferred
+## time, home and story at 3/5/10 meetings — every locked line says how many meetings it needs, so
+## ignorance is never punished. A crown marks a fully known species, "NEW" one met but not looked at
+## yet (looking at its page clears it, and with it the dot on the journal button and the "All" tab).
+##
+## Tabs follow the world: all species, one per region group, and the rare ones (rarity 4+).
 
 signal close_pressed
 
+const FULLSCREEN := true
+const KEEPS_NAV := true
+
+## [tab id, icon, label key, region ids (empty = every region), minimum rarity]
+const TABS: Array = [
+	["all", "fish", "ui.journal.tab.all", [], 1],
+	["pond", "lake", "ui.journal.tab.pond", ["region_01_quiet_pond"], 1],
+	["valley", "valley", "ui.journal.tab.valley", ["region_02_forest_stream"], 1],
+	["river", "freshwater", "ui.journal.tab.river", ["region_03_reed_river"], 1],
+	["sea", "sea", "ui.journal.tab.sea", ["region_04_blue_coast", "region_05_moonlight_isle"], 1],
+	["special", "special", "ui.journal.tab.special", [], 4],
+]
+const SORTS: PackedStringArray = ["found", "name", "size"]
+
 var journal: JournalModel
 var region_id := ""
+var tab := "all"
+var sort_mode := "found"
+var selected_id := ""
 
-var _title: Label
+var _counter: Label
 var _progress: Label
-var _list: VBoxContainer
+var _tabs: Dictionary = {}
+var _all_dot: UiKit.NoticeDot
+var _list: GridContainer
 var _scroll: ScrollContainer
+var _sort_button: Button
 var _cards: Dictionary = {}
+var _page: VBoxContainer
+var _page_name: Label
+var _page_line: Label
+var _page_portrait: UiKit.FishPortrait
+var _page_rows: VBoxContainer
+var _home_title: Label
+var _home_text: Label
+var _home_place: Label
+var _home_view: HomeView
 
 func _init() -> void:
-	custom_minimum_size = Vector2(640, 980)
-	var box := UiKit.vbox(12)
-	var header := UiKit.hbox(12)
-	_title = UiKit.label(tr("ui.journal.title"), "TitleLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
-	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(_title)
-	header.add_child(UiKit.button(tr("ui.close"), func() -> void: close_pressed.emit()))
-	box.add_child(header)
-	_progress = UiKit.label("", "DimLabel")
-	box.add_child(_progress)
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	var page := MarginContainer.new()
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right"]:
+		page.add_theme_constant_override("margin_" + side, 18)
+	page.add_theme_constant_override("margin_top", 26)
+	page.add_theme_constant_override("margin_bottom", 176)  # the navigation row stays visible below
+	add_child(page)
+	var column := UiKit.vbox(12)
+	page.add_child(column)
+
+	# Header: back, hanging sign with subtitle, species counter.
+	var header := UiKit.hbox(10)
+	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", 40.0)
+	back.tooltip_text = tr("ui.back")
+	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
+	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	header.add_child(back)
+	var title_column := UiKit.vbox(6)
+	title_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"))
+	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	title_column.add_child(sign_board)
+	var subtitle := UiKit.label(tr("ui.journal.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
+	subtitle.add_theme_font_size_override("font_size", 20)
+	title_column.add_child(subtitle)
+	header.add_child(title_column)
+	var counter_pill := PanelContainer.new()
+	counter_pill.theme_type_variation = "PillPanel"
+	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var counter_box := UiKit.hbox(8)
+	counter_box.add_child(UiKit.icon("fish", 30.0, UiTheme.PILL_TEXT))
+	var counter_text := UiKit.vbox(0)
+	var counter_caption := UiKit.label(tr("ui.journal.found"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	counter_caption.add_theme_font_size_override("font_size", 18)
+	counter_text.add_child(counter_caption)
+	_counter = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	counter_text.add_child(_counter)
+	counter_box.add_child(counter_text)
+	counter_pill.add_child(counter_box)
+	header.add_child(counter_pill)
+	column.add_child(header)
+
+	# Tabs.
+	var tab_row := UiKit.hbox(6)
+	for entry in TABS:
+		var tab_id: String = entry[0]
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", 24.0, false)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
+		button.add_theme_font_size_override("font_size", 22)
+		button.add_theme_constant_override("h_separation", 2)
+		button.custom_minimum_size.x = 60
+		_tabs[tab_id] = button
+		tab_row.add_child(button)
+	_all_dot = UiKit.notice_dot(_tabs["all"])
+	column.add_child(tab_row)
+
+	# Notebook: cards on the left, the chosen fish on the right.
+	var book := UiKit.hbox(8)
+	book.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var left := PanelContainer.new()
+	left.theme_type_variation = "PaperPanel"
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 0.92
+	var left_box := UiKit.vbox(8)
 	_scroll = ScrollContainer.new()
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_list = UiKit.vbox(12)
+	_list = GridContainer.new()
+	_list.columns = 2
+	_list.add_theme_constant_override("h_separation", 8)
+	_list.add_theme_constant_override("v_separation", 8)
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_list)
-	box.add_child(_scroll)
-	add_child(UiKit.margin(box, 24))
+	left_box.add_child(_scroll)
+	var left_footer := UiKit.hbox(8)
+	var progress_pill := PanelContainer.new()
+	progress_pill.theme_type_variation = "PillPanel"
+	var progress_row := UiKit.hbox(6)
+	_progress = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	_progress.add_theme_font_size_override("font_size", 20)
+	progress_row.add_child(_progress)
+	progress_pill.add_child(progress_row)
+	progress_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	left_footer.add_child(progress_pill)
+	_sort_button = UiKit.icon_button("sort", "", _next_sort, "", 22.0, false)
+	_sort_button.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_sort_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sort_button.add_theme_font_size_override("font_size", 20)
+	_sort_button.add_theme_constant_override("h_separation", 4)
+	left_footer.add_child(_sort_button)
+	left_box.add_child(left_footer)
+	left.add_child(UiKit.margin(left_box, 12))
+	book.add_child(left)
+
+	var right := PanelContainer.new()
+	right.theme_type_variation = "PaperPanel"
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var right_scroll := ScrollContainer.new()
+	right_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_page = UiKit.vbox(10)
+	_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_page_name = UiKit.label("", "BigLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
+	_page.add_child(_page_name)
+	_page_line = UiKit.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
+	_page.add_child(_page_line)
+	var picture := PanelContainer.new()
+	var water := StyleBoxFlat.new()
+	water.bg_color = Color("#7cc4bd")
+	water.set_corner_radius_all(18)
+	water.border_color = Color("#5aa39b")
+	water.set_border_width_all(2)
+	picture.add_theme_stylebox_override("panel", water)
+	_page_portrait = UiKit.FishPortrait.new()
+	_page_portrait.custom_minimum_size = Vector2(0, 170)
+	picture.add_child(_page_portrait)
+	_page.add_child(picture)
+	_page_rows = UiKit.vbox(0)
+	_page.add_child(_page_rows)
+	var home := PanelContainer.new()
+	home.theme_type_variation = "CardPanel"
+	var home_box := UiKit.vbox(6)
+	var home_head := UiKit.hbox(6)
+	home_head.add_child(UiKit.icon("star", 26.0, UiTheme.GOLD))
+	_home_title = UiKit.label(tr("ui.journal.home"), "", HORIZONTAL_ALIGNMENT_LEFT, false)
+	home_head.add_child(_home_title)
+	home_box.add_child(home_head)
+	_home_view = HomeView.new()
+	_home_view.custom_minimum_size = Vector2(0, 110)
+	_home_place = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
+	var place_pill := PanelContainer.new()
+	place_pill.theme_type_variation = "PillPanel"
+	place_pill.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	place_pill.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	place_pill.offset_left = 8
+	place_pill.offset_bottom = -8
+	var place_row := UiKit.hbox(4)
+	place_row.add_child(UiKit.icon("pin", 22.0, UiTheme.PILL_TEXT))
+	place_row.add_child(_home_place)
+	place_pill.add_child(place_row)
+	_home_view.add_child(place_pill)
+	home_box.add_child(_home_view)
+	_home_text = UiKit.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
+	home_box.add_child(_home_text)
+	home.add_child(UiKit.margin(home_box, 12))
+	_page.add_child(home)
+	right_scroll.add_child(_page)
+	right.add_child(UiKit.margin(right_scroll, 14))
+	book.add_child(right)
+	column.add_child(book)
 
 func setup(p_journal: JournalModel, p_region_id: String) -> void:
 	journal = p_journal
 	region_id = p_region_id
 
-## Rebuilds the cards from the current save.
+## Rebuilds the cards and the page from the current save.
 func refresh() -> void:
 	for child in _list.get_children():
 		_list.remove_child(child)  # gone at once: a queued free would leave old cards in the layout this frame
 		child.queue_free()
 	_cards.clear()
-	var completion := journal.completion(region_id, GameState)
-	_progress.text = tr("ui.journal.progress") % [completion["discovered"], completion["total"]]
-	for entry in journal.entries_for_region(region_id, GameState):
+	var all_entries := _entries_for("all")
+	var discovered := 0
+	for entry in all_entries:
+		if entry.discovered:
+			discovered += 1
+	_counter.text = "%d / %d" % [discovered, all_entries.size()]
+	var entries := _sorted(_entries_for(tab))
+	var tab_found := 0
+	for entry in entries:
+		if entry.discovered:
+			tab_found += 1
 		var card := _card(entry)
 		_cards[entry.fish_id] = card
 		_list.add_child(card)
+	_progress.text = tr("ui.journal.progress") % [tab_found, entries.size()]
+	for tab_id in _tabs:
+		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
+	_sort_button.text = tr("ui.journal.sort." + sort_mode)
+	if selected_id.is_empty() or not _cards.has(selected_id):
+		selected_id = _first_interesting(entries)
+	_show_page(selected_id)
+	_all_dot.visible = GameState.has_unseen_journal_entries()
 
+func select_tab(tab_id: String) -> void:
+	tab = tab_id
+	selected_id = ""
+	refresh()
+
+## Opens the page of `fish_id`, switching to the "all" tab if the current one does not hold it.
 func focus_fish(fish_id: String) -> void:
+	if not _cards.has(fish_id):
+		tab = "all"
+	selected_id = fish_id
+	refresh()
 	if _cards.has(fish_id):
 		_scroll.ensure_control_visible.call_deferred(_cards[fish_id])
 
 func card_count() -> int:
 	return _cards.size()
 
-func _card(entry: JournalModel.Entry) -> Control:
-	var def := ContentDB.get_fish(entry.fish_id)
-	var panel := PanelContainer.new()
-	var row := UiKit.hbox(16)
-	var portrait := UiKit.FishPortrait.new(entry.fish_id, entry.discovered)
-	portrait.custom_minimum_size = Vector2(150, 96)
-	row.add_child(portrait)
+func select_fish(fish_id: String) -> void:
+	selected_id = fish_id
+	for id in _cards:
+		(_cards[id] as Button).theme_type_variation = "CardSelected" if id == fish_id else ""
+	_show_page(fish_id)
 
-	var info := UiKit.vbox(4)
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if entry.show_name:
-		info.add_child(UiKit.label(tr(def["name_key"]), "TitleLabel", HORIZONTAL_ALIGNMENT_LEFT, false))
-		info.add_child(UiKit.label(tr("ui.journal.size_range") % [entry.smallest_cm, entry.largest_cm], "DimLabel"))
-		info.add_child(UiKit.label(tr("ui.journal.met") % entry.encounters, "DimLabel"))
+func _next_sort() -> void:
+	sort_mode = SORTS[(SORTS.find(sort_mode) + 1) % SORTS.size()]
+	refresh()
+
+# --- data ---
+
+func _entries_for(tab_id: String) -> Array[JournalModel.Entry]:
+	var spec: Array = TABS[0]
+	for entry in TABS:
+		if entry[0] == tab_id:
+			spec = entry
+	var regions: Array = spec[3]
+	var min_rarity: int = spec[4]
+	var entries: Array[JournalModel.Entry] = []
+	for fish_id in ContentDB.fish:
+		var def: Dictionary = ContentDB.fish[fish_id]
+		if int(def["rarity"]) < min_rarity:
+			continue
+		if not regions.is_empty() and not _shares_region(def, regions):
+			continue
+		entries.append(journal.entry_for(def, GameState.get_collection_record(fish_id)))
+	return entries
+
+static func _shares_region(def: Dictionary, regions: Array) -> bool:
+	for id in def.get("regions", []):
+		if id in regions:
+			return true
+	return false
+
+func _sorted(entries: Array[JournalModel.Entry]) -> Array[JournalModel.Entry]:
+	var order := {}
+	for i in entries.size():
+		order[entries[i].fish_id] = i
+	var records := {}
+	for entry in entries:
+		records[entry.fish_id] = GameState.get_collection_record(entry.fish_id)
+	var names := {}
+	for entry in entries:
+		names[entry.fish_id] = tr(ContentDB.get_fish(entry.fish_id).get("name_key", ""))
+	var sorted := entries.duplicate()
+	sorted.sort_custom(func(a: JournalModel.Entry, b: JournalModel.Entry) -> bool:
+		if a.discovered != b.discovered:
+			return a.discovered  # met species first, the unmet keep catalog order after them
+		if not a.discovered:
+			return order[a.fish_id] < order[b.fish_id]
+		match sort_mode:
+			"name":
+				return names[a.fish_id] < names[b.fish_id]
+			"size":
+				if a.largest_cm != b.largest_cm:
+					return a.largest_cm > b.largest_cm
+		var first_a := int(records[a.fish_id]["first_seen_at"])
+		var first_b := int(records[b.fish_id]["first_seen_at"])
+		if first_a != first_b:
+			return first_a < first_b
+		return order[a.fish_id] < order[b.fish_id])
+	return sorted
+
+func _first_interesting(entries: Array[JournalModel.Entry]) -> String:
+	for entry in entries:
+		if entry.discovered and GameState.get_collection_record(entry.fish_id)["journal_seen"] != true:
+			return entry.fish_id
+	return entries[0].fish_id if not entries.is_empty() else ""
+
+# --- cards ---
+
+func _card(entry: JournalModel.Entry) -> Button:
+	var def := ContentDB.get_fish(entry.fish_id)
+	var card := Button.new()
+	card.custom_minimum_size = Vector2(0, 168)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.focus_mode = Control.FOCUS_ALL
+	card.theme_type_variation = "CardSelected" if entry.fish_id == selected_id else ""
+	var fish_id := entry.fish_id
+	card.pressed.connect(func() -> void: select_fish(fish_id))
+	var name_text := tr(def["name_key"]) if entry.show_name else tr("ui.journal.unknown_name")
+	card.tooltip_text = name_text
+	var box := UiKit.vbox(2)
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 6
+	box.offset_right = -6
+	box.offset_top = 8
+	box.offset_bottom = -8
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var portrait := UiKit.FishPortrait.new(entry.fish_id, entry.discovered)
+	portrait.custom_minimum_size = Vector2(0, 104)
+	portrait.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(portrait)
+	var caption := UiKit.label(name_text, "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	caption.add_theme_color_override("font_color", UiTheme.INK)
+	caption.clip_text = true
+	caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	box.add_child(caption)
+	card.add_child(box)
+	if entry.tier >= 4:
+		var crown := UiKit.icon("crown", 30.0, UiTheme.GOLD)
+		crown.position = Vector2(10, 8)
+		crown.size = Vector2(30, 30)
+		card.add_child(crown)
+	if entry.discovered and GameState.get_collection_record(entry.fish_id)["journal_seen"] != true:
+		card.add_child(_new_badge())
+	return card
+
+static func _new_badge() -> Control:
+	var badge := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = UiTheme.NOTICE
+	style.set_corner_radius_all(14)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
+	badge.add_theme_stylebox_override("panel", style)
+	var text := UiKit.label("NEW", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	text.add_theme_font_size_override("font_size", 18)
+	badge.add_child(text)
+	badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	badge.offset_right = -8
+	badge.offset_top = 8
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.name = "NewBadge"
+	return badge
+
+# --- page ---
+
+func _show_page(fish_id: String) -> void:
+	for child in _page_rows.get_children():
+		_page_rows.remove_child(child)
+		child.queue_free()
+	var def := ContentDB.get_fish(fish_id)
+	if def.is_empty():
+		_page.visible = false
+		return
+	_page.visible = true
+	var record := GameState.get_collection_record(fish_id)
+	var entry := journal.entry_for(def, record)
+	_page_portrait.fish_id = fish_id
+	_page_portrait.known = entry.discovered
+	_page_portrait.queue_redraw()
+	if not entry.discovered:
+		_page_name.text = tr("ui.journal.unknown_name")
+		_page_line.text = tr("ui.journal.unknown_hint")
 	else:
-		info.add_child(UiKit.label(tr("ui.journal.unknown_name"), "TitleLabel"))
-		info.add_child(UiKit.label(tr("ui.journal.unknown_hint"), "DimLabel"))
-	if entry.show_time_bands:
-		var names: Array[String] = []
-		for band in TimeService.TIME_BANDS:
-			if float(def["time_bands"].get(band, 1.0)) >= 1.05:
-				names.append(tr("ui.time." + band))
-		if not names.is_empty():
-			info.add_child(UiKit.label(tr("ui.journal.time") % ", ".join(names), "DimLabel"))
-	if entry.show_habitats:
-		var places: Array[String] = []
-		for habitat in def["habitats"]:
-			places.append(tr("ui.habitat." + habitat))
-		info.add_child(UiKit.label(tr("ui.journal.habitat") % ", ".join(places), "DimLabel"))
-	if entry.show_behavior:
-		info.add_child(UiKit.label(tr("ui.journal.behavior") % tr("ui.behavior." + def["behavior"]), "DimLabel"))
-		info.add_child(UiKit.label(tr(def["journal_key"]), "DimLabel"))
-	if entry.next_unlock_at > 0 and entry.show_name:
-		info.add_child(UiKit.label(tr("ui.journal.next_unlock") % entry.next_unlock_at, "DimLabel"))
-	row.add_child(info)
-	panel.add_child(UiKit.margin(row, 14))
-	return panel
+		_page_name.text = tr(def["name_key"])
+		if entry.show_behavior:
+			_page_line.text = "%s\n%s" % [tr("ui.behavior." + String(def.get("behavior", "steady"))), tr(def["journal_key"])]
+		else:
+			_page_line.text = tr("ui.catch.flavor." + String(def.get("behavior", "steady")))
+	var reveal: Dictionary = ContentDB.balance["journal"]["reveal_at_encounters"]
+	_row("calendar", "ui.journal.row.first_met", InspectPanel.date_text(int(record["first_seen_at"]), false) if entry.discovered else "", entry.discovered, int(reveal["size"]))
+	var weather_id: String = record.get("first_weather", "")
+	var weather_text := tr(ContentDB.get_weather(weather_id).get("name_key", "")) if not weather_id.is_empty() else tr("ui.journal.not_recorded")
+	_row(UiIcons.for_weather(weather_id), "ui.journal.row.weather", weather_text, entry.discovered, int(reveal["size"]))
+	var places: Array[String] = []
+	for habitat in def["habitats"]:
+		places.append(tr("ui.habitat." + habitat))
+	_row("lake", "ui.journal.row.habitat", ", ".join(places), entry.show_habitats, int(reveal["habitats"]))
+	var bands: Array[String] = []
+	for band in TimeService.TIME_BANDS:
+		if float(def["time_bands"].get(band, 1.0)) >= 1.05:
+			bands.append(tr("ui.time." + band))
+	_row("clock", "ui.journal.row.time", ", ".join(bands) if not bands.is_empty() else tr("ui.journal.any_time"), entry.show_time_bands, int(reveal["time_bands"]))
+	_row("ruler", "ui.journal.row.largest", tr("ui.inspect.size") % entry.largest_cm, entry.discovered, int(reveal["size"]))
+	_row("fish", "ui.journal.row.met", tr("ui.journal.times") % entry.encounters, entry.discovered, int(reveal["size"]))
+	var home_region: String = def.get("regions", [""])[0]
+	_home_place.text = tr(ContentDB.get_region(home_region).get("name_key", ""))
+	_home_view.region_id = home_region
+	_home_view.queue_redraw()
+	_home_text.text = tr("ui.journal.home_text") % ", ".join(places) if entry.show_habitats else tr("ui.journal.locked") % int(reveal["habitats"])
+	if entry.discovered:
+		GameState.mark_journal_seen(fish_id)
+		var badge := (_cards[fish_id] as Node).get_node_or_null("NewBadge") if _cards.has(fish_id) else null
+		if badge != null:
+			badge.queue_free()
+		_all_dot.visible = GameState.has_unseen_journal_entries()
+
+## One fact row; a locked fact says how many meetings open it.
+func _row(icon_name: String, caption_key: String, value: String, open: bool, needed: int) -> void:
+	var row := UiKit.hbox(8)
+	row.custom_minimum_size.y = 54
+	row.add_child(UiKit.icon(icon_name, 26.0, UiTheme.INK_DIM))
+	var caption := UiKit.label(tr(caption_key), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
+	caption.add_theme_font_size_override("font_size", 18)
+	row.add_child(caption)
+	# The value takes the rest of the line and wraps there, so the page never widens.
+	var shown := UiKit.label(value if open else tr("ui.journal.locked") % needed, "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT, true)
+	shown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shown.custom_minimum_size.x = 60
+	if open:
+		shown.add_theme_color_override("font_color", UiTheme.INK)
+	row.add_child(shown)
+	_page_rows.add_child(row)
+	var line := ColorRect.new()
+	line.color = Color(UiTheme.CREAM_BORDER, 0.6)
+	line.custom_minimum_size = Vector2(0, 1)
+	_page_rows.add_child(line)
+
+## A tiny painted view of the species' home water (until region thumbnails arrive as art).
+class HomeView extends Control:
+	var region_id := ""
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		clip_contents = true
+
+	func _draw() -> void:
+		var layout := ContentDB.get_layout(region_id)
+		var palette: Dictionary = layout.get("levels", [{}])[-1] if not layout.is_empty() else {}
+		var water := Color(palette.get("water_shallow", "#5fb3a9"))
+		var grass := Color(palette.get("grass", "#6db35e"))
+		var box := StyleBoxFlat.new()
+		box.bg_color = grass
+		box.set_corner_radius_all(14)
+		draw_style_box(box, Rect2(Vector2.ZERO, size))
+		var pond := PackedVector2Array()
+		for i in 24:
+			var angle := TAU * i / 24.0
+			pond.append(size * Vector2(0.55, 0.58) + Vector2(cos(angle) * size.x * 0.42, sin(angle) * size.y * 0.36))
+		draw_colored_polygon(pond, water)
+		for i in 3:
+			draw_circle(size * Vector2(0.2 + i * 0.28, 0.2), size.y * 0.18, grass.darkened(0.25))
+		draw_circle(size * Vector2(0.7, 0.62), size.y * 0.08, Color("#4f9a5a"))
+		draw_circle(size * Vector2(0.68, 0.6), size.y * 0.035, Color("#fdfcf5"))

@@ -18,7 +18,9 @@ var _timer: Timer
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	theme_type_variation = "PillPanel"  # the mockups' dark tip pill
 	_label = Label.new()
+	_label.theme_type_variation = "LightLabel"
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.custom_minimum_size = Vector2(480, 0)

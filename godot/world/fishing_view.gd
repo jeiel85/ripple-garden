@@ -12,9 +12,13 @@ const BOBBER_RADIUS := 9.0
 const RING_LIFETIME := 1.6
 const MAX_RINGS := 8
 const CAST_ARC_HEIGHT := 170.0
+## The angler's hands relative to the seat: where the rod is held.
+const HANDS := Vector2(30, -40)
 
 var origin := Vector2(360, 1090)
 var rod_base := Vector2(360, 1190)
+## Where the angler sits (the chair seat), or (-1, -1) when the layout places no angler.
+var angler := Vector2(-1, -1)
 var reduced_motion := false
 ## Accessibility: show an exclamation bubble at the bobber when a fish bites.
 var visual_bite_cue := false
@@ -35,10 +39,11 @@ var _tension := 0.5
 var _progress := 0.0
 var _rings: Array[Dictionary] = []
 
-func setup(controller: FishingController, rod_tip: Vector2) -> void:
+func setup(controller: FishingController, rod_tip: Vector2, angler_at: Vector2 = Vector2(-1, -1)) -> void:
 	_controller = controller
 	origin = rod_tip
-	rod_base = rod_tip + Vector2(0, 90)
+	angler = angler_at
+	rod_base = angler + HANDS if has_angler() else rod_tip + Vector2(0, 90)
 	_bobber = origin
 	controller.state_changed.connect(_on_state_changed)
 	controller.fight_updated.connect(_on_fight_updated)
@@ -129,10 +134,24 @@ func _process(delta: float) -> void:
 			_bobber = _bobber.lerp(origin + Vector2(0, -20), clampf(delta * 5.0, 0.0, 1.0))
 	queue_redraw()
 
+func has_angler() -> bool:
+	return angler.x >= 0.0 and angler.y >= 0.0
+
 func _draw() -> void:
-	# Rod: a gentle curve from the angler up to the tip.
-	draw_polyline(PackedVector2Array([rod_base, rod_base.lerp(origin, 0.55) + Vector2(10, 0), origin]), Color("#5d4630"), 6.0, true)
-	draw_circle(rod_base, 9.0, Color("#3f3022"))
+	if has_angler():
+		_draw_angler()
+	# Rod: a curve from the hands to the tip, bending towards the fish while fighting.
+	var bend := Vector2(10, 0)
+	if _state == FishingController.State.FIGHT:
+		bend = (_bobber - origin).normalized() * (14.0 + 26.0 * _tension)
+	var rod := PackedVector2Array()
+	for i in 9:
+		var t := i / 8.0
+		rod.append(rod_base.lerp(origin, t) + bend * sin(t * PI) * t)
+	draw_polyline(rod, Color("#3f3022"), 7.0, true)
+	draw_polyline(rod, Color("#8a6440"), 4.0, true)
+	draw_circle(rod_base + (origin - rod_base).normalized() * 18.0, 8.0, Color("#c9c4b8"))  # reel
+	draw_circle(rod_base + (origin - rod_base).normalized() * 18.0, 3.0, Color("#6c675e"))
 
 	if _aim_active:
 		var pulse := 1.0 if reduced_motion else 1.0 + sin(_clock * 4.0) * 0.08
@@ -154,11 +173,8 @@ func _draw() -> void:
 	draw_circle(_bobber, BOBBER_RADIUS, Color("#f2f2f2"))
 	draw_arc(_bobber, BOBBER_RADIUS * 0.6, PI, TAU, 10, Color("#e8483c"), BOBBER_RADIUS * 0.9)
 
-	if visual_bite_cue and (_state == FishingController.State.BITE_HINT or _state == FishingController.State.HOOK):
-		var bubble := _bobber + Vector2(0, -46)
-		draw_circle(bubble, 20.0, Color("#fff3c4"))
-		draw_arc(bubble, 20.0, 0.0, TAU, 24, Color("#d9a521"), 3.0)
-		draw_string(ThemeDB.fallback_font, bubble + Vector2(-5, 9), "!", HORIZONTAL_ALIGNMENT_CENTER, -1, 28, Color("#7a4b00"))
+	if _state == FishingController.State.BITE_HINT or _state == FishingController.State.HOOK:
+		_draw_bite_callout()
 
 	if _state == FishingController.State.FIGHT:
 		# The fish under the surface: a dark shape that thrashes harder with more tension.
@@ -188,3 +204,68 @@ static func _ellipse(center: Vector2, radius: Vector2, steps: int = 20) -> Packe
 		var angle := TAU * i / steps
 		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
 	return points
+
+## The "입질!" speech bubble of the bite mockup, pointing at the bobber, with spark marks. The Visual
+## Bite Cue setting adds a pulsing ring around the bobber for players who may miss the dip.
+func _draw_bite_callout() -> void:
+	var anchor := _bobber + Vector2(26, -34)
+	var box := Rect2(anchor + Vector2(10, -64), Vector2(150, 56))
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#2c2a22").lerp(Color(0, 0, 0), 0.1)
+	style.bg_color.a = 0.82
+	style.border_color = Color("#f3e6c8")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(26)
+	draw_colored_polygon(PackedVector2Array([anchor, box.position + Vector2(24, box.size.y - 2), box.position + Vector2(48, box.size.y - 2)]), style.bg_color)
+	draw_style_box(style, box)
+	var fish := UiIcons.texture("fish")
+	draw_texture_rect(fish, Rect2(box.position + Vector2(14, 12), Vector2(34, 34)), false, Color("#f3e6c8"))
+	draw_string(ThemeDB.fallback_font, box.position + Vector2(56, 38), tr("ui.fight.bite"), HORIZONTAL_ALIGNMENT_LEFT, 90, 26, Color("#fff4dc"))
+	for spark in [Vector2(-30, -26), Vector2(-40, -6), Vector2(36, 10)]:
+		var at: Vector2 = _bobber + spark
+		draw_polyline(PackedVector2Array([at, at + Vector2(6, 8), at + Vector2(1, 10), at + Vector2(8, 18)]), Color("#ffd23f"), 3.0, true)
+	if visual_bite_cue:
+		var pulse := 1.0 if reduced_motion else 1.0 + 0.15 * sin(_clock * 8.0)
+		_draw_ring(_bobber, 34.0 * pulse, Color("#ffd23f"), 4.0)
+
+## The angler of the mockup, seated on a camp chair on the dock: straw hat with a green band and a
+## flower, cream shirt, green overalls. Drawn here because the pose follows the fishing state (a
+## startled lean when a fish bites, a firm lean back while reeling).
+func _draw_angler() -> void:
+	var lean := Vector2.ZERO
+	if _state == FishingController.State.FIGHT:
+		lean = Vector2(-4, 2)
+	elif _state == FishingController.State.BITE_HINT or _state == FishingController.State.HOOK:
+		lean = Vector2(3, -2)
+	var seat := angler
+	draw_colored_polygon(_ellipse(seat + Vector2(4, 22), Vector2(46, 12)), Color(0, 0, 0, 0.2))
+	# Chair: back, legs, seat.
+	draw_colored_polygon(PackedVector2Array([seat + Vector2(-34, -66), seat + Vector2(4, -74), seat + Vector2(8, -6), seat + Vector2(-30, 0)]), Color("#cfc7b0"))
+	for leg in [[Vector2(-30, 0), Vector2(12, 26)], [Vector2(10, -4), Vector2(-24, 24)]]:
+		draw_line(seat + leg[0], seat + leg[1], Color("#6b4f3a"), 4.0)
+	draw_colored_polygon(PackedVector2Array([seat + Vector2(-30, -2), seat + Vector2(16, -10), seat + Vector2(26, 4), seat + Vector2(-20, 12)]), Color("#d9d1bb"))
+	var body := seat + lean
+	# Legs and boots towards the water.
+	draw_line(body + Vector2(-2, -6), body + Vector2(30, 6), Color("#5c7046"), 13.0)
+	draw_line(body + Vector2(30, 6), body + Vector2(36, 24), Color("#5c7046"), 11.0)
+	draw_colored_polygon(_ellipse(body + Vector2(40, 28), Vector2(11, 6)), Color("#4a3426"))
+	# Torso: overalls over a cream shirt.
+	draw_colored_polygon(_ellipse(body + Vector2(-8, -30), Vector2(20, 28)), Color("#f1ead8"))
+	draw_colored_polygon(PackedVector2Array([body + Vector2(-24, -24), body + Vector2(8, -28), body + Vector2(10, 0), body + Vector2(-22, 2)]), Color("#62774a"))
+	draw_line(body + Vector2(-16, -26), body + Vector2(-12, -50), Color("#62774a"), 4.0)
+	# Arms reaching for the rod.
+	var hands := seat + HANDS
+	draw_line(body + Vector2(-6, -44), hands, Color("#f1ead8"), 9.0)
+	draw_circle(hands, 5.5, Color("#f0c9a4"))
+	# Head, hair and the straw hat.
+	var head := body + Vector2(-8, -66)
+	draw_circle(head + Vector2(-4, 4), 15.0, Color("#5b3b26"))  # hair
+	draw_circle(head, 13.0, Color("#f3d2b0"))
+	draw_colored_polygon(_ellipse(head + Vector2(0, -8), Vector2(34, 13)), Color("#ece0c2"))
+	draw_colored_polygon(_ellipse(head + Vector2(0, -16), Vector2(18, 12)), Color("#f3e9cf"))
+	draw_colored_polygon(_ellipse(head + Vector2(0, -10), Vector2(18, 4)), Color("#5f7a4a"))
+	draw_circle(head + Vector2(10, -11), 4.0, Color("#fdfbf3"))
+	draw_circle(head + Vector2(10, -11), 1.6, Color("#f3c84b"))
+	if _state == FishingController.State.BITE_HINT or _state == FishingController.State.HOOK:
+		for mark in [[Vector2(-30, -30), Vector2(-38, -40)], [Vector2(-18, -40), Vector2(-20, -52)], [Vector2(2, -38), Vector2(8, -50)]]:
+			draw_line(head + mark[0], head + mark[1], Color("#ffd23f"), 3.0)

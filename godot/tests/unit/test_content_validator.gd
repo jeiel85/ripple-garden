@@ -323,6 +323,31 @@ func test_layout_props_and_animals_use_known_kinds_inside_the_viewport() -> void
 	_assert_error(result, "x and y must be inside the viewport")
 	_assert_error(result, "unknown animal 'dragon'")
 
+func test_scenery_may_bleed_past_the_viewport_but_zones_may_not() -> void:
+	var raw := _raw()
+	var layout: Dictionary = raw["layouts"]["region_01_quiet_pond"]
+	layout["props"][0]["x"] = -120  # inside the bleed margin: wider screens show it
+	layout["pond"][0] = [-200, 330]
+	var result := ContentValidator.validate(raw)
+	assert_false(result["layouts"].is_empty(), "bleed is allowed for scenery and the pond: %s" % [result["errors"]])
+	raw = _raw()
+	raw["layouts"]["region_01_quiet_pond"]["zones"][0]["polygon"][0] = [-40, 400]
+	_assert_error(ContentValidator.validate(raw), "zones[0].polygon: every point must be [x, y] inside the viewport")
+	raw = _raw()
+	raw["layouts"]["region_01_quiet_pond"]["props"][0]["x"] = -2000
+	_assert_error(ContentValidator.validate(raw), "x and y must be inside the viewport or its bleed margin")
+
+func test_layout_angler_waterfall_and_cast_direction_are_checked() -> void:
+	var raw := _raw()
+	var layout: Dictionary = raw["layouts"]["region_01_quiet_pond"]
+	layout["cast_forward_deg"] = 400
+	layout["angler"] = {"x": 900, "y": 640}
+	layout["waterfall"] = {"x": 590, "y": 120, "width": 0, "height": 140}
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "cast_forward_deg: must be a number in -180..180")
+	_assert_error(result, "angler: must be {x, y} inside the viewport")
+	_assert_error(result, "waterfall: must be {x, y, width > 0, height > 0}")
+
 func test_layout_needs_a_palette_for_every_slice_level() -> void:
 	var raw := _raw()
 	raw["layouts"]["region_01_quiet_pond"]["levels"].pop_back()

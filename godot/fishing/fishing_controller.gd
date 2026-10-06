@@ -312,7 +312,7 @@ func _advance_fight(delta: float) -> void:
 
 func _land_fish() -> void:
 	_miss_counts.erase(encounter.fish_id)
-	_catch_service().begin_catch(encounter, region_id)
+	_catch_service().begin_catch(encounter, region_id, String(_context().get("weather_id", "")))
 	_request_save()  # the discovery and the pending catch reach the disk now, not at the next autosave
 	_timer = float(_config()["land_sec"])
 	_enter(State.LAND)

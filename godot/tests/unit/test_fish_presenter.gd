@@ -129,8 +129,8 @@ func test_near_agents_think_more_often_than_far_ones() -> void:
 	parts[0].refresh()
 	var agents: Array[FishAgent] = parts[0].active_agents()
 	# Two spots in the water that are further apart than the "near" radius.
-	agents[0].position = Vector2(200, 700)
-	agents[1].position = Vector2(520, 800)
+	agents[0].position = Vector2(480, 380)
+	agents[1].position = Vector2(640, 850)
 	assert_true(parts[2].is_water(agents[0].position) and parts[2].is_water(agents[1].position))
 	assert_true(agents[0].position.distance_to(agents[1].position) > FishPopulationPresenter.NEAR_RADIUS)
 	parts[0].focus = agents[0].position

@@ -7,7 +7,7 @@ extends SceneTree
 ##
 ##   --level=N       restoration level 0..5          --hour=H       game hour 0..24
 ##   --weather=ID    clear | cloudy | rain           --populate=N   N of every species released
-##   --panel=NAME    journal | gear | restore | settings | debug | licenses
+##   --panel=NAME    journal | gear | restore | settings | debug | licenses | water_mind
 ##   --state=NAME    wait | fight | inspect          --seed=N       RNG seed for the scenario
 ##   --frames=N      frames to run before capture (default 40)
 ##   --hc            high contrast + large UI        --reduced      reduced motion
@@ -85,6 +85,7 @@ func _run() -> void:
 		"restore": game.ui.open_restoration()
 		"settings": game.ui._open(game.ui.settings_panel)
 		"debug": game.ui.toggle_debug_menu()
+		"water_mind": game.ui.enter_water_mind()
 		"licenses":
 			game.ui.licenses_panel.show_text("Licenses", load("res://ui/text_panel.gd").licenses_text())
 			game.ui._open(game.ui.licenses_panel)

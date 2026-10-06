@@ -142,8 +142,9 @@ func get_collection_record(fish_id: String) -> Dictionary:
 		return data["collection"][fish_id].duplicate(true)
 	return SaveSchema.default_collection_record()
 
-## Records a catch. Returns true when this is the species' first discovery.
-func record_encounter(fish_id: String, size_cm: float, behavior: String = "") -> bool:
+## Records a catch. Returns true when this is the species' first discovery. `weather_id` is the
+## weather at the moment (kept for the journal's "weather on the day you met").
+func record_encounter(fish_id: String, size_cm: float, behavior: String = "", weather_id: String = "") -> bool:
 	ensure_initialized()
 	var now := _now()
 	var is_new := not has_discovered(fish_id)
@@ -155,6 +156,8 @@ func record_encounter(fish_id: String, size_cm: float, behavior: String = "") ->
 		record["first_seen_at"] = now
 		record["largest_cm"] = size_cm
 		record["smallest_cm"] = size_cm
+		record["first_weather"] = weather_id
+		record["journal_seen"] = false
 	else:
 		record["largest_cm"] = maxf(record["largest_cm"], size_cm)
 		record["smallest_cm"] = minf(record["smallest_cm"], size_cm)
@@ -164,6 +167,24 @@ func record_encounter(fish_id: String, size_cm: float, behavior: String = "") ->
 	_changed()
 	EventBus.collection_changed.emit(fish_id)
 	return is_new
+
+## The player looked at the species in the journal: its NEW badge goes away.
+func mark_journal_seen(fish_id: String) -> void:
+	ensure_initialized()
+	if not has_discovered(fish_id) or data["collection"][fish_id]["journal_seen"] == true:
+		return
+	data["collection"][fish_id]["journal_seen"] = true
+	_changed()
+	EventBus.collection_changed.emit(fish_id)
+
+## Whether any met species has not been looked at in the journal yet.
+func has_unseen_journal_entries() -> bool:
+	ensure_initialized()
+	for fish_id in data["collection"]:
+		var record: Dictionary = data["collection"][fish_id]
+		if record["encounters"] > 0 and record["journal_seen"] != true:
+			return true
+	return false
 
 func record_release(fish_id: String) -> void:
 	ensure_initialized()

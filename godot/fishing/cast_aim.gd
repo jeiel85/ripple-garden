@@ -9,36 +9,40 @@ extends RefCounted
 
 ## Releases closer than this to where the press started count as a tap (quick cast).
 const TAP_MAX_DRAG_PX := 24.0
-## Widest angle away from straight "up" the line may be cast.
+## Widest angle away from the forward direction the line may be cast.
 const MAX_ANGLE_DEG := 80.0
 
 ## Where the line leaves the rod tip.
 var origin := Vector2.ZERO
+## The direction the angler faces (unit vector; straight up by default). The region layout sets it:
+## the mockup's angler sits on a dock at the lower left and casts up and to the right.
+var forward := Vector2.UP
 ## Reach limits in pixels for the equipped rod.
 var min_distance := 120.0
 var max_distance := 600.0
 ## Releasing within this radius of the origin cancels the cast.
 var cancel_radius := 56.0
 
-func _init(origin_point: Vector2, near_px: float, far_px: float) -> void:
+func _init(origin_point: Vector2, near_px: float, far_px: float, forward_deg: float = 0.0) -> void:
 	origin = origin_point
 	min_distance = near_px
 	max_distance = far_px
+	forward = Vector2.UP.rotated(deg_to_rad(forward_deg))
 
 ## Reach for a rod: `rod_range` is the rod's 0..1 range stat mapped onto [near_px, far_px].
 static func reach_for_rod(rod_range: float, near_px: float, far_px: float) -> float:
 	return lerpf(near_px, far_px, clampf(rod_range, 0.0, 1.0))
 
 ## Landing point for a pointer position: distance clamped to [min, max] and the direction kept
-## within MAX_ANGLE_DEG of straight up (negative y). A pointer on the origin aims straight up.
+## within MAX_ANGLE_DEG of `forward`. A pointer on the origin aims straight ahead.
 func landing_for(pointer: Vector2) -> Vector2:
 	var offset := pointer - origin
 	var distance := clampf(offset.length(), min_distance, max_distance)
-	var direction := Vector2.UP
+	var direction := forward
 	if offset.length_squared() > 0.0001:
-		var angle := Vector2.UP.angle_to(offset.normalized())
+		var angle := forward.angle_to(offset.normalized())
 		var limit := deg_to_rad(MAX_ANGLE_DEG)
-		direction = Vector2.UP.rotated(clampf(angle, -limit, limit))
+		direction = forward.rotated(clampf(angle, -limit, limit))
 	return origin + direction * distance
 
 ## True when the pointer is close enough to the rod that releasing should cancel.
@@ -54,4 +58,4 @@ static func is_tap(press: Vector2, release: Vector2) -> bool:
 func quick_cast_point(last_landing: Variant) -> Vector2:
 	if last_landing is Vector2:
 		return landing_for(last_landing)
-	return origin + Vector2.UP * lerpf(min_distance, max_distance, 0.6)
+	return origin + forward * lerpf(min_distance, max_distance, 0.6)
