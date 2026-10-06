@@ -89,3 +89,19 @@ func test_every_setting_default_survives_sanitizing() -> void:
 	for key in SaveSchema.SETTING_SPECS:
 		var default_value: Variant = SaveSchema.SETTING_SPECS[key]["default"]
 		assert_eq(SaveSchema.sanitize_setting(key, default_value), default_value, "setting %s" % key)
+
+func test_missing_equipment_falls_back_to_first_owned_item() -> void:
+	var legacy := {"save_version": 1, "inventory": {"rods": ["rod_bamboo", "rod_light"], "baits": ["bait_bread"]}}
+	var normalized := SaveSchema.normalize(legacy, NOW)
+	assert_eq(normalized["inventory"]["equipped_rod"], "rod_bamboo")
+	assert_eq(normalized["inventory"]["equipped_bait"], "bait_bread")
+
+func test_equipped_item_that_is_not_owned_is_replaced() -> void:
+	var raw := {"save_version": 1, "inventory": {"rods": ["rod_light"], "baits": [], "equipped_rod": "rod_gone", "equipped_bait": "bait_gone"}}
+	var normalized := SaveSchema.normalize(raw, NOW)
+	assert_eq(normalized["inventory"]["equipped_rod"], "rod_light")
+	assert_eq(normalized["inventory"]["equipped_bait"], "", "nothing owned means nothing equipped")
+
+func test_valid_equipment_is_kept() -> void:
+	var raw := {"save_version": 1, "inventory": {"rods": ["rod_bamboo", "rod_light"], "baits": ["bait_bread"], "equipped_rod": "rod_light"}}
+	assert_eq(SaveSchema.normalize(raw, NOW)["inventory"]["equipped_rod"], "rod_light")

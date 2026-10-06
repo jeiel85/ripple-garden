@@ -152,6 +152,12 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	inventory["baits"] = _string_list(inventory.get("baits"))
 	inventory["equipped_rod"] = _string_or(inventory.get("equipped_rod"), "")
 	inventory["equipped_bait"] = _string_or(inventory.get("equipped_bait"), "")
+	# Saves written before equipment was tracked own items but have nothing equipped; fall back to
+	# the first owned item so the player never holds an invalid or empty equipment id.
+	for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"]]:
+		var owned: Array = inventory[pair[1]]
+		if not owned.has(inventory[pair[0]]):
+			inventory[pair[0]] = owned[0] if not owned.is_empty() else ""
 
 	var session: Dictionary = result["session"]
 	var pending: Variant = session.get("pending_catch")

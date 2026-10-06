@@ -59,7 +59,10 @@ func get_game_minutes() -> float:
 
 func set_game_minutes(minutes: float) -> void:
 	ensure_initialized()
-	data["profile"]["game_minutes"] = clampf(minutes, 0.0, 1440.0)
+	var clamped := clampf(minutes, 0.0, 1440.0)
+	if data["profile"]["game_minutes"] != clamped:
+		data["profile"]["game_minutes"] = clamped
+		_changed()
 
 func get_last_session_at() -> int:
 	ensure_initialized()
@@ -67,7 +70,10 @@ func get_last_session_at() -> int:
 
 func touch_session(at: int) -> void:
 	ensure_initialized()
-	data["profile"]["last_session_at"] = maxi(0, at)
+	at = maxi(0, at)
+	if data["profile"]["last_session_at"] != at:
+		data["profile"]["last_session_at"] = at
+		_changed()
 
 # --- economy ---
 
@@ -161,7 +167,7 @@ func record_encounter(fish_id: String, size_cm: float, behavior: String = "") ->
 
 func record_release(fish_id: String) -> void:
 	ensure_initialized()
-	if not data["collection"].has(fish_id):
+	if not has_discovered(fish_id):
 		push_error("GameState: release recorded for undiscovered fish %s" % fish_id)
 		return
 	data["collection"][fish_id]["releases"] += 1

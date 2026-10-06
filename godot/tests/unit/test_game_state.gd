@@ -199,3 +199,28 @@ func test_pending_catch_roundtrip() -> void:
 	state.clear_pending_catch()
 	assert_deep_eq(state.get_pending_catch(), {})
 	state.free()
+
+func test_profile_mutators_advance_revision_only_when_value_changes() -> void:
+	var state := _new_state()
+	state.set_game_minutes(300.0)
+	var after_clock: int = state.revision
+	state.set_game_minutes(300.0)
+	assert_eq(state.revision, after_clock, "same value must not look like a change")
+	state.set_game_minutes(301.0)
+	assert_eq(state.revision, after_clock + 1)
+	var before_touch: int = state.revision
+	state.touch_session(1_700_000_123)
+	assert_eq(state.revision, before_touch + 1)
+	state.touch_session(1_700_000_123)
+	assert_eq(state.revision, before_touch + 1)
+	state.free()
+
+func test_release_is_rejected_for_a_zero_encounter_record() -> void:
+	var state := _new_state()
+	# A loaded save may hold a key whose record is all zeros; it is not a discovery.
+	state.load_data({"save_version": 1, "collection": {"fish_minnow": {}}})
+	assert_false(state.has_discovered("fish_minnow"))
+	expect_engine_error("release recorded for undiscovered fish")
+	state.record_release("fish_minnow")
+	assert_eq(state.get_collection_record("fish_minnow")["releases"], 0)
+	state.free()
