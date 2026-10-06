@@ -12,6 +12,8 @@ const BASE_FONT_PX := 30
 const TOUCH_MIN_PX := 96.0
 const TOUCH_MIN_LARGE_PX := 120.0
 const LARGE_UI_FONT_FACTOR := 1.15
+## Side padding inside buttons: small enough that a four-button row still fits a word like "Journal".
+const BUTTON_H_MARGIN := 12
 
 const PANEL := Color(0.07, 0.14, 0.16, 0.86)
 const PANEL_HC := Color(0.0, 0.0, 0.0, 0.94)
@@ -46,7 +48,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 			"hover": color = BUTTON_HOVER
 			"pressed": color = BUTTON_PRESSED
 			"disabled": color = BUTTON_DISABLED
-		var style := _box(color, Color.WHITE if (state == "focus" or high_contrast) else border, 4 if state == "focus" else border_width, 22)
+		var style := _box(color, Color.WHITE if (state == "focus" or high_contrast) else border, 4 if state == "focus" else border_width, 22, 0, BUTTON_H_MARGIN)
 		if state == "focus":
 			style.bg_color = Color(0, 0, 0, 0)
 			style.draw_center = false
@@ -64,7 +66,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 			"hover": color = ACCENT.lightened(0.12)
 			"pressed": color = ACCENT_PRESSED
 			"disabled": color = Color(ACCENT, 0.35)
-		theme.set_stylebox(state, "PrimaryButton", _box(color, Color.WHITE if high_contrast else Color(1, 1, 1, 0.25), border_width, 22))
+		theme.set_stylebox(state, "PrimaryButton", _box(color, Color.WHITE if high_contrast else Color(1, 1, 1, 0.25), border_width, 22, 0, BUTTON_H_MARGIN))
 	for color_name in ["font_color", "font_hover_color", "font_pressed_color"]:
 		theme.set_color(color_name, "PrimaryButton", TEXT_DARK)
 	theme.set_color("font_disabled_color", "PrimaryButton", Color(TEXT_DARK, 0.55))
@@ -88,14 +90,14 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("grabber_area_highlight", "HSlider", _box(ACCENT.lightened(0.15), Color(0, 0, 0, 0), 0, 6, 10))
 	return theme
 
-static func _box(color: Color, border: Color, border_width: int, radius: int, height: int = 0) -> StyleBoxFlat:
+static func _box(color: Color, border: Color, border_width: int, radius: int, height: int = 0, h_margin: int = 20) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
 	style.border_color = border
 	style.set_border_width_all(border_width)
 	style.set_corner_radius_all(radius)
-	style.content_margin_left = 20
-	style.content_margin_right = 20
+	style.content_margin_left = h_margin
+	style.content_margin_right = h_margin
 	style.content_margin_top = 14
 	style.content_margin_bottom = 14
 	if height > 0:

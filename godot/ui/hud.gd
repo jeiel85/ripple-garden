@@ -87,7 +87,7 @@ func _build_bottom() -> Control:
 	gear_button = UiKit.button(tr("ui.button.gear"), func() -> void: gear_pressed.emit())
 	cta_button = UiKit.button(tr("ui.cta.cast"), func() -> void: pass, true, UiTheme.TOUCH_MIN_PX * 1.2)
 	cta_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cta_button.size_flags_stretch_ratio = 2.2
+	cta_button.size_flags_stretch_ratio = 1.6
 	cta_button.button_down.connect(func() -> void: cta_down.emit())
 	cta_button.button_up.connect(func() -> void: cta_up.emit())
 	restore_button = UiKit.button(tr("ui.button.restore"), func() -> void: restore_pressed.emit())

@@ -21,8 +21,10 @@ void fragment() {
 	vec3 base = mix(deep_color.rgb, shallow_color.rgb, smoothstep(0.0, 1.0, depth));
 
 	float t = TIME * motion;
-	float wave = sin(world_pos.x * 0.11 + t * 0.9 + sin(world_pos.y * 0.07 + t * 0.5) * 2.0) * 0.5 + 0.5;
-	float glint = smoothstep(0.92, 1.0, wave) * 0.10 * shimmer;
+	// Two crossing waves multiplied give scattered glints instead of continuous stripes.
+	float wave_a = sin(world_pos.x * 0.09 + t * 0.8 + sin(world_pos.y * 0.05 + t * 0.4) * 2.0) * 0.5 + 0.5;
+	float wave_b = sin(world_pos.y * 0.12 - t * 0.6 + sin(world_pos.x * 0.04 - t * 0.3) * 2.0) * 0.5 + 0.5;
+	float glint = smoothstep(0.78, 0.96, wave_a * wave_b) * 0.11 * shimmer;
 	float soft = (sin(world_pos.y * 0.16 - t * 0.7 + world_pos.x * 0.05) * 0.5 + 0.5) * 0.025 * shimmer;
 	COLOR = vec4(base + vec3(glint + soft), 1.0);
 }
