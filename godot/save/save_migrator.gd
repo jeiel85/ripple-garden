@@ -105,6 +105,8 @@ static func apply_aliases(save: Dictionary, aliases: Dictionary) -> Dictionary:
 	inventory["baits"] = _remap_list(inventory["baits"], aliases.get("baits", {}))
 	inventory["equipped_rod"] = _resolve(inventory["equipped_rod"], aliases.get("rods", {}))
 	inventory["equipped_bait"] = _resolve(inventory["equipped_bait"], aliases.get("baits", {}))
+	# Bait stock follows its bait: a renamed bait keeps its count (merged if the new id already had some).
+	inventory["bait_counts"] = _remap_keys(inventory.get("bait_counts", {}), aliases.get("baits", {}), _sum_bait_counts)
 
 	var pending: Dictionary = result["session"]["pending_catch"]
 	if pending.has("fish_id"):
@@ -140,6 +142,9 @@ static func _remap_keys(source: Dictionary, aliases: Dictionary, merge: Callable
 
 static func _sum_ints(a: int, b: int) -> int:
 	return mini(a + b, SaveSchema.MAX_POPULATION)
+
+static func _sum_bait_counts(a: int, b: int) -> int:
+	return mini(a + b, SaveSchema.MAX_BAIT_COUNT)
 
 static func _merge_collection_records(a: Dictionary, b: Dictionary) -> Dictionary:
 	var merged := a.duplicate(true)

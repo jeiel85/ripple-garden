@@ -138,6 +138,15 @@ func test_missing_fields_are_filled_after_migration() -> void:
 
 # --- aliases ---
 
+func test_alias_moves_bait_stock_with_its_bait() -> void:
+	var save := _v1_save()
+	save["save_version"] = SaveSchema.CURRENT_VERSION
+	save["inventory"]["baits"] = ["bait_old", "bait_new"]
+	save["inventory"]["bait_counts"] = {"bait_old": 7, "bait_new": 2}
+	var result := SaveMigrator.new(SaveSchema.CURRENT_VERSION, {}, {"baits": {"bait_old": "bait_new"}}).migrate(save, NOW)
+	assert_true(result["ok"], result["error"])
+	assert_deep_eq(result["save"]["inventory"]["bait_counts"], {"bait_new": 9}, "the old stock is not stranded under a dead id")
+
 func test_alias_renames_collection_population_inventory_and_pending() -> void:
 	var save := _v1_save()
 	save["collection"] = {"fish_old": {"encounters": 3, "releases": 2, "largest_cm": 20.0}}
