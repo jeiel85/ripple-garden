@@ -7,13 +7,16 @@ extends Node2D
 ## reward for restoration) and are never a source of currency (CONTENT_PLAN §1).
 ##
 ## Motion is a closed-form wander (sines around a home point), so there is no per-animal state to
-## update or save, and the total is capped by the layout (a few dozen at most). With Reduced
-## Motion the animals still appear but drift much more slowly.
+## update or save, and the total is capped by the layout (a few dozen at most) and trimmed by the
+## graphics profile's wildlife share (low quality, Battery Saver). With Reduced Motion the animals
+## still appear but drift much more slowly.
 
 var layout: Dictionary = {}
 var level := 0
 var time_band := "day"
 var reduced_motion := false
+## Share of the layout's animals that are drawn (GraphicsProfile "wildlife").
+var wildlife := 1.0
 
 var _motes: Array[Dictionary] = []
 var _clock := 0.0
@@ -33,12 +36,18 @@ func set_time_band(band: String) -> void:
 	time_band = band
 	_rebuild()
 
+func set_wildlife(share: float) -> void:
+	if is_equal_approx(share, wildlife):
+		return
+	wildlife = share
+	_rebuild()
+
 ## Animals out right now: {kind: count}.
 func current_counts() -> Dictionary:
 	var counts := {}
 	for animal in layout.get("ambient_animals", []):
 		if level >= int(animal["min_level"]) and time_band in animal["time_bands"]:
-			counts[animal["kind"]] = counts.get(animal["kind"], 0) + int(animal["count"])
+			counts[animal["kind"]] = counts.get(animal["kind"], 0) + GraphicsProfile.scaled_count(int(animal["count"]), wildlife)
 	return counts
 
 func animal_count() -> int:

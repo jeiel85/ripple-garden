@@ -2,16 +2,17 @@ class_name WaterfallView
 extends Node2D
 
 ## The little waterfall at the pond's upper right (main-world mockup, D-018): a sheet of water falling
-## over a rock lip into a ring of foam. Streaks slide down the sheet; the picture is redrawn about
-## twelve times a second, never every frame, and Reduced Motion freezes it. The surrounding rocks
+## over a rock lip into a ring of foam. Streaks slide down the sheet; the picture is redrawn a few
+## times a second (the graphics profile's waterfall_fps), never every frame, and Reduced Motion freezes it. The surrounding rocks
 ## are ordinary props in the layout. Placeholder until the animated sheet in
 ## assets/design/ASSET_REQUESTS.md §1 arrives.
 
-const FRAME_SEC := 1.0 / 12.0
 const STREAKS := 9
 
 var area := Rect2()
 var reduced_motion := false
+## Seconds between redraws (from the graphics profile).
+var frame_sec := 1.0 / 12.0
 ## 0..1 how lively the water looks (the restoration level's share of the best palette).
 var flow := 1.0
 
@@ -31,7 +32,7 @@ func _process(delta: float) -> void:
 		return
 	_clock += delta
 	_frame_timer += delta
-	if _frame_timer >= FRAME_SEC:
+	if _frame_timer >= frame_sec:
 		_frame_timer = 0.0
 		queue_redraw()
 

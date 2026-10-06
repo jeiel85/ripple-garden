@@ -107,6 +107,9 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
 - 시작 미끼에는 끝없는 미끼가 하나 이상 있어야 하고, 시작 재고는 시작 가방에 들어가야 한다(검증기가 강제)
 - `decorations.json` (P1-002): [{id `deco_*`, name_key, desc_key, category furniture | ornament, prop(PropKinds), scale, price?, unlock?}]
 - `regions.json` (P1-010): `map` {x 0..1, y 0..1, style pond | valley | river | coast | isle, icon} — 지도 위 섬 자리
+- `balance.json` `graphics` (P1-014/015): `quality` {low, medium, high: {rain int, wildlife 0.1..1, stars int,
+  water_glints bool, waterfall_fps int}} — 위 단계가 아래 단계보다 적게 보여 주면 거부. `battery_saver` {rain_factor,
+  wildlife_factor 0.1..1, water_glints bool, waterfall_fps int} — 줄이기만 한다
 - `moments.json` (P1-008): [{id `moment_*`, name_key, desc_key, hint_key, icon, memory 0..50, when {weather?, band?, min_level?,
   water_mind?, caught_rarity?, camp_filled?, after_away?}}]. 세이브 최상위 `moments` {moment_id: 처음 본 unix 시각}
 - `region_layouts.json`: `camp_slots` [{id, x, y}], `camp_focus` {x, y, zoom}; `balance.json` `starting_camp` {region: {slot: deco}}

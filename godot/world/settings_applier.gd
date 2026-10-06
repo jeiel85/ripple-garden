@@ -38,7 +38,8 @@ func apply(key: String) -> void:
 			if key == "battery_saver":
 				_apply_presenters()  # fewer raindrops, fewer fish, slower AI
 		"quality":
-			# Quality scales rain density and the number of swimming fish; GL Compatibility has no 2D MSAA.
+			# Quality picks a GraphicsProfile tier (rain, wildlife, stars, water glints, waterfall) and the
+			# swimming-fish budget; GL Compatibility has no 2D MSAA to switch.
 			_apply_presenters()
 		"reduced_motion":
 			_apply_presenters()
@@ -60,7 +61,10 @@ func _apply_presenters() -> void:
 	var battery: bool = _state.get_setting("battery_saver") == true
 	_region.environment.set_reduced_motion(reduced)
 	_region.weather_presenter.reduced_motion = reduced
-	_region.weather_presenter.apply_quality(quality, battery)
+	var profile := GraphicsProfile.for_settings(quality, battery)
+	_region.weather_presenter.apply_profile(profile)
+	_region.environment.apply_graphics(profile)
+	_region.animals.set_wildlife(float(profile["wildlife"]))
 	_region.fishing_view.reduced_motion = reduced
 	_region.animals.reduced_motion = reduced
 	_region.props.reduced_motion = reduced

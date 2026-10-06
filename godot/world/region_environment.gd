@@ -17,7 +17,6 @@ const GROUND_BOTTOM := 3600.0
 const WORLD_LEFT := -2600.0
 const WORLD_RIGHT := 3300.0
 const BANK_WIDTH := 26.0
-const STAR_COUNT := 70
 const LIGHT_STEP_SEC := 0.2
 
 var region_id := ""
@@ -28,6 +27,8 @@ var palette_blend := 1.0
 
 var weather: WeatherService = null
 var hours_provider := Callable()
+## Stars in the night sky (GraphicsProfile "stars").
+var star_count := 70
 
 ## Level shown at the start of the current transition (fractional if one was interrupted).
 var _from_level := 0.0
@@ -142,6 +143,20 @@ func _apply_palette() -> void:
 		_waterfall.queue_redraw()
 	_ground.queue_redraw()
 
+## Applies a resolved GraphicsProfile: stars, the water's glints and the waterfall's frame rate.
+func apply_graphics(profile: Dictionary) -> void:
+	star_count = int(profile["stars"])
+	(_water.material as ShaderMaterial).set_shader_parameter("glints", profile["water_glints"] == true)
+	if _waterfall != null:
+		_waterfall.frame_sec = 1.0 / maxf(1.0, float(profile["waterfall_fps"]))
+	_sky.queue_redraw()
+
+func water_glints() -> bool:
+	return (_water.material as ShaderMaterial).get_shader_parameter("glints") == true
+
+func waterfall_frame_sec() -> float:
+	return _waterfall.frame_sec if _waterfall != null else 0.0
+
 ## Reduced Motion stops the water's drift; the surface stays a still picture.
 func set_reduced_motion(on: bool) -> void:
 	(_water.material as ShaderMaterial).set_shader_parameter("motion", 0.0 if on else 1.0)
@@ -203,7 +218,7 @@ func _draw_sky() -> void:
 
 	var star_alpha: float = style["stars"]
 	if star_alpha > 0.01:
-		for i in STAR_COUNT:
+		for i in star_count:
 			var x := PropPainter.noise(Vector2(i, 1), 1) * 1100.0 - 190.0
 			var y := PropPainter.noise(Vector2(i, 2), 2) * (horizon - 40.0)
 			_sky.draw_circle(Vector2(x, y), 1.2 + PropPainter.noise(Vector2(i, 3), 3) * 1.4,

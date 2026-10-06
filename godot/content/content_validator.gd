@@ -691,6 +691,8 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 					last = int(totals[quality])
 		_check_balance_number(population, "population", "battery_saver_agent_factor", 0.1, 1.0)
 
+	_check_graphics(data.get("graphics"))
+
 	var journal: Variant = data.get("journal")
 	if typeof(journal) != TYPE_DICTIONARY or typeof(journal.get("reveal_at_encounters")) != TYPE_DICTIONARY:
 		_errors.append("%s.journal.reveal_at_encounters: must be an object" % file_name)
@@ -1046,6 +1048,49 @@ static func _is_point_within(value: Variant, width: float, height: float) -> boo
 static func _is_point_within_bleed(value: Variant, width: float, height: float) -> bool:
 	return _is_point(value) and value[0] >= -LAYOUT_BLEED.x and value[0] <= width + LAYOUT_BLEED.x \
 		and value[1] >= -LAYOUT_BLEED.y and value[1] <= height + LAYOUT_BLEED.y
+
+## Graphics tiers (P1-014) and Battery Saver (P1-015): every quality has every field, a higher tier never
+## shows less than a lower one, and Battery Saver only ever trims.
+func _check_graphics(graphics: Variant) -> void:
+	var file_name: String = FILE_NAMES["balance"]
+	if typeof(graphics) != TYPE_DICTIONARY or typeof(graphics.get("quality")) != TYPE_DICTIONARY \
+			or typeof(graphics.get("battery_saver")) != TYPE_DICTIONARY:
+		_errors.append("%s.graphics: must be an object with quality {low, medium, high} and battery_saver" % file_name)
+		return
+	var tiers: Dictionary = graphics["quality"]
+	var previous: Dictionary = {}
+	for quality in GraphicsProfile.QUALITIES:
+		var tier: Variant = tiers.get(quality)
+		var section := "graphics.quality." + quality
+		if typeof(tier) != TYPE_DICTIONARY:
+			_errors.append("%s.%s: must be an object" % [file_name, section])
+			previous = {}
+			continue
+		var before := _errors.size()
+		_check_balance_number(tier, section, "rain", GraphicsProfile.MIN_RAIN, 1000.0, true)
+		_check_balance_number(tier, section, "wildlife", 0.1, 1.0)
+		_check_balance_number(tier, section, "stars", 0.0, 300.0, true)
+		_check_balance_number(tier, section, "waterfall_fps", 1.0, 60.0, true)
+		if typeof(tier.get("water_glints")) != TYPE_BOOL:
+			_errors.append("%s.%s.water_glints: must be true or false" % [file_name, section])
+		if _errors.size() > before:
+			previous = {}
+			continue
+		if not previous.is_empty():
+			for field in ["rain", "wildlife", "stars", "waterfall_fps"]:
+				if tier[field] < previous[field]:
+					_errors.append("%s.%s.%s: must not be lower than the tier below" % [file_name, section, field])
+			if previous["water_glints"] == true and tier["water_glints"] != true:
+				_errors.append("%s.%s.water_glints: a higher tier must keep the glints of the tier below" % [file_name, section])
+		previous = tier
+	if not tiers.has("medium"):
+		return
+	var saver: Dictionary = graphics["battery_saver"]
+	_check_balance_number(saver, "graphics.battery_saver", "rain_factor", 0.1, 1.0)
+	_check_balance_number(saver, "graphics.battery_saver", "wildlife_factor", 0.1, 1.0)
+	_check_balance_number(saver, "graphics.battery_saver", "waterfall_fps", 1.0, 60.0, true)
+	if typeof(saver.get("water_glints")) != TYPE_BOOL:
+		_errors.append("%s.graphics.battery_saver.water_glints: must be true or false" % file_name)
 
 ## `section[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
 func _check_balance_range(section: Dictionary, section_name: String, field: String,

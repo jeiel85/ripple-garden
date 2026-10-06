@@ -130,6 +130,22 @@ Ambient는 하나의 긴 파일 대신 layers + randomized one-shots.
 - particles quality tiers
 - shadow quality tiers
 
+### 13.1 화질 단계와 배터리 절약 (P1-014, P1-015)
+`balance.json` `graphics`가 단계별 값을 갖고 `GraphicsProfile.resolve(quality, battery_saver)`가 하나의 프로필로 합친다.
+SettingsApplier가 설정이 바뀔 때 한 번 계산해 각 표현 노드에 넘긴다(매 프레임 계산하지 않는다).
+
+| 항목 | 낮음 | 보통 | 높음 | 배터리 절약 |
+|---|---|---|---|---|
+| 빗방울(CPUParticles2D) | 90 | 180 | 320 | ×0.5 (최소 20) |
+| 작은 동물(잠자리·나비·반딧불·새) | 레이아웃의 50% | 100% | 100% | ×0.5 (종류마다 최소 1) |
+| 밤하늘 별 | 30 | 70 | 110 | 그대로(조명 단계마다 한 번 그림) |
+| 물 반짝임(셰이더 파동 2개) | 끔 | 켬 | 켬 | 끔 |
+| 폭포 다시 그리기 | 8fps | 12fps | 20fps | 최대 6fps |
+| 헤엄치는 물고기(`population`) | 20 | 35 | 50 | ×0.6, AI 판단 주기 ×2 |
+| 프레임 상한 | 설정값 | 설정값 | 설정값 | 30fps |
+
+GL Compatibility 2D에는 그림자·MSAA 단계가 없어 위 항목이 화질 단계의 전부다. 수치는 실기기 프로파일링 전 시작값이다.
+
 ## 14. Performance Targets
 내부 목표:
 - Mid Android: stable 30 FPS

@@ -76,8 +76,8 @@
 - [ ] P1-011 entitlement service abstraction
 - [ ] P1-012 full-game unlock UI
 - [ ] P1-013 KO/EN/JA localization
-- [ ] P1-014 graphics quality profiles
-- [ ] P1-015 battery saver
+- [x] P1-014 graphics quality profiles
+- [x] P1-015 battery saver
 
 ## P2 — Content Expansion
 - [ ] P2-001 Region 02 production

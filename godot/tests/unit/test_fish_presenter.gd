@@ -13,8 +13,8 @@ func _setup() -> Array:
 	var map := HabitatMap.from_layout(ContentDB.get_layout(REGION), _zone_nodes)
 	var presenter := FishPopulationPresenter.new()
 	presenter.game_state = state
-	presenter.rng.seed = 5
 	presenter.setup(REGION, map)
+	presenter.rng.seed = 5  # after setup, which randomizes the generator
 	return [presenter, state, map]
 
 func _teardown(parts: Array) -> void:
