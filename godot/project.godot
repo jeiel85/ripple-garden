@@ -1,0 +1,24 @@
+; Engine configuration file.
+; Ripple Garden bootstrap skeleton
+
+config_version=5
+
+[application]
+config/name="Ripple Garden"
+run/main_scene="res://world/world_root.tscn"
+
+[display]
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[autoload]
+EventBus="*res://autoload/event_bus.gd"
+GameState="*res://autoload/game_state.gd"
+ContentDB="*res://autoload/content_db.gd"
+SaveService="*res://autoload/save_service.gd"
+TimeService="*res://autoload/time_service.gd"

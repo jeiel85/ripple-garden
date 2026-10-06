@@ -1,0 +1,2810 @@
+[
+  {
+    "id": "fish_crucian_carp",
+    "name_key": "fish.crucian_carp.name",
+    "dev_name_ko": "붕어",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "shallow",
+      "vegetation"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 5,
+      "max": 25
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.25,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.crucian_carp.desc"
+  },
+  {
+    "id": "fish_common_carp",
+    "name_key": "fish.common_carp.name",
+    "dev_name_ko": "잉어",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "vegetation",
+      "open_water"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 7,
+      "max": 35
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.28,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.common_carp.desc"
+  },
+  {
+    "id": "fish_minnow",
+    "name_key": "fish.minnow.name",
+    "dev_name_ko": "피라미",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "open_water",
+      "bottom"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 9,
+      "max": 45
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.3,
+      "duration_sec": 7.5
+    },
+    "journal_key": "fish.minnow.desc"
+  },
+  {
+    "id": "fish_catfish",
+    "name_key": "fish.catfish.name",
+    "dev_name_ko": "메기",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "bottom",
+      "shallow"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 11,
+      "max": 55
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.38,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.catfish.desc"
+  },
+  {
+    "id": "fish_loach",
+    "name_key": "fish.loach.name",
+    "dev_name_ko": "미꾸라지",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "shallow",
+      "vegetation"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 13,
+      "max": 65
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.4,
+      "duration_sec": 11.0
+    },
+    "journal_key": "fish.loach.desc"
+  },
+  {
+    "id": "fish_gudgeon",
+    "name_key": "fish.gudgeon.name",
+    "dev_name_ko": "모래무지",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "vegetation",
+      "open_water"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 15,
+      "max": 75
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.43,
+      "duration_sec": 7.0
+    },
+    "journal_key": "fish.gudgeon.desc"
+  },
+  {
+    "id": "fish_bitterling",
+    "name_key": "fish.bitterling.name",
+    "dev_name_ko": "납자루",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "open_water",
+      "bottom"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 17,
+      "max": 85
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.5,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.bitterling.desc"
+  },
+  {
+    "id": "fish_bluegill",
+    "name_key": "fish.bluegill.name",
+    "dev_name_ko": "블루길",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "bottom",
+      "shallow"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 19,
+      "max": 39
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.53,
+      "duration_sec": 10.5
+    },
+    "journal_key": "fish.bluegill.desc"
+  },
+  {
+    "id": "fish_largemouth_bass",
+    "name_key": "fish.largemouth_bass.name",
+    "dev_name_ko": "큰입배스",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "shallow",
+      "vegetation"
+    ],
+    "rarity": 4,
+    "base_weight": 0.65,
+    "size_cm": {
+      "min": 5,
+      "max": 33
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.6,
+      "duration_sec": 13.0
+    },
+    "journal_key": "fish.largemouth_bass.desc"
+  },
+  {
+    "id": "fish_snakehead",
+    "name_key": "fish.snakehead.name",
+    "dev_name_ko": "가물치",
+    "regions": [
+      "region_01_quiet_pond"
+    ],
+    "habitats": [
+      "vegetation",
+      "open_water"
+    ],
+    "rarity": 5,
+    "base_weight": 0.18,
+    "size_cm": {
+      "min": 7,
+      "max": 43
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.68,
+      "duration_sec": 15.5
+    },
+    "journal_key": "fish.snakehead.desc"
+  },
+  {
+    "id": "fish_rainbow_trout",
+    "name_key": "fish.rainbow_trout.name",
+    "dev_name_ko": "무지개송어",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "riffle",
+      "pool"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 9,
+      "max": 53
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.25,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.rainbow_trout.desc"
+  },
+  {
+    "id": "fish_cherry_salmon",
+    "name_key": "fish.cherry_salmon.name",
+    "dev_name_ko": "산천어",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "pool",
+      "rock"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 11,
+      "max": 63
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.28,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.cherry_salmon.desc"
+  },
+  {
+    "id": "fish_dace",
+    "name_key": "fish.dace.name",
+    "dev_name_ko": "황어",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "rock",
+      "vegetation"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 13,
+      "max": 73
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.3,
+      "duration_sec": 7.5
+    },
+    "journal_key": "fish.dace.desc"
+  },
+  {
+    "id": "fish_sculpin",
+    "name_key": "fish.sculpin.name",
+    "dev_name_ko": "둑중개",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "vegetation",
+      "riffle"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 15,
+      "max": 83
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.38,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.sculpin.desc"
+  },
+  {
+    "id": "fish_brook_minnow",
+    "name_key": "fish.brook_minnow.name",
+    "dev_name_ko": "갈겨니",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "riffle",
+      "pool"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 17,
+      "max": 37
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.4,
+      "duration_sec": 11.0
+    },
+    "journal_key": "fish.brook_minnow.desc"
+  },
+  {
+    "id": "fish_lenok",
+    "name_key": "fish.lenok.name",
+    "dev_name_ko": "열목어",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "pool",
+      "rock"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 19,
+      "max": 47
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.43,
+      "duration_sec": 7.0
+    },
+    "journal_key": "fish.lenok.desc"
+  },
+  {
+    "id": "fish_freshwater_goby",
+    "name_key": "fish.freshwater_goby.name",
+    "dev_name_ko": "민물망둑",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "rock",
+      "vegetation"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 5,
+      "max": 41
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.5,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.freshwater_goby.desc"
+  },
+  {
+    "id": "fish_stone_loach",
+    "name_key": "fish.stone_loach.name",
+    "dev_name_ko": "종개",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "vegetation",
+      "riffle"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 7,
+      "max": 51
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.53,
+      "duration_sec": 10.5
+    },
+    "journal_key": "fish.stone_loach.desc"
+  },
+  {
+    "id": "fish_torrent_catfish",
+    "name_key": "fish.torrent_catfish.name",
+    "dev_name_ko": "퉁가리",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "riffle",
+      "pool"
+    ],
+    "rarity": 4,
+    "base_weight": 0.65,
+    "size_cm": {
+      "min": 9,
+      "max": 61
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.6,
+      "duration_sec": 13.0
+    },
+    "journal_key": "fish.torrent_catfish.desc"
+  },
+  {
+    "id": "fish_stream_chub",
+    "name_key": "fish.stream_chub.name",
+    "dev_name_ko": "버들치",
+    "regions": [
+      "region_02_forest_stream"
+    ],
+    "habitats": [
+      "pool",
+      "rock"
+    ],
+    "rarity": 5,
+    "base_weight": 0.18,
+    "size_cm": {
+      "min": 11,
+      "max": 71
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.68,
+      "duration_sec": 15.5
+    },
+    "journal_key": "fish.stream_chub.desc"
+  },
+  {
+    "id": "fish_barbel",
+    "name_key": "fish.barbel.name",
+    "dev_name_ko": "누치",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "shallow",
+      "deep"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 13,
+      "max": 81
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.25,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.barbel.desc"
+  },
+  {
+    "id": "fish_mandarin_fish",
+    "name_key": "fish.mandarin_fish.name",
+    "dev_name_ko": "쏘가리",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "deep",
+      "reed"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 15,
+      "max": 35
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.28,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.mandarin_fish.desc"
+  },
+  {
+    "id": "fish_yellowfin_goby",
+    "name_key": "fish.yellowfin_goby.name",
+    "dev_name_ko": "문절망둑",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "reed",
+      "channel"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 17,
+      "max": 45
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.3,
+      "duration_sec": 7.5
+    },
+    "journal_key": "fish.yellowfin_goby.desc"
+  },
+  {
+    "id": "fish_eel",
+    "name_key": "fish.eel.name",
+    "dev_name_ko": "뱀장어",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "channel",
+      "shallow"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 19,
+      "max": 55
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.38,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.eel.desc"
+  },
+  {
+    "id": "fish_freshwater_smelt",
+    "name_key": "fish.freshwater_smelt.name",
+    "dev_name_ko": "빙어",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "shallow",
+      "deep"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 5,
+      "max": 49
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.4,
+      "duration_sec": 11.0
+    },
+    "journal_key": "fish.freshwater_smelt.desc"
+  },
+  {
+    "id": "fish_silver_carp",
+    "name_key": "fish.silver_carp.name",
+    "dev_name_ko": "백련어",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "deep",
+      "reed"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 7,
+      "max": 59
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.43,
+      "duration_sec": 7.0
+    },
+    "journal_key": "fish.silver_carp.desc"
+  },
+  {
+    "id": "fish_grass_carp",
+    "name_key": "fish.grass_carp.name",
+    "dev_name_ko": "초어",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "reed",
+      "channel"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 9,
+      "max": 69
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.5,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.grass_carp.desc"
+  },
+  {
+    "id": "fish_skygager",
+    "name_key": "fish.skygager.name",
+    "dev_name_ko": "끄리",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "channel",
+      "shallow"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 11,
+      "max": 79
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.53,
+      "duration_sec": 10.5
+    },
+    "journal_key": "fish.skygager.desc"
+  },
+  {
+    "id": "fish_river_puffer",
+    "name_key": "fish.river_puffer.name",
+    "dev_name_ko": "복어",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "shallow",
+      "deep"
+    ],
+    "rarity": 4,
+    "base_weight": 0.65,
+    "size_cm": {
+      "min": 13,
+      "max": 33
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.6,
+      "duration_sec": 13.0
+    },
+    "journal_key": "fish.river_puffer.desc"
+  },
+  {
+    "id": "fish_mudfish",
+    "name_key": "fish.mudfish.name",
+    "dev_name_ko": "미꾸리",
+    "regions": [
+      "region_03_reed_river"
+    ],
+    "habitats": [
+      "deep",
+      "reed"
+    ],
+    "rarity": 5,
+    "base_weight": 0.18,
+    "size_cm": {
+      "min": 15,
+      "max": 43
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.68,
+      "duration_sec": 15.5
+    },
+    "journal_key": "fish.mudfish.desc"
+  },
+  {
+    "id": "fish_sea_bass",
+    "name_key": "fish.sea_bass.name",
+    "dev_name_ko": "농어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "shore",
+      "rock"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 17,
+      "max": 53
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.25,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.sea_bass.desc"
+  },
+  {
+    "id": "fish_black_porgy",
+    "name_key": "fish.black_porgy.name",
+    "dev_name_ko": "감성돔",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "rock",
+      "pier"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 19,
+      "max": 63
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.28,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.black_porgy.desc"
+  },
+  {
+    "id": "fish_red_seabream",
+    "name_key": "fish.red_seabream.name",
+    "dev_name_ko": "참돔",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "pier",
+      "deep"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 5,
+      "max": 57
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.3,
+      "duration_sec": 7.5
+    },
+    "journal_key": "fish.red_seabream.desc"
+  },
+  {
+    "id": "fish_mackerel",
+    "name_key": "fish.mackerel.name",
+    "dev_name_ko": "고등어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "deep",
+      "shore"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 7,
+      "max": 67
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.33,
+      "duration_sec": 8.5
+    },
+    "journal_key": "fish.mackerel.desc"
+  },
+  {
+    "id": "fish_horse_mackerel",
+    "name_key": "fish.horse_mackerel.name",
+    "dev_name_ko": "전갱이",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "shore",
+      "rock"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 9,
+      "max": 77
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.35,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.horse_mackerel.desc"
+  },
+  {
+    "id": "fish_rockfish",
+    "name_key": "fish.rockfish.name",
+    "dev_name_ko": "볼락",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "rock",
+      "pier"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 11,
+      "max": 31
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.38,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.rockfish.desc"
+  },
+  {
+    "id": "fish_flounder",
+    "name_key": "fish.flounder.name",
+    "dev_name_ko": "광어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "pier",
+      "deep"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 13,
+      "max": 41
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.45,
+      "duration_sec": 8.0
+    },
+    "journal_key": "fish.flounder.desc"
+  },
+  {
+    "id": "fish_greenling",
+    "name_key": "fish.greenling.name",
+    "dev_name_ko": "쥐노래미",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "deep",
+      "shore"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 15,
+      "max": 51
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.48,
+      "duration_sec": 9.0
+    },
+    "journal_key": "fish.greenling.desc"
+  },
+  {
+    "id": "fish_mullet",
+    "name_key": "fish.mullet.name",
+    "dev_name_ko": "숭어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "shore",
+      "rock"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 17,
+      "max": 61
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.5,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.mullet.desc"
+  },
+  {
+    "id": "fish_anchovy",
+    "name_key": "fish.anchovy.name",
+    "dev_name_ko": "멸치",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "rock",
+      "pier"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 19,
+      "max": 71
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.53,
+      "duration_sec": 11.0
+    },
+    "journal_key": "fish.anchovy.desc"
+  },
+  {
+    "id": "fish_sardine",
+    "name_key": "fish.sardine.name",
+    "dev_name_ko": "정어리",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "pier",
+      "deep"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 5,
+      "max": 65
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.55,
+      "duration_sec": 7.0
+    },
+    "journal_key": "fish.sardine.desc"
+  },
+  {
+    "id": "fish_halfbeak",
+    "name_key": "fish.halfbeak.name",
+    "dev_name_ko": "학공치",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "deep",
+      "shore"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 7,
+      "max": 75
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.57,
+      "duration_sec": 8.0
+    },
+    "journal_key": "fish.halfbeak.desc"
+  },
+  {
+    "id": "fish_filefish",
+    "name_key": "fish.filefish.name",
+    "dev_name_ko": "쥐치",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "shore",
+      "rock"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 9,
+      "max": 29
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.6,
+      "duration_sec": 9.0
+    },
+    "journal_key": "fish.filefish.desc"
+  },
+  {
+    "id": "fish_pufferfish",
+    "name_key": "fish.pufferfish.name",
+    "dev_name_ko": "복어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "rock",
+      "pier"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 11,
+      "max": 39
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.68,
+      "duration_sec": 11.5
+    },
+    "journal_key": "fish.pufferfish.desc"
+  },
+  {
+    "id": "fish_conger",
+    "name_key": "fish.conger.name",
+    "dev_name_ko": "붕장어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "pier",
+      "deep"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 13,
+      "max": 49
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.7,
+      "duration_sec": 12.5
+    },
+    "journal_key": "fish.conger.desc"
+  },
+  {
+    "id": "fish_octopus",
+    "name_key": "fish.octopus.name",
+    "dev_name_ko": "문어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "deep",
+      "shore"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 15,
+      "max": 59
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.73,
+      "duration_sec": 8.5
+    },
+    "journal_key": "fish.octopus.desc"
+  },
+  {
+    "id": "fish_cuttlefish",
+    "name_key": "fish.cuttlefish.name",
+    "dev_name_ko": "갑오징어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "shore",
+      "rock"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 17,
+      "max": 69
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.75,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.cuttlefish.desc"
+  },
+  {
+    "id": "fish_squid",
+    "name_key": "fish.squid.name",
+    "dev_name_ko": "오징어",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "rock",
+      "pier"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 19,
+      "max": 79
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.78,
+      "duration_sec": 10.5
+    },
+    "journal_key": "fish.squid.desc"
+  },
+  {
+    "id": "fish_blue_crab",
+    "name_key": "fish.blue_crab.name",
+    "dev_name_ko": "꽃게",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "pier",
+      "deep"
+    ],
+    "rarity": 4,
+    "base_weight": 0.65,
+    "size_cm": {
+      "min": 5,
+      "max": 73
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.85,
+      "duration_sec": 13.0
+    },
+    "journal_key": "fish.blue_crab.desc"
+  },
+  {
+    "id": "fish_shrimp",
+    "name_key": "fish.shrimp.name",
+    "dev_name_ko": "새우",
+    "regions": [
+      "region_04_blue_coast"
+    ],
+    "habitats": [
+      "deep",
+      "shore"
+    ],
+    "rarity": 5,
+    "base_weight": 0.18,
+    "size_cm": {
+      "min": 7,
+      "max": 27
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.85,
+      "duration_sec": 15.5
+    },
+    "journal_key": "fish.shrimp.desc"
+  },
+  {
+    "id": "fish_clownfish",
+    "name_key": "fish.clownfish.name",
+    "dev_name_ko": "흰동가리",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 9,
+      "max": 37
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.25,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.clownfish.desc"
+  },
+  {
+    "id": "fish_butterflyfish",
+    "name_key": "fish.butterflyfish.name",
+    "dev_name_ko": "나비고기",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 11,
+      "max": 47
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.28,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.butterflyfish.desc"
+  },
+  {
+    "id": "fish_surgeonfish",
+    "name_key": "fish.surgeonfish.name",
+    "dev_name_ko": "양쥐돔",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "shore",
+      "deep"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 13,
+      "max": 57
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.3,
+      "duration_sec": 7.5
+    },
+    "journal_key": "fish.surgeonfish.desc"
+  },
+  {
+    "id": "fish_parrotfish",
+    "name_key": "fish.parrotfish.name",
+    "dev_name_ko": "비늘돔",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "deep",
+      "lagoon"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 15,
+      "max": 67
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.33,
+      "duration_sec": 8.5
+    },
+    "journal_key": "fish.parrotfish.desc"
+  },
+  {
+    "id": "fish_rabbitfish",
+    "name_key": "fish.rabbitfish.name",
+    "dev_name_ko": "독가시치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 17,
+      "max": 77
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.35,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.rabbitfish.desc"
+  },
+  {
+    "id": "fish_damselfish",
+    "name_key": "fish.damselfish.name",
+    "dev_name_ko": "자리돔",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 19,
+      "max": 87
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.38,
+      "duration_sec": 5.5
+    },
+    "journal_key": "fish.damselfish.desc"
+  },
+  {
+    "id": "fish_wrasse",
+    "name_key": "fish.wrasse.name",
+    "dev_name_ko": "놀래기",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "shore",
+      "deep"
+    ],
+    "rarity": 1,
+    "base_weight": 12.0,
+    "size_cm": {
+      "min": 5,
+      "max": 25
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.4,
+      "duration_sec": 6.5
+    },
+    "journal_key": "fish.wrasse.desc"
+  },
+  {
+    "id": "fish_grouper",
+    "name_key": "fish.grouper.name",
+    "dev_name_ko": "바리",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "deep",
+      "lagoon"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 7,
+      "max": 35
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.48,
+      "duration_sec": 9.0
+    },
+    "journal_key": "fish.grouper.desc"
+  },
+  {
+    "id": "fish_trevally",
+    "name_key": "fish.trevally.name",
+    "dev_name_ko": "전갱이류",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 9,
+      "max": 45
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.5,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.trevally.desc"
+  },
+  {
+    "id": "fish_barracuda",
+    "name_key": "fish.barracuda.name",
+    "dev_name_ko": "꼬치고기",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 11,
+      "max": 55
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.53,
+      "duration_sec": 11.0
+    },
+    "journal_key": "fish.barracuda.desc"
+  },
+  {
+    "id": "fish_flying_fish",
+    "name_key": "fish.flying_fish.name",
+    "dev_name_ko": "날치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "shore",
+      "deep"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 13,
+      "max": 65
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.55,
+      "duration_sec": 7.0
+    },
+    "journal_key": "fish.flying_fish.desc"
+  },
+  {
+    "id": "fish_moonfish",
+    "name_key": "fish.moonfish.name",
+    "dev_name_ko": "달고기",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "deep",
+      "lagoon"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 15,
+      "max": 75
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.57,
+      "duration_sec": 8.0
+    },
+    "journal_key": "fish.moonfish.desc"
+  },
+  {
+    "id": "fish_needlefish",
+    "name_key": "fish.needlefish.name",
+    "dev_name_ko": "동갈치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 17,
+      "max": 85
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.6,
+      "duration_sec": 9.0
+    },
+    "journal_key": "fish.needlefish.desc"
+  },
+  {
+    "id": "fish_triggerfish",
+    "name_key": "fish.triggerfish.name",
+    "dev_name_ko": "쥐돔",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 2,
+    "base_weight": 5.5,
+    "size_cm": {
+      "min": 19,
+      "max": 39
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.62,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.triggerfish.desc"
+  },
+  {
+    "id": "fish_boxfish",
+    "name_key": "fish.boxfish.name",
+    "dev_name_ko": "거북복",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "shore",
+      "deep"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 5,
+      "max": 33
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "small_fish",
+      "worm"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.7,
+      "duration_sec": 12.5
+    },
+    "journal_key": "fish.boxfish.desc"
+  },
+  {
+    "id": "fish_lionfish",
+    "name_key": "fish.lionfish.name",
+    "dev_name_ko": "쏠배감펭",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "deep",
+      "lagoon"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 7,
+      "max": 43
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "plant",
+      "grain"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.73,
+      "duration_sec": 8.5
+    },
+    "journal_key": "fish.lionfish.desc"
+  },
+  {
+    "id": "fish_moray_eel",
+    "name_key": "fish.moray_eel.name",
+    "dev_name_ko": "곰치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 9,
+      "max": 53
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "bread",
+      "insect"
+    ],
+    "behavior": "surface",
+    "fight": {
+      "strength": 0.75,
+      "duration_sec": 9.5
+    },
+    "journal_key": "fish.moray_eel.desc"
+  },
+  {
+    "id": "fish_stingray",
+    "name_key": "fish.stingray.name",
+    "dev_name_ko": "가오리",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 50,
+      "max": 500
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "worm",
+      "shrimp"
+    ],
+    "behavior": "bottom",
+    "fight": {
+      "strength": 0.78,
+      "duration_sec": 10.5
+    },
+    "journal_key": "fish.stingray.desc"
+  },
+  {
+    "id": "fish_tuna",
+    "name_key": "fish.tuna.name",
+    "dev_name_ko": "참치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "shore",
+      "deep"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 50,
+      "max": 600
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 1.05
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "grain",
+      "shellfish"
+    ],
+    "behavior": "steady",
+    "fight": {
+      "strength": 0.8,
+      "duration_sec": 11.5
+    },
+    "journal_key": "fish.tuna.desc"
+  },
+  {
+    "id": "fish_mahi_mahi",
+    "name_key": "fish.mahi_mahi.name",
+    "dev_name_ko": "만새기",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "deep",
+      "lagoon"
+    ],
+    "rarity": 3,
+    "base_weight": 2.0,
+    "size_cm": {
+      "min": 50,
+      "max": 700
+    },
+    "time_bands": {
+      "dawn": 1.1,
+      "day": 1.0,
+      "dusk": 1.1500000000000001,
+      "night": 1.15
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.08
+    },
+    "bait_tags": [
+      "insect",
+      "small_fish"
+    ],
+    "behavior": "dasher",
+    "fight": {
+      "strength": 0.82,
+      "duration_sec": 12.5
+    },
+    "journal_key": "fish.mahi_mahi.desc"
+  },
+  {
+    "id": "fish_sunfish",
+    "name_key": "fish.sunfish.name",
+    "dev_name_ko": "개복치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "lagoon",
+      "reef"
+    ],
+    "rarity": 4,
+    "base_weight": 0.65,
+    "size_cm": {
+      "min": 50,
+      "max": 300
+    },
+    "time_bands": {
+      "dawn": 1.1500000000000001,
+      "day": 1.0,
+      "dusk": 1.05,
+      "night": 0.85
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.16
+    },
+    "bait_tags": [
+      "shrimp",
+      "plant"
+    ],
+    "behavior": "heavy",
+    "fight": {
+      "strength": 0.85,
+      "duration_sec": 10.0
+    },
+    "journal_key": "fish.sunfish.desc"
+  },
+  {
+    "id": "fish_oarfish",
+    "name_key": "fish.oarfish.name",
+    "dev_name_ko": "산갈치",
+    "regions": [
+      "region_05_moonlight_isle"
+    ],
+    "habitats": [
+      "reef",
+      "shore"
+    ],
+    "rarity": 5,
+    "base_weight": 0.18,
+    "size_cm": {
+      "min": 50,
+      "max": 400
+    },
+    "time_bands": {
+      "dawn": 1.05,
+      "day": 1.0,
+      "dusk": 1.1,
+      "night": 0.95
+    },
+    "weather": {
+      "clear": 1.0,
+      "cloudy": 1.05,
+      "rain": 1.0
+    },
+    "bait_tags": [
+      "shellfish",
+      "bread"
+    ],
+    "behavior": "zigzag",
+    "fight": {
+      "strength": 0.85,
+      "duration_sec": 12.5
+    },
+    "journal_key": "fish.oarfish.desc"
+  }
+]

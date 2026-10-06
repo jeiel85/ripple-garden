@@ -1,0 +1,89 @@
+[
+  {
+    "id": "region_01_quiet_pond",
+    "name_key": "region.quiet_pond.name",
+    "habitats": [
+      "shallow",
+      "vegetation",
+      "open_water",
+      "bottom"
+    ],
+    "weather": [
+      "clear",
+      "cloudy",
+      "rain"
+    ],
+    "restoration_levels": 10
+  },
+  {
+    "id": "region_02_forest_stream",
+    "name_key": "region.forest_stream.name",
+    "habitats": [
+      "riffle",
+      "pool",
+      "rock",
+      "vegetation"
+    ],
+    "weather": [
+      "clear",
+      "cloudy",
+      "rain",
+      "mist"
+    ],
+    "restoration_levels": 10
+  },
+  {
+    "id": "region_03_reed_river",
+    "name_key": "region.reed_river.name",
+    "habitats": [
+      "shallow",
+      "deep",
+      "reed",
+      "channel"
+    ],
+    "weather": [
+      "clear",
+      "cloudy",
+      "rain",
+      "storm",
+      "mist"
+    ],
+    "restoration_levels": 10
+  },
+  {
+    "id": "region_04_blue_coast",
+    "name_key": "region.blue_coast.name",
+    "habitats": [
+      "shore",
+      "rock",
+      "pier",
+      "deep"
+    ],
+    "weather": [
+      "clear",
+      "cloudy",
+      "rain",
+      "storm",
+      "mist"
+    ],
+    "restoration_levels": 10
+  },
+  {
+    "id": "region_05_moonlight_isle",
+    "name_key": "region.moonlight_isle.name",
+    "habitats": [
+      "lagoon",
+      "reef",
+      "shore",
+      "deep"
+    ],
+    "weather": [
+      "clear",
+      "cloudy",
+      "rain",
+      "storm",
+      "mist"
+    ],
+    "restoration_levels": 10
+  }
+]

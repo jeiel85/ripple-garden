@@ -1,0 +1,132 @@
+[
+  {
+    "id": "bait_bread",
+    "name_key": "bait.bread.name",
+    "tags": [
+      "bread"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_worm",
+    "name_key": "bait.worm.name",
+    "tags": [
+      "worm"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_corn",
+    "name_key": "bait.corn.name",
+    "tags": [
+      "grain"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_insect",
+    "name_key": "bait.insect.name",
+    "tags": [
+      "insect"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_shrimp",
+    "name_key": "bait.shrimp.name",
+    "tags": [
+      "shrimp"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_shellfish",
+    "name_key": "bait.shellfish.name",
+    "tags": [
+      "shellfish"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_small_fish",
+    "name_key": "bait.small_fish.name",
+    "tags": [
+      "small_fish"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_berry",
+    "name_key": "bait.berry.name",
+    "tags": [
+      "fruit"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_larva",
+    "name_key": "bait.larva.name",
+    "tags": [
+      "larva"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_cricket",
+    "name_key": "bait.cricket.name",
+    "tags": [
+      "insect"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_minnow",
+    "name_key": "bait.minnow.name",
+    "tags": [
+      "small_fish"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_crab",
+    "name_key": "bait.crab.name",
+    "tags": [
+      "crab"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_squid",
+    "name_key": "bait.squid.name",
+    "tags": [
+      "squid"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_seaweed",
+    "name_key": "bait.seaweed.name",
+    "tags": [
+      "plant"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_moon_moth",
+    "name_key": "bait.moon_moth.name",
+    "tags": [
+      "insect",
+      "special"
+    ],
+    "consumable": true
+  },
+  {
+    "id": "bait_old_recipe",
+    "name_key": "bait.old_recipe.name",
+    "tags": [
+      "bread",
+      "special"
+    ],
+    "consumable": true
+  }
+]

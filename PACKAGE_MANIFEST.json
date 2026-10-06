@@ -1,0 +1,12 @@
+{
+  "package": "Ripple Garden Commercial Game Production Package",
+  "version": "1.0",
+  "created_for": "Godot 4.x",
+  "contents": {
+    "regions": 5,
+    "fish": 72,
+    "rods": 12,
+    "baits": 16
+  },
+  "notes": "Design/balance values are initial production baselines and require playtest/profile validation."
+}

@@ -1,0 +1,55 @@
+{
+  "restoration_points": [
+    0,
+    25,
+    60,
+    110,
+    180,
+    270,
+    390,
+    540,
+    730,
+    960,
+    1250
+  ],
+  "region_unlocks": [
+    {
+      "region_id": "region_01_quiet_pond",
+      "condition": {
+        "type": "start"
+      }
+    },
+    {
+      "region_id": "region_02_forest_stream",
+      "condition": {
+        "region": "region_01_quiet_pond",
+        "restoration_level": 7,
+        "unique_fish": 7
+      }
+    },
+    {
+      "region_id": "region_03_reed_river",
+      "condition": {
+        "region": "region_02_forest_stream",
+        "restoration_level": 7,
+        "unique_fish": 7
+      }
+    },
+    {
+      "region_id": "region_04_blue_coast",
+      "condition": {
+        "region": "region_03_reed_river",
+        "restoration_level": 7,
+        "unique_fish": 7
+      }
+    },
+    {
+      "region_id": "region_05_moonlight_isle",
+      "condition": {
+        "region": "region_04_blue_coast",
+        "restoration_level": 8,
+        "unique_fish": 12
+      }
+    }
+  ]
+}

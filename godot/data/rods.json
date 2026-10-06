@@ -1,0 +1,132 @@
+[
+  {
+    "id": "rod_bamboo",
+    "name_key": "rod.bamboo.name",
+    "range": 0.35,
+    "bite_speed": 1.0,
+    "tension_assist": 0.15,
+    "tags": [
+      "freshwater"
+    ]
+  },
+  {
+    "id": "rod_light",
+    "name_key": "rod.light.name",
+    "range": 0.5,
+    "bite_speed": 1.08,
+    "tension_assist": 0.2,
+    "tags": [
+      "freshwater"
+    ]
+  },
+  {
+    "id": "rod_long",
+    "name_key": "rod.long.name",
+    "range": 0.75,
+    "bite_speed": 0.95,
+    "tension_assist": 0.1,
+    "tags": [
+      "freshwater"
+    ]
+  },
+  {
+    "id": "rod_stream",
+    "name_key": "rod.stream.name",
+    "range": 0.55,
+    "bite_speed": 1.05,
+    "tension_assist": 0.22,
+    "tags": [
+      "freshwater",
+      "stream"
+    ]
+  },
+  {
+    "id": "rod_deepwater",
+    "name_key": "rod.deepwater.name",
+    "range": 0.7,
+    "bite_speed": 0.92,
+    "tension_assist": 0.18,
+    "tags": [
+      "freshwater",
+      "deep"
+    ]
+  },
+  {
+    "id": "rod_river",
+    "name_key": "rod.river.name",
+    "range": 0.72,
+    "bite_speed": 1.0,
+    "tension_assist": 0.2,
+    "tags": [
+      "freshwater",
+      "river"
+    ]
+  },
+  {
+    "id": "rod_coastal",
+    "name_key": "rod.coastal.name",
+    "range": 0.7,
+    "bite_speed": 1.0,
+    "tension_assist": 0.18,
+    "tags": [
+      "saltwater"
+    ]
+  },
+  {
+    "id": "rod_pier",
+    "name_key": "rod.pier.name",
+    "range": 0.82,
+    "bite_speed": 0.96,
+    "tension_assist": 0.22,
+    "tags": [
+      "saltwater"
+    ]
+  },
+  {
+    "id": "rod_reef",
+    "name_key": "rod.reef.name",
+    "range": 0.65,
+    "bite_speed": 1.04,
+    "tension_assist": 0.22,
+    "tags": [
+      "saltwater",
+      "reef"
+    ]
+  },
+  {
+    "id": "rod_heavy",
+    "name_key": "rod.heavy.name",
+    "range": 0.78,
+    "bite_speed": 0.9,
+    "tension_assist": 0.32,
+    "tags": [
+      "freshwater",
+      "saltwater",
+      "heavy"
+    ]
+  },
+  {
+    "id": "rod_moonwood",
+    "name_key": "rod.moonwood.name",
+    "range": 0.76,
+    "bite_speed": 1.02,
+    "tension_assist": 0.25,
+    "tags": [
+      "freshwater",
+      "saltwater",
+      "special"
+    ]
+  },
+  {
+    "id": "rod_old_master",
+    "name_key": "rod.old_master.name",
+    "range": 0.8,
+    "bite_speed": 1.0,
+    "tension_assist": 0.28,
+    "tags": [
+      "freshwater",
+      "saltwater",
+      "special"
+    ]
+  }
+]
