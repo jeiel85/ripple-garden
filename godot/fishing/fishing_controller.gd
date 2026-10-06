@@ -56,6 +56,9 @@ var last_reward: CatchService.Reward = null
 var game_state: Node = null
 ## () -> {"time_band": String, "weather_id": String}; defaults to TimeService + clear weather.
 var context_provider := Callable()
+## Called right after a fish is landed and after it is released, so a crash cannot lose either.
+## The game wires it to SaveService.save_if_dirty; it stays empty in tests, which must never save.
+var save_hook := Callable()
 
 var _resolver: EncounterResolver
 var _catches: CatchService
@@ -153,6 +156,7 @@ func release_catch() -> bool:
 		_finish_attempt()
 		return false
 	last_reward = reward
+	_request_save()
 	_timer = float(_config()["release_sec"])
 	return _enter(State.RELEASE)
 
@@ -301,6 +305,7 @@ func _advance_fight(delta: float) -> void:
 func _land_fish() -> void:
 	_miss_counts.erase(encounter.fish_id)
 	_catch_service().begin_catch(encounter, region_id)
+	_request_save()  # the discovery and the pending catch reach the disk now, not at the next autosave
 	_timer = float(_config()["land_sec"])
 	_enter(State.LAND)
 
@@ -310,6 +315,10 @@ func _escape(reason: String) -> void:
 		_miss_counts[fish_id] = _miss_counts.get(fish_id, 0) + 1
 	_finish_attempt()
 	EventBus.fish_escaped.emit(fish_id, reason)
+
+func _request_save() -> void:
+	if save_hook.is_valid():
+		save_hook.call()
 
 # --- transitions ---
 

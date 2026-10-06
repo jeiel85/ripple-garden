@@ -419,3 +419,28 @@ func test_a_long_frame_can_cross_several_state_boundaries() -> void:
 	controller.advance(40.0)  # far longer than wait + hint + hook window
 	assert_eq(controller.state, FishingController.State.READY, "the missed hook must resolve inside one long frame")
 	_free(parts)
+
+func test_landing_and_releasing_both_request_a_save() -> void:
+	var parts := _make(6)
+	var controller: FishingController = parts[0]
+	var saves: Array = []
+	controller.save_hook = func() -> void: saves.append(controller.state)
+	controller.cast(WATER, "shallow")
+	var elapsed := 0.0
+	while controller.state != FishingController.State.INSPECT and elapsed < 120.0:
+		if controller.state == FishingController.State.HOOK:
+			controller.tap()
+		if controller.state == FishingController.State.FIGHT:
+			controller.set_reeling(controller.fight.tension < 0.5)
+		controller.advance(DT)
+		elapsed += DT
+	assert_eq(saves.size(), 1, "the catch must be saved as soon as the fish is landed")
+	assert_eq(saves[0], FishingController.State.FIGHT, "the save is requested at the moment of landing, before the animation")
+	assert_true(controller.release_catch())
+	assert_eq(saves.size(), 2, "releasing saves the rewards too")
+	_free(parts)
+
+func test_a_controller_without_a_save_hook_never_saves() -> void:
+	var parts := _make(7)
+	assert_false(parts[0].save_hook.is_valid(), "tests must never write the player's save")
+	_free(parts)

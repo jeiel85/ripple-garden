@@ -352,8 +352,10 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 		var hook: Variant = fishing.get("hook_window_sec")
 		var relaxed: Variant = fishing.get("hook_window_relaxed_sec")
 		if typeof(hook) == TYPE_DICTIONARY and typeof(relaxed) == TYPE_DICTIONARY \
-				and _is_number(hook.get("min")) and _is_number(relaxed.get("min")) and relaxed["min"] < hook["min"]:
-			_errors.append("%s.fishing.hook_window_relaxed_sec: relaxed windows must not be shorter than the normal ones" % file_name)
+				and _is_number(hook.get("min")) and _is_number(relaxed.get("min")) \
+				and _is_number(hook.get("max")) and _is_number(relaxed.get("max")) \
+				and (relaxed["min"] < hook["min"] or relaxed["max"] < hook["max"]):
+			_errors.append("%s.fishing.hook_window_relaxed_sec: relaxed windows must not be shorter than the normal ones (min and max)" % file_name)
 		var fight: Variant = fishing.get("fight")
 		if typeof(fight) != TYPE_DICTIONARY:
 			_errors.append("%s.fishing.fight: must be an object" % file_name)

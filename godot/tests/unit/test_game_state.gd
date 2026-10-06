@@ -187,7 +187,7 @@ func test_every_mutation_bumps_revision() -> void:
 	state.record_encounter("fish_minnow", 5.0)
 	state.add_population("region_01_quiet_pond", "fish_minnow", 1)
 	state.set_setting("haptics", false)
-	state.set_pending_catch({"fish_id": "fish_minnow"})
+	state.set_pending_catch({"fish_id": "fish_minnow", "region_id": "region_01_quiet_pond", "size_cm": 9.0})
 	assert_eq(state.revision, before + 5)
 	state.free()
 
@@ -231,4 +231,16 @@ func test_awards_never_lower_a_loaded_balance() -> void:
 	var before: int = state.get_ripple()
 	state.add_ripple(5)
 	assert_true(state.get_ripple() >= before, "an award reduced the balance (%d -> %d)" % [before, state.get_ripple()])
+	state.free()
+
+func test_pending_catch_is_normalized_and_malformed_ones_are_refused() -> void:
+	var state := _new_state()
+	state.set_pending_catch({"fish_id": "fish_minnow", "region_id": "region_01_quiet_pond", "size_cm": 9, "rarity": 2.0})
+	var pending: Dictionary = state.get_pending_catch()
+	assert_eq(typeof(pending["rarity"]), TYPE_INT)
+	assert_eq(typeof(pending["size_cm"]), TYPE_FLOAT)
+	assert_eq(pending["first_discovery"], false, "defaults are filled in")
+	expect_engine_error("refusing a malformed pending catch")
+	state.set_pending_catch({"fish_id": "fish_minnow"})
+	assert_deep_eq(state.get_pending_catch(), {}, "a malformed catch must not be stored")
 	state.free()

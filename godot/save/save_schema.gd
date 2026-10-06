@@ -149,7 +149,7 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	economy["memory"] = clampi(_int_or(economy.get("memory"), 0), 0, MAX_CURRENCY)
 
 	var entitlement: Dictionary = result["entitlement_cache"]
-	entitlement["full_game"] = entitlement.get("full_game") == true
+	entitlement["full_game"] = _bool_or_false(entitlement.get("full_game"))
 
 	var inventory: Dictionary = result["inventory"]
 	inventory["rods"] = _string_list(inventory.get("rods"))
@@ -164,8 +164,7 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 			inventory[pair[0]] = owned[0] if not owned.is_empty() else ""
 
 	var session: Dictionary = result["session"]
-	var pending: Variant = session.get("pending_catch")
-	session["pending_catch"] = pending if typeof(pending) == TYPE_DICTIONARY else {}
+	session["pending_catch"] = normalize_pending_catch(session.get("pending_catch"))
 
 	# Settings: known keys are sanitized, unknown keys survive untouched.
 	var settings := default_settings()
@@ -234,6 +233,14 @@ static func validate(save: Variant) -> PackedStringArray:
 				if typeof(population) != TYPE_INT or population < 0:
 					problems.append("regions.%s.species_population.%s must be a non-negative integer" % [region_id, fish_id])
 
+	var pending: Dictionary = save["session"]["pending_catch"]
+	if not pending.is_empty():
+		if typeof(pending.get("fish_id")) != TYPE_STRING or typeof(pending.get("region_id")) != TYPE_STRING:
+			problems.append("session.pending_catch must name a fish and a region")
+		if typeof(pending.get("size_cm")) != TYPE_FLOAT or typeof(pending.get("rarity")) != TYPE_INT \
+				or typeof(pending.get("first_discovery")) != TYPE_BOOL:
+			problems.append("session.pending_catch has fields of the wrong type")
+
 	for fish_id in save["collection"]:
 		var record: Variant = save["collection"][fish_id]
 		if typeof(record) != TYPE_DICTIONARY:
@@ -248,6 +255,22 @@ static func validate(save: Variant) -> PackedStringArray:
 	return problems
 
 # --- helpers ---
+
+## A catch waiting to be released: fish_id, region_id, size_cm, rarity, first_discovery. Anything
+## that is not a complete catch becomes "no pending catch" rather than something that could fail later.
+static func normalize_pending_catch(raw: Variant) -> Dictionary:
+	if typeof(raw) != TYPE_DICTIONARY or raw.is_empty():
+		return {}
+	var fish_id: Variant = raw.get("fish_id")
+	var region_id: Variant = raw.get("region_id")
+	if typeof(fish_id) != TYPE_STRING or fish_id.is_empty() or typeof(region_id) != TYPE_STRING or region_id.is_empty() \
+			or not _is_number(raw.get("size_cm")):
+		return {}
+	var pending: Dictionary = raw.duplicate(true)
+	pending["size_cm"] = maxf(0.0, float(raw["size_cm"]))
+	pending["rarity"] = clampi(_int_or(raw.get("rarity"), 1), 1, 5)
+	pending["first_discovery"] = _bool_or_false(raw.get("first_discovery"))
+	return pending
 
 static func _normalize_region(raw: Variant) -> Dictionary:
 	var region := default_region()
@@ -295,6 +318,10 @@ static func _merge_section(result: Dictionary, input: Dictionary, section: Strin
 
 static func _is_number(value: Variant) -> bool:
 	return typeof(value) == TYPE_INT or (typeof(value) == TYPE_FLOAT and is_finite(value))
+
+## GDScript refuses `String == bool`, so check the type first.
+static func _bool_or_false(value: Variant) -> bool:
+	return typeof(value) == TYPE_BOOL and value
 
 static func _int_or(value: Variant, fallback: int) -> int:
 	if not _is_number(value):

@@ -328,9 +328,14 @@ func get_pending_catch() -> Dictionary:
 	ensure_initialized()
 	return data["session"]["pending_catch"].duplicate(true)
 
+## Stores a catch that has not been released yet. The info is normalized like a loaded save, so a
+## malformed catch is refused (an error is logged and nothing is stored) instead of poisoning the save.
 func set_pending_catch(catch_info: Dictionary) -> void:
 	ensure_initialized()
-	data["session"]["pending_catch"] = catch_info.duplicate(true)
+	var clean := SaveSchema.normalize_pending_catch(catch_info)
+	if clean.is_empty() and not catch_info.is_empty():
+		push_error("GameState: refusing a malformed pending catch: %s" % var_to_str(catch_info))
+	data["session"]["pending_catch"] = clean
 	_changed()
 
 func clear_pending_catch() -> void:

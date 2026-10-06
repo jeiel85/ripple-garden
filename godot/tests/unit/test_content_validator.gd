@@ -265,3 +265,10 @@ func test_alias_cycles_and_live_ids_are_rejected() -> void:
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "the old id still exists as content")
 	assert_true(result["aliases"].is_empty(), "invalid alias table kept")
+
+func test_relaxed_hook_windows_must_not_be_shorter_at_either_end() -> void:
+	var raw := _raw()
+	raw["balance"]["fishing"]["hook_window_sec"] = {"min": 1.5, "max": 10.0}
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "relaxed windows must not be shorter than the normal ones")
+	assert_true(result["balance"].is_empty())

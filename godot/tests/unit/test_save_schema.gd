@@ -125,3 +125,25 @@ func test_oversized_values_are_clamped_to_the_declared_maximum() -> void:
 	assert_eq(normalized["regions"]["region_01_quiet_pond"]["restoration_points"], SaveSchema.MAX_CURRENCY)
 	assert_eq(normalized["regions"]["region_01_quiet_pond"]["species_population"]["fish_a"], SaveSchema.MAX_POPULATION)
 	assert_eq(SaveSchema.validate(normalized), PackedStringArray())
+
+func test_pending_catch_is_normalized_field_by_field() -> void:
+	var raw := {"save_version": 1, "session": {"pending_catch": {
+		"fish_id": "fish_minnow", "region_id": "region_01_quiet_pond", "size_cm": 14, "rarity": 3.0,
+		"first_discovery": "yes", "future_field": 7}}}
+	var pending: Dictionary = SaveSchema.normalize(raw, NOW)["session"]["pending_catch"]
+	assert_eq(typeof(pending["size_cm"]), TYPE_FLOAT)
+	assert_eq(typeof(pending["rarity"]), TYPE_INT)
+	assert_eq(pending["rarity"], 3)
+	assert_eq(pending["first_discovery"], false, "only a real true counts")
+	assert_eq(pending["future_field"], 7, "unknown fields survive")
+	assert_eq(SaveSchema.validate(SaveSchema.normalize(raw, NOW)), PackedStringArray())
+
+func test_incomplete_pending_catches_are_dropped() -> void:
+	for broken in [{"fish_id": "fish_minnow"}, {"region_id": "r", "size_cm": 1.0}, {"fish_id": 5, "region_id": "r", "size_cm": 1.0},
+			{"fish_id": "f", "region_id": "r", "size_cm": "big"}, "text", 42]:
+		var normalized := SaveSchema.normalize({"save_version": 1, "session": {"pending_catch": broken}}, NOW)
+		assert_deep_eq(normalized["session"]["pending_catch"], {}, "kept %s" % var_to_str(broken))
+	var clamped := SaveSchema.normalize({"save_version": 1, "session": {"pending_catch": {
+		"fish_id": "f", "region_id": "r", "size_cm": -3, "rarity": 99}}}, NOW)
+	assert_eq(clamped["session"]["pending_catch"]["rarity"], 5)
+	assert_eq(clamped["session"]["pending_catch"]["size_cm"], 0.0)
