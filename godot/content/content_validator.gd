@@ -160,8 +160,8 @@ func _check_region(d: Dictionary) -> void:
 	if typeof(place) != TYPE_DICTIONARY or not _is_number(place.get("x")) or not _is_number(place.get("y")) \
 			or place["x"] < 0.0 or place["x"] > 1.0 or place["y"] < 0.0 or place["y"] > 1.0 \
 			or typeof(place.get("style")) != TYPE_STRING or not place["style"] in MAP_STYLES \
-			or typeof(place.get("icon")) != TYPE_STRING or place["icon"].is_empty():
-		_item_errors.append("map: must be {x: 0..1, y: 0..1, style: %s, icon}" % " | ".join(MAP_STYLES))
+			or typeof(place.get("icon")) != TYPE_STRING or not UiIcons.has_icon(place["icon"]):
+		_item_errors.append("map: must be {x: 0..1, y: 0..1, style: %s, icon: a name from UiIcons.NAMES}" % " | ".join(MAP_STYLES))
 
 ## Baits: `consumable` false means an endless supply (the fallback bait); a consumable bait is bought
 ## in packs for `price` once `unlock` is met.

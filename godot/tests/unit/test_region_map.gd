@@ -77,3 +77,11 @@ func test_the_region_pill_opens_the_map() -> void:
 	assert_false(root.ui.is_panel_open(), "the pill toggles the map")
 	root.free()
 	save_service.write_blocked = was_blocked
+
+func test_a_map_icon_must_be_a_real_icon() -> void:
+	var raw: Dictionary = {}
+	for category in ContentValidator.FILE_NAMES:
+		raw[category] = JSON.parse_string(FileAccess.get_file_as_string("res://data".path_join(ContentValidator.FILE_NAMES[category])))
+	raw["regions"][1]["map"]["icon"] = "mountian"  # a typo
+	var result := ContentValidator.validate(raw)
+	assert_true("\n".join(result["errors"]).contains("UiIcons.NAMES"), str(result["errors"]))
