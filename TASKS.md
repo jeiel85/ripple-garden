@@ -3,7 +3,9 @@
 ## P0 — Vertical Slice Foundation
 - [x] P0-001 Godot project bootstrap, folders, autoload registration
   - EntitlementService autoload는 P1-011에서 등록 (TECH_SPEC §2 목록 중 유일한 미등록 항목)
-- [ ] P0-002 ContentDB JSON loader + validation errors
+- [x] P0-002 ContentDB JSON loader + validation errors
+  - 런타임 검증: `godot/content/content_validator.gd` (DATA_SCHEMA §7). 로컬라이제이션 키 존재는 `tests/unit/test_localization_keys.gd`
+  - behavior 값은 정의 목록이 아직 없어 비어 있지 않은 문자열만 검사 → P0-015(fight)에서 behavior 정의 시 참조 검사 추가
 - [ ] P0-003 EventBus typed event conventions
 - [ ] P0-004 GameState domain model
 - [ ] P0-005 SaveService atomic write + backup + load
@@ -28,6 +30,7 @@
 - [ ] P0-024 settings/accessibility baseline
 - [ ] P0-025 debug menu
 - [ ] P0-026 automated content validation
+  - `tools/validate_content.py`(Python)와 ContentValidator(GDScript) 규칙이 중복됨 → 단일 출처로 정리
 - [ ] P0-027 save roundtrip/migration tests
 - [ ] P0-028 Android/Windows vertical slice builds
 
@@ -42,6 +45,7 @@
 - [ ] P1-008 moment/ambient event journal
 - [ ] P1-009 photo mode
 - [ ] P1-010 map/region unlock
+  - `progression.json`의 `unique_fish`는 "선행 지역에서 발견한 종 수"로 해석 (ContentValidator가 그 지역 서식 종 수 이하를 강제)
 - [ ] P1-011 entitlement service abstraction
 - [ ] P1-012 full-game unlock UI
 - [ ] P1-013 KO/EN/JA localization

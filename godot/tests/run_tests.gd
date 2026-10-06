@@ -61,7 +61,7 @@ func _run() -> void:
 			test_case.tree = self
 			await test_case.call(method_name)
 			var problems := test_case.get_failures()
-			problems.append_array(_collector.take())
+			problems.append_array(_unexpected_errors(_collector.take(), test_case.get_expected_engine_errors()))
 			var label := "%s::%s" % [path.get_file(), method_name]
 			if problems.is_empty():
 				print("ok   ", label)
@@ -74,6 +74,24 @@ func _run() -> void:
 	print("\n%d passed, %d failed" % [passed, failed])
 	OS.remove_logger(_collector)
 	quit(0 if failed == 0 and passed > 0 else 1)
+
+## Removes one logged error per expected substring; reports expected errors
+## that never appeared and any errors left over.
+func _unexpected_errors(logged: PackedStringArray, expected: PackedStringArray) -> PackedStringArray:
+	var remaining := logged.duplicate()
+	var problems := PackedStringArray()
+	for substring in expected:
+		var found := -1
+		for i in remaining.size():
+			if remaining[i].contains(substring):
+				found = i
+				break
+		if found == -1:
+			problems.append("expected engine error containing '%s' was not logged" % substring)
+		else:
+			remaining.remove_at(found)
+	problems.append_array(remaining)
+	return problems
 
 func _discover() -> PackedStringArray:
 	var found := PackedStringArray()
