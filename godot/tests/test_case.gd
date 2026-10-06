@@ -8,9 +8,19 @@ extends RefCounted
 
 var tree: SceneTree
 var _failures: PackedStringArray = []
+var _expected_engine_errors: PackedStringArray = []
 
 func get_failures() -> PackedStringArray:
 	return _failures
+
+## Declares that the code under test will log an engine error containing
+## `substring`. Each call consumes one matching error; the test fails if the
+## error is never logged.
+func expect_engine_error(substring: String) -> void:
+	_expected_engine_errors.append(substring)
+
+func get_expected_engine_errors() -> PackedStringArray:
+	return _expected_engine_errors
 
 func clear_failures() -> void:
 	_failures.clear()
