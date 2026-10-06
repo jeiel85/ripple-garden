@@ -11,7 +11,9 @@
     "weather": [
       "clear",
       "cloudy",
-      "rain"
+      "rain",
+      "mist",
+      "sunshower"
     ],
     "restoration_levels": 10,
     "map": {
@@ -34,7 +36,8 @@
       "clear",
       "cloudy",
       "rain",
-      "mist"
+      "mist",
+      "sunshower"
     ],
     "restoration_levels": 10,
     "map": {
@@ -58,7 +61,8 @@
       "cloudy",
       "rain",
       "storm",
-      "mist"
+      "mist",
+      "sunshower"
     ],
     "restoration_levels": 10,
     "map": {
@@ -82,7 +86,8 @@
       "cloudy",
       "rain",
       "storm",
-      "mist"
+      "mist",
+      "sunshower"
     ],
     "restoration_levels": 10,
     "map": {
@@ -106,7 +111,8 @@
       "cloudy",
       "rain",
       "storm",
-      "mist"
+      "mist",
+      "sunshower"
     ],
     "restoration_levels": 10,
     "map": {

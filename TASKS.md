@@ -66,8 +66,8 @@
 - [x] P1-002 camp system
 - [x] P1-003 equipment/rod system
 - [x] P1-004 bait system
-- [ ] P1-005 5 time bands
-- [ ] P1-006 6 weather types
+- [x] P1-005 5 time bands
+- [x] P1-006 6 weather types
 - [ ] P1-007 offline aggregate simulation
 - [ ] P1-008 moment/ambient event journal
 - [ ] P1-009 photo mode

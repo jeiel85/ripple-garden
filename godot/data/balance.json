@@ -39,8 +39,9 @@
   "time": {
     "day_length_real_sec": 1440.0,
     "band_starts_hour": {
-      "dawn": 6.0,
-      "day": 9.0,
+      "dawn": 5.0,
+      "morning": 7.0,
+      "day": 11.0,
       "dusk": 17.0,
       "night": 20.0
     }

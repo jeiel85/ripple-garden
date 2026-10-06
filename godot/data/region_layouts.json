@@ -97,10 +97,10 @@
       {"kind": "bush", "x": 520, "y": 1212, "scale": 1.5, "min_level": 4}
     ],
     "ambient_animals": [
-      {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "day", "dusk"]},
-      {"kind": "butterfly", "count": 3, "min_level": 4, "time_bands": ["day"]},
+      {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
+      {"kind": "butterfly", "count": 3, "min_level": 4, "time_bands": ["morning", "day"]},
       {"kind": "firefly", "count": 10, "min_level": 5, "time_bands": ["dusk", "night"]},
-      {"kind": "bird", "count": 2, "min_level": 8, "time_bands": ["dawn", "day", "dusk"]},
+      {"kind": "bird", "count": 2, "min_level": 8, "time_bands": ["dawn", "morning", "day", "dusk"]},
       {"kind": "butterfly", "count": 3, "min_level": 9, "time_bands": ["day", "dusk"]},
       {"kind": "firefly", "count": 8, "min_level": 9, "time_bands": ["dusk", "night"]}
     ],

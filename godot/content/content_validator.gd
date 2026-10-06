@@ -289,6 +289,10 @@ func _check_weather(d: Dictionary) -> void:
 		_require_number(visual, "cloud", 0.0, 1.0, true, "visual.")
 		_require_number(visual, "rain", 0.0, 1.0, true, "visual.")
 		_require_number(visual, "brightness", 0.3, 1.2, true, "visual.")
+		# P1-006: optional fog over the water and how often lightning flashes (0 = never).
+		for optional in ["fog", "lightning"]:
+			if visual.has(optional):
+				_require_number(visual, optional, 0.0, 1.0, true, "visual.")
 		if typeof(visual.get("tint")) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(visual["tint"]) == null:
 			_item_errors.append("visual.tint: must be a #rrggbb color")
 
