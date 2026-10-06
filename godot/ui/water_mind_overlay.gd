@@ -47,6 +47,8 @@ var _idle_sec := 0.0
 var _menu_idle := 0.0
 var _dim_tween: Tween
 var _syncing := false
+## While photo mode frames a picture the overlay neither hides nor dims (a dimmed photo is no photo).
+var idle_paused := false
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -228,8 +230,13 @@ func _sync_sliders() -> void:
 		(_sliders[key] as HSlider).value = float(GameState.get_setting(key))
 	_syncing = false
 
+## Pauses or resumes the idle timers (photo mode on top).
+func pause_idle(paused: bool) -> void:
+	idle_paused = paused
+	_touched()
+
 func _process(delta: float) -> void:
-	if not active:
+	if not active or idle_paused:
 		return
 	if _chrome.visible:
 		_menu_idle += delta

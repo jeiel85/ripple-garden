@@ -189,15 +189,15 @@ func test_rain_amount_follows_quality_and_battery_saver() -> void:
 	var presenter := WeatherPresenter.new()
 	tree.root.add_child(presenter)
 	presenter.setup(weather, HabitatZone.to_polygon(_layout()["pond"]))
-	presenter.apply_quality("low", false)
+	presenter.apply_profile(GraphicsProfile.for_settings("low", false))
 	var low: int = presenter._rain.amount
-	presenter.apply_quality("high", false)
+	presenter.apply_profile(GraphicsProfile.for_settings("high", false))
 	var high: int = presenter._rain.amount
-	presenter.apply_quality("high", true)
+	presenter.apply_profile(GraphicsProfile.for_settings("high", true))
 	var saver: int = presenter._rain.amount
-	assert_true(low < high and saver < high and saver >= 20, "rain amounts: low %d high %d saver %d" % [low, high, saver])
-	presenter.apply_quality("nonsense", false)
-	assert_eq(presenter._rain.amount, WeatherPresenter.RAIN_AMOUNT["medium"], "unknown quality falls back to medium")
+	assert_true(low < high and saver < high and saver >= GraphicsProfile.MIN_RAIN, "rain amounts: low %d high %d saver %d" % [low, high, saver])
+	presenter.apply_profile(GraphicsProfile.for_settings("nonsense", false))
+	assert_eq(presenter._rain.amount, int(ContentDB.balance["graphics"]["quality"]["medium"]["rain"]), "unknown quality falls back to medium")
 	presenter.free()
 	weather.free()
 

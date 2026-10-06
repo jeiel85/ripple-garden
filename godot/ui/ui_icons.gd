@@ -9,10 +9,10 @@ extends RefCounted
 const DIR := "res://ui/icons/"
 const NAMES: PackedStringArray = [
 	"back", "bag", "bait", "bite", "calendar", "camera", "camp", "check", "clear", "clock", "close", "cloudy",
-	"crown", "decorate", "eye_off", "fish", "forward", "freshwater", "furniture", "gear", "hat", "hook", "journal", "lake",
+	"crown", "decorate", "eye_off", "fish", "forward", "frame", "freshwater", "furniture", "gear", "hat", "hook", "journal", "lake",
 	"laurel", "layout", "lock", "lotus", "map", "memory", "mist", "mountain", "music", "night", "ornament", "pin",
-	"rain", "record", "reel", "release", "ripple", "rod", "rotate", "ruler", "sea", "settings", "sort", "special",
-	"sprout", "star", "storm", "trash", "valley", "weather",
+	"rain", "record", "reel", "release", "ripple", "rod", "rotate", "ruler", "sea", "settings", "signature", "sort", "special",
+	"sprout", "star", "storm", "trash", "valley", "weather", "zoom_in", "zoom_out",
 ]
 
 static var _cache: Dictionary = {}

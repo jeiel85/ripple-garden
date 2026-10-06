@@ -5,10 +5,9 @@ extends Node2D
 ## mist over the water, and now and then a soft lightning flash in a storm (never with Reduced Motion).
 ## It reads WeatherService.visual() every frame, so conditions ease in and out with the
 ## service's transition instead of switching. Rain is one CPUParticles2D (GL Compatibility
-## friendly) whose count follows graphics quality and Battery Saver; with Reduced Motion the
-## clouds hold still.
+## friendly) whose count follows the graphics profile (quality and Battery Saver, GraphicsProfile);
+## with Reduced Motion the clouds hold still.
 
-const RAIN_AMOUNT := {"low": 90, "medium": 180, "high": 320}
 const MAX_RIPPLES := 14
 const RIPPLE_LIFETIME := 1.2
 const CLOUD_Y_MIN := 20.0
@@ -17,8 +16,6 @@ const CLOUD_Y_MAX := 300.0
 var weather: WeatherService = null
 var pond: PackedVector2Array = PackedVector2Array()
 var reduced_motion := false
-var quality := "medium"
-var battery_saver := false
 var rng := RandomNumberGenerator.new()
 
 var _rain: CPUParticles2D
@@ -61,13 +58,11 @@ func setup(p_weather: WeatherService, pond_polygon: PackedVector2Array) -> void:
 	_rain.color = Color(0.82, 0.9, 1.0, 0.55)
 	_rain.texture = _streak_texture()
 	add_child(_rain)
-	apply_quality(quality, battery_saver)
+	apply_profile(GraphicsProfile.for_settings("medium", false))
 
-func apply_quality(new_quality: String, new_battery_saver: bool) -> void:
-	quality = new_quality
-	battery_saver = new_battery_saver
-	var amount: int = RAIN_AMOUNT.get(quality, RAIN_AMOUNT["medium"])
-	_rain.amount = maxi(20, roundi(amount * (0.5 if battery_saver else 1.0)))
+## Takes the rain density from a resolved GraphicsProfile.
+func apply_profile(profile: Dictionary) -> void:
+	_rain.amount = int(profile["rain"])
 
 func _process(delta: float) -> void:
 	if weather == null or weather.current_id.is_empty():

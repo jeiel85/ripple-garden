@@ -163,6 +163,14 @@
     },
     "battery_saver_agent_factor": 0.6
   },
+  "graphics": {
+    "quality": {
+      "low": {"rain": 90, "wildlife": 0.5, "stars": 30, "water_glints": false, "waterfall_fps": 8},
+      "medium": {"rain": 180, "wildlife": 1.0, "stars": 70, "water_glints": true, "waterfall_fps": 12},
+      "high": {"rain": 320, "wildlife": 1.0, "stars": 110, "water_glints": true, "waterfall_fps": 20}
+    },
+    "battery_saver": {"rain_factor": 0.5, "wildlife_factor": 0.5, "water_glints": false, "waterfall_fps": 6}
+  },
   "journal": {
     "reveal_at_encounters": {
       "size": 1,

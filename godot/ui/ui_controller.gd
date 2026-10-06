@@ -6,10 +6,13 @@ extends CanvasLayer
 ## shown one at a time in a modal host (no stacked popups).
 ##
 ## Layers, bottom to top: world input, HUD (side buttons, fishing row), fight meter, toast, modal host,
-## the HUD's top and bottom bars, water-mind overlay, debug menu. The two bars sit above the modal host
+## the HUD's top and bottom bars, water-mind overlay, photo mode, debug menu. The two bars sit above the modal host
 ## so a full-screen panel can keep them (D-018): the catch result, equipment, camp and map keep the
 ## status bar (`KEEPS_STATUS`), the journal keeps the navigation row (`KEEPS_NAV`). Small panels
 ## (settings, restoration) are centred over a dimmed scene and hide both.
+
+## Messages sit above photo mode's buttons (and the polaroid strip under them) while it is open.
+const PHOTO_TOAST_BOTTOM := PhotoMode.POLAROID_STRIP + 210.0
 
 var game: Dictionary = {}
 
@@ -19,6 +22,7 @@ var hud: Hud
 var fight_meter: FightMeter
 var toast: Toast
 var water_mind: WaterMindOverlay
+var photo_mode: PhotoMode
 var inspect_panel: InspectPanel
 var journal_panel: JournalPanel
 var gear_panel: GearPanel
@@ -103,6 +107,8 @@ func setup(deps: Dictionary) -> void:
 	water_mind = WaterMindOverlay.new()
 	water_mind.weather_choices = _region.weather.allowed_ids()
 	root.add_child(water_mind)
+	photo_mode = PhotoMode.new()
+	root.add_child(photo_mode)
 	_build_panels(deps)
 
 	hud.setup(_fishing, _region_id, _region.weather)
@@ -119,7 +125,10 @@ func setup(deps: Dictionary) -> void:
 	hud.cancel_pressed.connect(func() -> void: _fishing.cancel())
 	water_mind.exited.connect(exit_water_mind)
 	water_mind.message.connect(show_message)
-	water_mind.photo_requested.connect(save_photo)
+	water_mind.photo_requested.connect(open_photo_mode)
+	photo_mode.shutter_pressed.connect(save_photo)
+	photo_mode.closed.connect(_on_photo_mode_closed)
+	photo_mode.message.connect(show_message)
 	water_mind.time_preview_changed.connect(_on_time_preview)
 	water_mind.weather_preview_changed.connect(_on_weather_preview)
 
@@ -496,6 +505,8 @@ func enter_water_mind() -> void:
 	water_mind.enter()
 
 func exit_water_mind() -> void:
+	if photo_mode.active:
+		photo_mode.exit()
 	hud.visible = true
 	hud.allow_top = true
 	hud.allow_bottom = true
@@ -535,6 +546,22 @@ static func preview_hour(band: String) -> float:
 	return fposmod((start + next) / 2.0, 24.0)
 
 ## Saves a picture of the scene without the overlay (water-mind "저장").
+## Photo mode over water-mind (P1-009): the overlay steps aside and the camera is the player's to frame.
+func open_photo_mode() -> void:
+	if not water_mind.active:
+		return
+	water_mind.hide_chrome()
+	water_mind.pause_idle(true)
+	var region_name := tr(ContentDB.get_region(_region_id).get("name_key", ""))
+	toast.offset_bottom = -PHOTO_TOAST_BOTTOM  # above the photo controls
+	photo_mode.enter(_camera, "%s · %s" % [region_name, InspectPanel.date_text(int(Time.get_unix_time_from_system()), false)])
+
+func _on_photo_mode_closed() -> void:
+	toast.offset_bottom = -196.0
+	water_mind.pause_idle(false)
+	if water_mind.active:
+		water_mind.show_chrome()
+
 func save_photo() -> void:
 	var hidden := hide_for_photo()
 	await RenderingServer.frame_post_draw
@@ -543,15 +570,19 @@ func save_photo() -> void:
 	var path := PhotoSaver.save(image)
 	show_message(tr("ui.photo.saved") % path if not path.is_empty() else tr("ui.photo.failed"))
 
-## Hides the overlay and any message for the one captured frame; returns what to bring back.
+## Hides the overlays and any message for the one captured frame (photo mode keeps its frame and
+## signature, which belong to the picture); returns what to bring back.
 func hide_for_photo() -> Dictionary:
-	var shown := {"chrome": water_mind.is_chrome_visible(), "toast": toast.visible}
+	var shown := {"chrome": water_mind.is_chrome_visible(), "toast": toast.visible, "photo_controls": photo_mode.controls_visible()}
 	water_mind.hide_chrome()
+	photo_mode.hide_controls()
 	toast.visible = false
 	return shown
 
 func restore_after_photo(shown: Dictionary) -> void:
 	toast.visible = shown.get("toast", false)
+	if shown.get("photo_controls", false):
+		photo_mode.show_controls()
 	if shown.get("chrome", false):
 		water_mind.show_chrome()
 

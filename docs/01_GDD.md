@@ -180,8 +180,8 @@ BGM/Water/Wind/Wildlife/Weather/Camp 믹서를 개별 조절.
 배터리 절약 설정과 연동.
 
 ## 17. Photo Mode
-Zoom / Pan / HUD Off / Frame / Logo Toggle.
-실제 저장과 OS Share는 플랫폼 구현 단계에서 추가.
+Zoom / Pan / HUD Off / Frame / Logo Toggle. (P1-009: 물멍의 "저장"에서 들어간다. UI_UX §8.1)
+사진은 게임 폴더에 PNG로 저장된다. 휴대폰 갤러리 저장과 OS Share는 플랫폼 구현 단계에서 추가.
 
 ## 18. Narrative
 NPC 대화 중심이 아닌 Environmental Storytelling:

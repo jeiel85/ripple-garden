@@ -7,7 +7,8 @@ extends SceneTree
 ##
 ##   --level=N       restoration level 0..5          --hour=H       game hour 0..24
 ##   --weather=ID    clear | cloudy | rain           --populate=N   N of every species released
-##   --panel=NAME    journal | gear | camp | map | restore | settings | debug | licenses | water_mind
+##   --panel=NAME    journal | gear | camp | map | restore | settings | debug | licenses | water_mind | photo
+##   --frame=ID      photo mode frame (none | polaroid | wood | soft), --zoom=X photo mode zoom
 ##   --state=NAME    wait | fight | inspect          --seed=N       RNG seed for the scenario
 ##   --frames=N      frames to run before capture (default 40)
 ##   --hc            high contrast + large UI        --reduced      reduced motion
@@ -93,6 +94,15 @@ func _run() -> void:
 		"settings": game.ui._open(game.ui.settings_panel)
 		"debug": game.ui.toggle_debug_menu()
 		"water_mind": game.ui.enter_water_mind()
+		"photo":
+			game.ui.enter_water_mind()
+			game.ui.open_photo_mode()
+			var photo: Control = game.ui.photo_mode  # untyped: autoload-dependent classes do not compile in a -s script
+			for i in 8:  # more than the frames there are; an unknown id leaves the frame as it was
+				if photo.frame_id == _args.get("frame", "none"):
+					break
+				photo.cycle_frame()
+			photo.set_zoom(float(_args.get("zoom", "1.0")))
 		"licenses":
 			game.ui.licenses_panel.show_text("Licenses", load("res://ui/text_panel.gd").licenses_text())
 			game.ui._open(game.ui.licenses_panel)

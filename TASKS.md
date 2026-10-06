@@ -70,14 +70,14 @@
 - [x] P1-006 6 weather types
 - [x] P1-007 offline aggregate simulation
 - [x] P1-008 moment/ambient event journal
-- [ ] P1-009 photo mode
+- [x] P1-009 photo mode
 - [x] P1-010 map/region unlock
   - `progression.json`의 `unique_fish`는 "선행 지역에서 발견한 종 수"로 해석 (ContentValidator가 그 지역 서식 종 수 이하를 강제)
 - [ ] P1-011 entitlement service abstraction
 - [ ] P1-012 full-game unlock UI
 - [ ] P1-013 KO/EN/JA localization
-- [ ] P1-014 graphics quality profiles
-- [ ] P1-015 battery saver
+- [x] P1-014 graphics quality profiles
+- [x] P1-015 battery saver
 
 ## P2 — Content Expansion
 - [ ] P2-001 Region 02 production
