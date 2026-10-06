@@ -25,6 +25,7 @@ var gear_panel: GearPanel
 var restoration_panel: RestorationPanel
 var camp_panel: CampPanel
 var map_panel: RegionMapPanel
+var away_panel: AwayPanel
 var settings_panel: SettingsPanel
 var licenses_panel: TextPanel
 var debug_menu: DebugMenu = null
@@ -188,6 +189,8 @@ func _build_panels(deps: Dictionary) -> void:
 	map_panel = RegionMapPanel.new()
 	map_panel.setup(RegionUnlocks.new(GameState), _region_id)
 	map_panel.close_pressed.connect(close_panel)
+	away_panel = AwayPanel.new()
+	away_panel.close_pressed.connect(close_panel)
 	settings_panel = SettingsPanel.new()
 	settings_panel.close_pressed.connect(close_panel)
 	settings_panel.message.connect(show_message)
@@ -420,6 +423,14 @@ func _refresh_restore_hint() -> void:
 
 func _refresh_journal_notice() -> void:
 	hud.set_journal_notice(GameState.has_unseen_journal_entries())
+
+## "While you were away": one short card; skipped while another screen or water-mind is up (the fish are
+## in the pond either way).
+func show_away_summary(summary: OfflineService.Summary) -> void:
+	if _current_panel != null or water_mind.active:
+		return
+	_open(away_panel)
+	away_panel.show_summary(summary)
 
 func _on_state_replaced() -> void:
 	_apply_theme()
