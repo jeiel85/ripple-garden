@@ -48,6 +48,20 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
 }
 ```
 
+### 3.1 Inventory (D-019)
+```json
+{
+  "rods": ["rod_bamboo"], "equipped_rod": "rod_bamboo",
+  "baits": ["bait_bread", "bait_worm"], "equipped_bait": "bait_bread",
+  "bait_counts": {"bait_worm": 6},
+  "bags": ["bag_basic"], "equipped_bag": "bag_basic",
+  "accessories": ["acc_straw_hat"], "equipped_accessory": "acc_straw_hat"
+}
+```
+- `bait_counts`: 개수가 있는 미끼의 재고(정수 0..9999). 끝없는 미끼(`consumable: false`)는 세지 않는다.
+- 가방 칸(장착한 가방의 `capacity`)을 넘는 재고는 서비스가 막는다. 세이브 자체는 숫자만 검사한다.
+- 이 필드가 없는 예전 세이브는 불러올 때 시작 가방·모자를 받고, 가진 미끼는 시작 재고를 받는다.
+
 ## 4. Collection Record
 ```json
 {
@@ -78,6 +92,15 @@ ID는 출시 후 변경하지 않는다. 표시명은 localization key로 분리
   "seen_events": []
 }
 ```
+
+## 5.1 Equipment Content (D-019)
+- `rods.json`: `grade` (common | uncommon | rare | event), `line_strength` 0..1(내구도), `desc_key`,
+  선택 `price` {currency: ripple | memory, amount}, `unlock` {region, restoration_level}, event는 `granted_by` (가격 없음)
+- `baits.json`: `consumable` false = 끝없는 미끼, `desc_key`, 선택 `price`(한 묶음 가격) · `unlock`
+- `equipment.json`: `bags` [{id `bag_*`, name_key, desc_key, capacity, color, price?, unlock?}],
+  `accessories` [{id `acc_*`, name_key, desc_key, hat, band (색), price?, unlock?}]
+- `balance.json`: `starting_inventory`에 bags·accessories·equipped_*·bait_counts, `equipment.bait_pack_size`
+- 시작 미끼에는 끝없는 미끼가 하나 이상 있어야 하고, 시작 재고는 시작 가방에 들어가야 한다(검증기가 강제)
 
 ## 6. Migration Rules
 - migration은 한 버전씩 순서대로 수행

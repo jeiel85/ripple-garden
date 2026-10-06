@@ -24,16 +24,37 @@ func new_game() -> void:
 	data = SaveSchema.default_save(_now())
 	var starting: Dictionary = ContentDB.balance.get("starting_inventory", {})
 	var inventory: Dictionary = data["inventory"]
-	inventory["rods"] = starting.get("rods", []).duplicate()
-	inventory["baits"] = starting.get("baits", []).duplicate()
-	inventory["equipped_rod"] = starting.get("equipped_rod", "")
-	inventory["equipped_bait"] = starting.get("equipped_bait", "")
+	for key in ["rods", "baits", "bags", "accessories"]:
+		inventory[key] = starting.get(key, []).duplicate()
+	for key in ["equipped_rod", "equipped_bait", "equipped_bag", "equipped_accessory"]:
+		inventory[key] = starting.get(key, "")
+	var stock: Dictionary = starting.get("bait_counts", {})
+	for bait_id in stock:
+		inventory["bait_counts"][bait_id] = int(stock[bait_id])  # JSON numbers arrive as floats
 	_replaced()
 
 ## Replaces the whole state with a loaded save, filling defaults and fixing types.
 func load_data(loaded: Dictionary) -> void:
+	var raw_inventory: Variant = loaded.get("inventory")
+	var old_save: bool = typeof(raw_inventory) == TYPE_DICTIONARY and not raw_inventory.has("bait_counts")
 	data = SaveSchema.normalize(loaded, _now())
+	_fill_starting_equipment(old_save)
 	_replaced()
+
+## Saves from before bags and counted baits (D-019) get the starting bag and hat, and their owned
+## consumable baits a starting stock, so nobody opens an old save to an empty bag.
+func _fill_starting_equipment(old_save: bool) -> void:
+	var starting: Dictionary = ContentDB.balance.get("starting_inventory", {})
+	var inventory: Dictionary = data["inventory"]
+	for pair in [["bags", "equipped_bag"], ["accessories", "equipped_accessory"]]:
+		if inventory[pair[0]].is_empty():
+			inventory[pair[0]] = starting.get(pair[0], []).duplicate()
+			inventory[pair[1]] = starting.get(pair[1], "")
+	if old_save:
+		var stock: Dictionary = starting.get("bait_counts", {})
+		for bait_id in inventory["baits"]:
+			if stock.has(bait_id):
+				inventory["bait_counts"][bait_id] = int(stock[bait_id])
 
 func ensure_initialized() -> void:
 	if data.is_empty():
@@ -310,6 +331,78 @@ func equip_bait(bait_id: String) -> bool:
 	if not data["inventory"]["baits"].has(bait_id):
 		return false
 	data["inventory"]["equipped_bait"] = bait_id
+	_inventory_changed()
+	return true
+
+func get_owned_bags() -> Array:
+	ensure_initialized()
+	return data["inventory"]["bags"].duplicate()
+
+func get_equipped_bag() -> String:
+	ensure_initialized()
+	return data["inventory"]["equipped_bag"]
+
+func get_owned_accessories() -> Array:
+	ensure_initialized()
+	return data["inventory"]["accessories"].duplicate()
+
+func get_equipped_accessory() -> String:
+	ensure_initialized()
+	return data["inventory"]["equipped_accessory"]
+
+func grant_bag(bag_id: String) -> void:
+	_grant("bags", bag_id)
+
+func grant_accessory(accessory_id: String) -> void:
+	_grant("accessories", accessory_id)
+
+func equip_bag(bag_id: String) -> bool:
+	return _equip("bags", "equipped_bag", bag_id)
+
+func equip_accessory(accessory_id: String) -> bool:
+	return _equip("accessories", "equipped_accessory", accessory_id)
+
+## Counted stock of a bait (0 for baits never stocked; endless baits are not counted).
+func get_bait_count(bait_id: String) -> int:
+	ensure_initialized()
+	return data["inventory"]["bait_counts"].get(bait_id, 0)
+
+## Every counted bait and its stock.
+func get_bait_counts() -> Dictionary:
+	ensure_initialized()
+	return data["inventory"]["bait_counts"].duplicate()
+
+## Adds `amount` (>= 0) baits to the stock. Capacity is the LoadoutService's rule, not the save's.
+func add_baits(bait_id: String, amount: int) -> void:
+	if amount < 0:
+		push_error("GameState: cannot add a negative number of baits (%d)" % amount)
+		return
+	ensure_initialized()
+	var counts: Dictionary = data["inventory"]["bait_counts"]
+	counts[bait_id] = mini(SaveSchema.MAX_BAIT_COUNT, counts.get(bait_id, 0) + amount)
+	_inventory_changed()
+
+## Uses one bait. Returns false (nothing changes) when there is none left.
+func take_bait(bait_id: String) -> bool:
+	ensure_initialized()
+	var counts: Dictionary = data["inventory"]["bait_counts"]
+	if counts.get(bait_id, 0) <= 0:
+		return false
+	counts[bait_id] -= 1
+	_inventory_changed()
+	return true
+
+func _grant(list_key: String, item_id: String) -> void:
+	ensure_initialized()
+	if not data["inventory"][list_key].has(item_id):
+		data["inventory"][list_key].append(item_id)
+		_inventory_changed()
+
+func _equip(list_key: String, equipped_key: String, item_id: String) -> bool:
+	ensure_initialized()
+	if not data["inventory"][list_key].has(item_id):
+		return false
+	data["inventory"][equipped_key] = item_id
 	_inventory_changed()
 	return true
 

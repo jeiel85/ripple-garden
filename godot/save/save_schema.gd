@@ -15,6 +15,8 @@ const CURRENT_VERSION := 1
 ## clamp downward (which would make an award reduce a balance).
 const MAX_CURRENCY := 999_999_999
 const MAX_POPULATION := 9999
+## Most baits of one kind a save may hold (bags hold far fewer; this only guards damaged saves).
+const MAX_BAIT_COUNT := 9999
 
 const QUALITY_OPTIONS: PackedStringArray = ["low", "medium", "high"]
 const FPS_OPTIONS: Array = [30, 60]
@@ -116,7 +118,12 @@ static func default_save(now: int) -> Dictionary:
 		"economy": {"ripple": 0, "memory": 0},
 		"regions": {},
 		"collection": {},
-		"inventory": {"rods": [], "baits": [], "equipped_rod": "", "equipped_bait": ""},
+		"inventory": {
+			"rods": [], "baits": [], "equipped_rod": "", "equipped_bait": "",
+			# D-019: bags hold the counted baits, accessories dress the angler.
+			"bags": [], "equipped_bag": "", "accessories": [], "equipped_accessory": "",
+			"bait_counts": {},
+		},
 		"settings": default_settings(),
 		"entitlement_cache": {"full_game": false},
 		# A fish that was caught but not yet released when the game closed (see GameState).
@@ -156,13 +163,20 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	entitlement["full_game"] = _bool_or_false(entitlement.get("full_game"))
 
 	var inventory: Dictionary = result["inventory"]
-	inventory["rods"] = _string_list(inventory.get("rods"))
-	inventory["baits"] = _string_list(inventory.get("baits"))
-	inventory["equipped_rod"] = _string_or(inventory.get("equipped_rod"), "")
-	inventory["equipped_bait"] = _string_or(inventory.get("equipped_bait"), "")
+	for list_key in ["rods", "baits", "bags", "accessories"]:
+		inventory[list_key] = _string_list(inventory.get(list_key))
+	for equipped_key in ["equipped_rod", "equipped_bait", "equipped_bag", "equipped_accessory"]:
+		inventory[equipped_key] = _string_or(inventory.get(equipped_key), "")
+	var counts := {}
+	var raw_counts: Variant = inventory.get("bait_counts")
+	if typeof(raw_counts) == TYPE_DICTIONARY:
+		for bait_id in raw_counts:
+			if typeof(bait_id) == TYPE_STRING and _is_number(raw_counts[bait_id]):
+				counts[bait_id] = clampi(_int_or(raw_counts[bait_id], 0), 0, MAX_BAIT_COUNT)
+	inventory["bait_counts"] = counts
 	# Saves written before equipment was tracked own items but have nothing equipped; fall back to
 	# the first owned item so the player never holds an invalid or empty equipment id.
-	for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"]]:
+	for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"], ["equipped_bag", "bags"], ["equipped_accessory", "accessories"]]:
 		var owned: Array = inventory[pair[1]]
 		if not owned.has(inventory[pair[0]]):
 			inventory[pair[0]] = owned[0] if not owned.is_empty() else ""
@@ -236,6 +250,14 @@ static func validate(save: Variant) -> PackedStringArray:
 				var population: Variant = region["species_population"][fish_id]
 				if typeof(population) != TYPE_INT or population < 0:
 					problems.append("regions.%s.species_population.%s must be a non-negative integer" % [region_id, fish_id])
+
+	var bait_counts: Variant = save["inventory"].get("bait_counts")
+	if typeof(bait_counts) != TYPE_DICTIONARY:
+		problems.append("inventory.bait_counts must be an object")
+	else:
+		for bait_id in bait_counts:
+			if typeof(bait_counts[bait_id]) != TYPE_INT or bait_counts[bait_id] < 0:
+				problems.append("inventory.bait_counts.%s must be a non-negative integer" % bait_id)
 
 	var pending: Dictionary = save["session"]["pending_catch"]
 	if not pending.is_empty():

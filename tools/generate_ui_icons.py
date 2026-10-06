@@ -95,6 +95,7 @@ ICONS = {
     "settings": cog(),
     "map": fill("M4 10 L16 6 L32 11 L44 7 L44 38 L32 42 L16 37 L4 41 Z M17 10 L17 34 L31 38 L31 14 Z", "evenodd"),
     "back": stroke("M31 7 L14 24 L31 41", 6),
+    "forward": stroke("M17 7 L34 24 L17 41", 6),
     "close": stroke("M11 11 L37 37 M37 11 L11 37", 6),
     "check": stroke("M8 25 L19 36 L40 12", 6),
     # status / weather

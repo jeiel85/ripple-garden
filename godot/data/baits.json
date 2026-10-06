@@ -5,7 +5,8 @@
     "tags": [
       "bread"
     ],
-    "consumable": true
+    "consumable": false,
+    "desc_key": "bait.bread.desc"
   },
   {
     "id": "bait_worm",
@@ -13,7 +14,12 @@
     "tags": [
       "worm"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 30
+    },
+    "desc_key": "bait.worm.desc"
   },
   {
     "id": "bait_corn",
@@ -21,7 +27,12 @@
     "tags": [
       "grain"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 25
+    },
+    "desc_key": "bait.corn.desc"
   },
   {
     "id": "bait_insect",
@@ -29,7 +40,12 @@
     "tags": [
       "insect"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 35
+    },
+    "desc_key": "bait.insect.desc"
   },
   {
     "id": "bait_shrimp",
@@ -37,7 +53,16 @@
     "tags": [
       "shrimp"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 45
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 3
+    },
+    "desc_key": "bait.shrimp.desc"
   },
   {
     "id": "bait_shellfish",
@@ -45,7 +70,16 @@
     "tags": [
       "shellfish"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 55
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 2
+    },
+    "desc_key": "bait.shellfish.desc"
   },
   {
     "id": "bait_small_fish",
@@ -53,7 +87,16 @@
     "tags": [
       "small_fish"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 65
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 1
+    },
+    "desc_key": "bait.small_fish.desc"
   },
   {
     "id": "bait_berry",
@@ -61,7 +104,16 @@
     "tags": [
       "fruit"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 40
+    },
+    "unlock": {
+      "region": "region_02_forest_stream",
+      "restoration_level": 1
+    },
+    "desc_key": "bait.berry.desc"
   },
   {
     "id": "bait_larva",
@@ -69,7 +121,16 @@
     "tags": [
       "larva"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 40
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 2
+    },
+    "desc_key": "bait.larva.desc"
   },
   {
     "id": "bait_cricket",
@@ -77,7 +138,16 @@
     "tags": [
       "insect"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 45
+    },
+    "unlock": {
+      "region": "region_02_forest_stream",
+      "restoration_level": 2
+    },
+    "desc_key": "bait.cricket.desc"
   },
   {
     "id": "bait_minnow",
@@ -85,7 +155,16 @@
     "tags": [
       "small_fish"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 60
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 1
+    },
+    "desc_key": "bait.minnow.desc"
   },
   {
     "id": "bait_crab",
@@ -93,7 +172,16 @@
     "tags": [
       "crab"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 70
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 2
+    },
+    "desc_key": "bait.crab.desc"
   },
   {
     "id": "bait_squid",
@@ -101,7 +189,16 @@
     "tags": [
       "squid"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 75
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 3
+    },
+    "desc_key": "bait.squid.desc"
   },
   {
     "id": "bait_seaweed",
@@ -109,7 +206,16 @@
     "tags": [
       "plant"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "ripple",
+      "amount": 50
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 1
+    },
+    "desc_key": "bait.seaweed.desc"
   },
   {
     "id": "bait_moon_moth",
@@ -118,7 +224,16 @@
       "insect",
       "special"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "memory",
+      "amount": 30
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 3
+    },
+    "desc_key": "bait.moon_moth.desc"
   },
   {
     "id": "bait_old_recipe",
@@ -127,6 +242,15 @@
       "bread",
       "special"
     ],
-    "consumable": true
+    "consumable": true,
+    "price": {
+      "currency": "memory",
+      "amount": 20
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 5
+    },
+    "desc_key": "bait.old_recipe.desc"
   }
 ]

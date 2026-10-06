@@ -28,6 +28,7 @@ const FILE_NAMES := {
 	"weather": "weather.json",
 	"layouts": "region_layouts.json",
 	"audio": "audio.json",
+	"equipment": "equipment.json",
 }
 
 const ID_PATTERNS := {
@@ -37,7 +38,14 @@ const ID_PATTERNS := {
 	"baits": "^bait_[a-z0-9_]+$",
 	"behaviors": "^[a-z][a-z0-9_]*$",
 	"weather": "^[a-z][a-z0-9_]*$",
+	"bags": "^bag_[a-z0-9_]+$",
+	"accessories": "^acc_[a-z0-9_]+$",
 }
+## Lists that live inside another file (equipment.json holds bags and accessories).
+const LIST_FILES := {"bags": "equipment.json", "accessories": "equipment.json"}
+## Equipment grades (GDD §12, D-019). "event" items are granted by a moment, never sold.
+const GRADES: PackedStringArray = ["common", "uncommon", "rare", "event"]
+const CURRENCIES: PackedStringArray = ["ripple", "memory"]
 
 const AUDIO_BUSES: PackedStringArray = preload("res://autoload/audio_service.gd").REQUIRED_BUSES
 const AUDIO_CUES: PackedStringArray = ["cast", "landed", "bite", "hooked", "caught", "released", "escaped"]
@@ -62,7 +70,15 @@ static func validate(raw: Dictionary) -> Dictionary:
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
 	var weather := v._validate_list(raw.get("weather"), "weather", v._check_weather)
 	v._check_weather_links(weather)
-	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
+	var equipment_raw: Variant = raw.get("equipment")
+	var bags := {}
+	var accessories := {}
+	if equipment_raw != null and typeof(equipment_raw) != TYPE_DICTIONARY:
+		v._errors.append("equipment.json: top level must be an object with bags and accessories")
+	elif equipment_raw != null:
+		bags = v._validate_list(equipment_raw.get("bags"), "bags", v._check_bag)
+		accessories = v._validate_list(equipment_raw.get("accessories"), "accessories", v._check_accessory)
+	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits, bags, accessories)
 	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
 	var audio := v._validate_audio(raw.get("audio"))
 	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
@@ -78,6 +94,8 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"weather": weather,
 		"layouts": layouts,
 		"audio": audio,
+		"bags": bags,
+		"accessories": accessories,
 		"errors": v._errors,
 	}
 
@@ -88,7 +106,7 @@ var _behaviors: Dictionary = {}
 var _item_errors := PackedStringArray()
 
 func _validate_list(items: Variant, category: String, check: Callable) -> Dictionary:
-	var file_name: String = FILE_NAMES[category]
+	var file_name: String = LIST_FILES.get(category, FILE_NAMES.get(category, ""))
 	var result: Dictionary = {}
 	if items == null:
 		return result
@@ -130,18 +148,67 @@ func _check_region(d: Dictionary) -> void:
 	_require_string_list(d, "weather")
 	_require_int(d, "restoration_levels", 1, 100)
 
+## Baits: `consumable` false means an endless supply (the fallback bait); a consumable bait is bought
+## in packs for `price` once `unlock` is met.
 func _check_bait(d: Dictionary) -> void:
 	_require_string(d, "name_key")
+	_require_string(d, "desc_key")
 	_require_string_list(d, "tags")
 	if typeof(d.get("consumable")) != TYPE_BOOL:
 		_item_errors.append("consumable: must be true or false")
+	_check_acquisition(d, false)
 
 func _check_rod(d: Dictionary) -> void:
 	_require_string(d, "name_key")
+	_require_string(d, "desc_key")
 	_require_number(d, "range", 0.0, 1.0, false)
 	_require_number(d, "bite_speed", 0.0, INF, false)
 	_require_number(d, "tension_assist", 0.0, 1.0, true)
+	_require_number(d, "line_strength", 0.0, 1.0, true)
 	_require_string_list(d, "tags")
+	if typeof(d.get("grade")) != TYPE_STRING or not d["grade"] in GRADES:
+		_item_errors.append("grade: must be one of %s" % ", ".join(GRADES))
+	_check_acquisition(d, true)
+
+func _check_bag(d: Dictionary) -> void:
+	_require_string(d, "name_key")
+	_require_string(d, "desc_key")
+	_require_int(d, "capacity", 1, 999)
+	_require_color(d, "color")
+	_check_acquisition(d, false)
+
+func _check_accessory(d: Dictionary) -> void:
+	_require_string(d, "name_key")
+	_require_string(d, "desc_key")
+	_require_color(d, "hat")
+	_require_color(d, "band")
+	_check_acquisition(d, false)
+
+## How an item is obtained: `price` {currency, amount} once `unlock` {region, restoration_level} is met,
+## or `granted_by` the same kind of condition for event items (which are never sold, No FOMO). An item
+## with neither is a starting item.
+func _check_acquisition(d: Dictionary, has_grade: bool) -> void:
+	for field in ["unlock", "granted_by"]:
+		if d.has(field):
+			var condition: Variant = d[field]
+			if typeof(condition) != TYPE_DICTIONARY or typeof(condition.get("region")) != TYPE_STRING \
+					or not _regions.has(condition["region"]) or not _is_int(condition.get("restoration_level")) \
+					or condition["restoration_level"] < 0 or condition["restoration_level"] > 100:
+				_item_errors.append("%s: must be {region: known region id, restoration_level: 0..100}" % field)
+	if d.has("price"):
+		var price: Variant = d["price"]
+		if typeof(price) != TYPE_DICTIONARY or not price.get("currency") in CURRENCIES or not _is_int(price.get("amount")) \
+				or price["amount"] < 1 or price["amount"] > 100000:
+			_item_errors.append("price: must be {currency: %s, amount: 1..100000}" % " | ".join(CURRENCIES))
+	if d.has("granted_by") and d.has("price"):
+		_item_errors.append("granted_by: an item granted by a moment is never also sold")
+	if has_grade and typeof(d.get("grade")) == TYPE_STRING:
+		if (d["grade"] == "event") != d.has("granted_by"):
+			_item_errors.append("grade: event items (and only they) are granted_by a moment")
+
+func _require_color(d: Dictionary, field: String) -> void:
+	if typeof(d.get(field)) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(d[field]) == null:
+		_item_errors.append("%s: must be a #rrggbb color" % field)
 
 func _check_weather(d: Dictionary) -> void:
 	_require_string(d, "name_key")
@@ -324,7 +391,8 @@ func _validate_progression(data: Variant, regions: Dictionary, fish: Dictionary)
 
 	return data if _errors.size() == before else {}
 
-func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, baits: Dictionary) -> Dictionary:
+func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, baits: Dictionary,
+		bags: Dictionary = {}, accessories: Dictionary = {}) -> Dictionary:
 	var file_name: String = FILE_NAMES["balance"]
 	if data == null:
 		return {}
@@ -339,12 +407,21 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 	else:
 		_check_owned_list(starting, "rods", rods, "starting_inventory.rods")
 		_check_owned_list(starting, "baits", baits, "starting_inventory.baits")
-		for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"]]:
+		_check_owned_list(starting, "bags", bags, "starting_inventory.bags")
+		_check_owned_list(starting, "accessories", accessories, "starting_inventory.accessories")
+		for pair in [["equipped_rod", "rods"], ["equipped_bait", "baits"], ["equipped_bag", "bags"], ["equipped_accessory", "accessories"]]:
 			var equipped: Variant = starting.get(pair[0])
 			var owned: Variant = starting.get(pair[1])
 			if typeof(owned) == TYPE_ARRAY and (typeof(equipped) != TYPE_STRING or not equipped in owned):
 				_errors.append("%s.starting_inventory.%s: must be one of starting_inventory.%s (got %s)" % [
 					file_name, pair[0], pair[1], var_to_str(equipped)])
+		_check_starting_baits(starting, baits, bags)
+
+	var equipment: Variant = data.get("equipment")
+	if typeof(equipment) != TYPE_DICTIONARY:
+		_errors.append("%s.equipment: must be an object" % file_name)
+	else:
+		_check_balance_number(equipment, "equipment", "bait_pack_size", 1, 99, true)
 
 	var time: Variant = data.get("time")
 	if typeof(time) != TYPE_DICTIONARY:
@@ -838,6 +915,35 @@ func _check_balance_number(section: Dictionary, section_name: String, field: Str
 		_errors.append("%s.%s.%s: must be %s in %s..%s (got %s)" % [
 			FILE_NAMES[file_key], section_name, field, "an integer" if integer else "a number",
 			min_value, max_value, var_to_str(value)])
+
+## Starting bait stock: only owned consumable baits, fitting the starting bag, plus at least one endless
+## bait so a player can always fish (D-019).
+func _check_starting_baits(starting: Dictionary, baits: Dictionary, bags: Dictionary) -> void:
+	var file_name: String = FILE_NAMES["balance"]
+	var owned: Variant = starting.get("baits")
+	var counts: Variant = starting.get("bait_counts")
+	var carried := 0
+	if typeof(counts) != TYPE_DICTIONARY:
+		_errors.append("%s.starting_inventory.bait_counts: must be an object {bait_id: count}" % file_name)
+	else:
+		for bait_id in counts:
+			if not baits.has(bait_id) or typeof(owned) != TYPE_ARRAY or not bait_id in owned or baits[bait_id]["consumable"] != true:
+				_errors.append("%s.starting_inventory.bait_counts.%s: must be an owned consumable bait" % [file_name, bait_id])
+			elif not _is_int(counts[bait_id]) or counts[bait_id] < 0:
+				_errors.append("%s.starting_inventory.bait_counts.%s: must be an integer >= 0" % [file_name, bait_id])
+			else:
+				carried += int(counts[bait_id])
+	var bag_id: Variant = starting.get("equipped_bag")
+	if typeof(bag_id) == TYPE_STRING and bags.has(bag_id) and carried > int(bags[bag_id]["capacity"]):
+		_errors.append("%s.starting_inventory.bait_counts: %d baits do not fit the starting bag (%d)" % [
+			file_name, carried, int(bags[bag_id]["capacity"])])
+	var endless := 0
+	if typeof(owned) == TYPE_ARRAY:
+		for bait_id in owned:
+			if baits.has(bait_id) and baits[bait_id]["consumable"] == false:
+				endless += 1
+	if endless == 0:
+		_errors.append("%s.starting_inventory.baits: needs an endless (consumable: false) bait so a player can always fish" % file_name)
 
 func _check_owned_list(section: Dictionary, field: String, known: Dictionary, label: String) -> void:
 	var file_name: String = FILE_NAMES["balance"]

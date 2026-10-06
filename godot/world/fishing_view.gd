@@ -46,6 +46,8 @@ func setup(controller: FishingController, rod_tip: Vector2, angler_at: Vector2 =
 	rod_base = angler + HANDS if has_angler() else rod_tip + Vector2(0, 90)
 	_bobber = origin
 	controller.state_changed.connect(_on_state_changed)
+	EventBus.inventory_changed.connect(queue_redraw)  # a new hat shows at once
+	EventBus.game_state_replaced.connect(queue_redraw)
 	controller.fight_updated.connect(_on_fight_updated)
 	EventBus.bite_hinted.connect(_on_bite_hinted)
 	EventBus.cast_landed.connect(_on_cast_landed)
@@ -261,9 +263,13 @@ func _draw_angler() -> void:
 	var head := body + Vector2(-8, -66)
 	draw_circle(head + Vector2(-4, 4), 15.0, Color("#5b3b26"))  # hair
 	draw_circle(head, 13.0, Color("#f3d2b0"))
-	draw_colored_polygon(_ellipse(head + Vector2(0, -8), Vector2(34, 13)), Color("#ece0c2"))
-	draw_colored_polygon(_ellipse(head + Vector2(0, -16), Vector2(18, 12)), Color("#f3e9cf"))
-	draw_colored_polygon(_ellipse(head + Vector2(0, -10), Vector2(18, 4)), Color("#5f7a4a"))
+	# The hat is the equipped accessory (D-019).
+	var accessory := ContentDB.get_accessory(GameState.get_equipped_accessory())
+	var hat := Color(accessory.get("hat", "#ece0c2"))
+	var band := Color(accessory.get("band", "#5f7a4a"))
+	draw_colored_polygon(_ellipse(head + Vector2(0, -8), Vector2(34, 13)), hat)
+	draw_colored_polygon(_ellipse(head + Vector2(0, -16), Vector2(18, 12)), hat.lightened(0.08))
+	draw_colored_polygon(_ellipse(head + Vector2(0, -10), Vector2(18, 4)), band)
 	draw_circle(head + Vector2(10, -11), 4.0, Color("#fdfbf3"))
 	draw_circle(head + Vector2(10, -11), 1.6, Color("#f3c84b"))
 	if _state == FishingController.State.BITE_HINT or _state == FishingController.State.HOOK:
