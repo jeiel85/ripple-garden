@@ -34,7 +34,7 @@
   },
   "vertical_slice": {
     "region_id": "region_01_quiet_pond",
-    "max_restoration_level": 5
+    "max_restoration_level": 10
   },
   "time": {
     "day_length_real_sec": 1440.0,

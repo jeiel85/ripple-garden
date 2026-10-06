@@ -12,5 +12,7 @@ const PROPS: PackedStringArray = [
 	"stepping_stone", "dock", "cat", "frog",
 	# Camp decorations (P1-002) that only the camp places.
 	"wood_table", "flower_pot", "campfire", "bench",
+	# The last restoration stage's payoff (P1-001).
+	"rainbow",
 ]
-const ANIMALS: PackedStringArray = ["dragonfly", "butterfly", "firefly"]
+const ANIMALS: PackedStringArray = ["dragonfly", "butterfly", "firefly", "bird"]

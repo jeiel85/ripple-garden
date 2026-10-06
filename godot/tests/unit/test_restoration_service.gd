@@ -54,12 +54,13 @@ func test_restoring_raises_one_level_and_keeps_the_points() -> void:
 func test_many_points_still_restore_one_level_at_a_time() -> void:
 	var parts := _setup()
 	parts[0].add_restoration_points(REGION, 500)
-	assert_eq(parts[1].levels_available(REGION), 5, "500 points justify the slice's maximum")
+	# progression.json: 390 points reach stage 6, the next stage needs 540.
+	assert_eq(parts[1].levels_available(REGION), 6, "500 points earn six stages")
 	var restores := 0
 	while parts[1].restore(REGION):
 		restores += 1
-	assert_eq(restores, 5)
-	assert_eq(parts[0].get_restoration_level(REGION), 5)
+	assert_eq(restores, 6, "one stage per restore, each its own visible change")
+	assert_eq(parts[0].get_restoration_level(REGION), 6)
 	parts[0].free()
 
 func test_the_slice_cap_stops_restoration_but_not_point_accumulation() -> void:

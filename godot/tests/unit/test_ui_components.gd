@@ -189,7 +189,7 @@ func test_restoration_panel_states_the_requirement_and_the_cap() -> void:
 	panel.refresh()
 	assert_false(panel._confirm.disabled)
 	GameState.add_restoration_points("region_01_quiet_pond", 100000)
-	GameState.set_restoration_level("region_01_quiet_pond", 5)
+	GameState.set_restoration_level("region_01_quiet_pond", int(ContentDB.balance["vertical_slice"]["max_restoration_level"]))
 	panel.refresh()
 	assert_true(panel._confirm.disabled)
 	assert_false(panel._brings.visible)
@@ -202,7 +202,7 @@ func test_restoration_panel_names_what_the_next_stage_brings() -> void:
 	var panel := RestorationPanel.new()
 	tree.root.add_child(panel)
 	panel.setup(restoration, "region_01_quiet_pond")
-	for level in range(1, 6):
+	for level in range(1, int(ContentDB.balance["vertical_slice"]["max_restoration_level"]) + 1):
 		var names := panel._next_stage_names(level)
 		assert_false(names.is_empty(), "stage %d promises nothing" % level)
 	assert_true(panel._next_stage_names(2).contains(String(TranslationServer.translate("ui.prop.reed"))))
@@ -273,7 +273,7 @@ func test_the_restoration_bar_is_full_at_the_cap_even_after_a_partial_stage() ->
 	GameState.set_restoration_level("region_01_quiet_pond", 3)
 	panel.refresh()  # leaves max_value at the next stage's requirement
 	GameState.add_restoration_points("region_01_quiet_pond", 5000)
-	GameState.set_restoration_level("region_01_quiet_pond", 5)
+	GameState.set_restoration_level("region_01_quiet_pond", int(ContentDB.balance["vertical_slice"]["max_restoration_level"]))
 	panel.refresh()
 	assert_eq(panel._bar.value, panel._bar.max_value, "the bar must read full at the cap")
 	panel.free()

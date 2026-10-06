@@ -62,7 +62,7 @@
     **실기기와 저사양 기기, 성능·발열·배터리는 아직 측정하지 않았다**(P3-005/006). 릴리스 서명·AAB·스토어 제출은 P3-001.
 
 ## P1 — Production Systems
-- [ ] P1-001 full 10 restoration levels
+- [x] P1-001 full 10 restoration levels
 - [x] P1-002 camp system
 - [x] P1-003 equipment/rod system
 - [x] P1-004 bait system
