@@ -29,17 +29,19 @@ var _current_panel: Control = null
 var _fishing: FishingController
 var _region: RegionRuntime
 var _restoration: RestorationService
+var _hints: TutorialHints
 var _region_id := ""
 
 func _init() -> void:
 	layer = 10
 
-## `deps`: fishing, region, restoration, journal, debug (nullable), region_id.
+## `deps`: fishing, region, restoration, journal, loadout, hints, debug (nullable), region_id.
 func setup(deps: Dictionary) -> void:
 	game = deps
 	_fishing = deps["fishing"]
 	_region = deps["region"]
 	_restoration = deps["restoration"]
+	_hints = deps["hints"]
 	_region_id = deps["region_id"]
 
 	root = Control.new()
@@ -122,6 +124,7 @@ func _build_panels(deps: Dictionary) -> void:
 	journal_panel.setup(deps["journal"], _region_id)
 	journal_panel.close_pressed.connect(_back_from_journal)
 	gear_panel = GearPanel.new()
+	gear_panel.setup(deps["loadout"])
 	gear_panel.close_pressed.connect(close_panel)
 	restoration_panel = RestorationPanel.new()
 	restoration_panel.setup(_restoration, _region_id)
@@ -198,9 +201,8 @@ func _show_inspect() -> void:
 	if pending.is_empty():
 		return
 	_open(inspect_panel)
-	inspect_panel.show_catch(pending)
-	if GameState.get_setting("tutorial_hints") == true:
-		_hint_once("hint_release", "ui.hint.release")
+	# The hint is part of the panel: a toast would be drawn behind the dimmed modal and never be read.
+	inspect_panel.show_catch(pending, tr("ui.hint.release") if _hints.take("hint_release") else "")
 
 func toggle_debug_menu() -> void:
 	if debug_menu == null:
@@ -270,14 +272,11 @@ func _refresh_restore_hint() -> void:
 # --- hints (Tutorial Hints setting) ---
 
 func _show_first_hint() -> void:
-	if GameState.get_setting("tutorial_hints") == true:
-		_hint_once("hint_cast", "ui.hint.cast")
+	_hint_once("hint_cast", "ui.hint.cast")
 
 func _hint_once(event_id: String, key: String) -> void:
-	if GameState.get_setting("tutorial_hints") != true or GameState.has_seen_event(_region_id, event_id):
-		return
-	GameState.mark_event_seen(_region_id, event_id)
-	show_message(tr(key))
+	if _hints.take(event_id):
+		show_message(tr(key))
 
 func show_message(text: String) -> void:
 	toast.show_message(text)
@@ -285,6 +284,11 @@ func show_message(text: String) -> void:
 # --- water-mind ---
 
 func enter_water_mind() -> void:
+	# A fish in hand (landing, inspecting, releasing) is finished first; the screen is not left behind.
+	if _fishing.state in [FishingController.State.LAND, FishingController.State.INSPECT, FishingController.State.RELEASE]:
+		return
+	# A line left out would bite and escape while nothing can be done about it: reel it in quietly.
+	_fishing.cancel()
 	if _current_panel != null:
 		close_panel()
 	hud.visible = false
@@ -296,6 +300,8 @@ func exit_water_mind() -> void:
 	hud.visible = true
 	hud.wake()
 	world_input.enabled = true
+	if _fishing.state == FishingController.State.INSPECT:
+		_show_inspect()  # a catch that arrived while the screen was hidden
 
 # --- settings: theme, layout ---
 
@@ -321,17 +327,19 @@ func _apply_motion() -> void:
 	toast.reduced_motion = reduced
 	water_mind.reduced_motion = reduced
 
+## Top and bottom insets (design pixels) for a notch or gesture bar. `safe` is the usable area in screen
+## pixels. Only mobile screens report meaningful insets: on a desktop the rectangle can be offset by other
+## monitors or the taskbar, which would push the top bar off screen, so desktop gets none.
+static func safe_insets(safe: Rect2i, screen: Vector2i, window_height: float, mobile: bool) -> Vector2:
+	if not mobile or screen.y <= 0 or safe.size.y <= 0:
+		return Vector2.ZERO
+	var scale := window_height / float(screen.y)
+	return Vector2(maxf(0.0, float(safe.position.y)) * scale, maxf(0.0, float(screen.y - safe.end.y)) * scale)
+
 func _apply_layout() -> void:
-	var window_size := get_viewport().get_visible_rect().size
-	var safe := DisplayServer.get_display_safe_area()
-	var screen := DisplayServer.screen_get_size()
-	var top_inset := 0.0
-	var bottom_inset := 0.0
-	if screen.y > 0 and safe.size.y > 0:
-		var scale := window_size.y / float(screen.y)
-		top_inset = float(safe.position.y) * scale
-		bottom_inset = maxf(0.0, float(screen.y - safe.end.y)) * scale
-	hud.apply_layout(top_inset, bottom_inset, UiTheme.touch_min(GameState.get_setting("large_ui") == true))
+	var insets := safe_insets(DisplayServer.get_display_safe_area(), DisplayServer.screen_get_size(),
+		get_viewport().get_visible_rect().size.y, OS.has_feature("mobile"))
+	hud.apply_layout(insets.x, insets.y, UiTheme.touch_min(GameState.get_setting("large_ui") == true))
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:

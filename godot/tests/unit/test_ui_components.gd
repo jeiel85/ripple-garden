@@ -154,6 +154,7 @@ func test_journal_panel_lists_every_species_and_hides_the_unmet() -> void:
 func test_gear_panel_equips_owned_items_only_through_the_state() -> void:
 	_fresh_state()
 	var panel := GearPanel.new()
+	panel.setup(LoadoutService.new(GameState))
 	tree.root.add_child(panel)
 	panel.refresh()
 	assert_eq(panel._rods_box.get_child_count(), 2)
@@ -218,6 +219,7 @@ func test_no_panel_is_wider_than_its_design_width_in_korean_or_english() -> void
 		var settings := SettingsPanel.new()
 		panels.append(settings)
 		var gear := GearPanel.new()
+		gear.setup(LoadoutService.new(GameState))
 		panels.append(gear)
 		var restore := RestorationPanel.new()
 		restore.setup(restoration, "region_01_quiet_pond")
@@ -241,3 +243,64 @@ func test_no_panel_is_wider_than_its_design_width_in_korean_or_english() -> void
 			panel.free()
 	TranslationServer.set_locale(previous)
 	_fresh_state()
+
+# --- review fixes ---
+
+func test_refreshing_the_journal_leaves_no_stale_cards_in_the_layout() -> void:
+	_fresh_state()
+	var panel := JournalPanel.new()
+	tree.root.add_child(panel)
+	panel.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), "region_01_quiet_pond")
+	panel.refresh()
+	panel.refresh()
+	panel.refresh()
+	assert_eq(panel._list.get_child_count(), panel.card_count(), "old cards must leave the list immediately")
+	panel.free()
+	_fresh_state()
+
+func test_the_restoration_bar_is_full_at_the_cap_even_after_a_partial_stage() -> void:
+	_fresh_state()
+	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
+	var panel := RestorationPanel.new()
+	tree.root.add_child(panel)
+	panel.setup(restoration, "region_01_quiet_pond")
+	GameState.add_restoration_points("region_01_quiet_pond", 150)
+	GameState.set_restoration_level("region_01_quiet_pond", 3)
+	panel.refresh()  # leaves max_value at the next stage's requirement
+	GameState.add_restoration_points("region_01_quiet_pond", 5000)
+	GameState.set_restoration_level("region_01_quiet_pond", 5)
+	panel.refresh()
+	assert_eq(panel._bar.value, panel._bar.max_value, "the bar must read full at the cap")
+	panel.free()
+	_fresh_state()
+
+func test_restore_ready_is_shown_by_text_as_well_as_colour() -> void:
+	var hud := Hud.new()
+	tree.root.add_child(hud)
+	var idle_text := hud.restore_button.text
+	hud.set_restore_ready(true)
+	assert_true(hud.restore_button.text != idle_text, "the label must change, not only the colour")
+	assert_eq(hud.restore_button.theme_type_variation, &"PrimaryButton")
+	hud.set_restore_ready(false)
+	assert_eq(hud.restore_button.text, idle_text)
+	hud.free()
+
+func test_sliders_and_popup_rows_are_full_size_touch_targets() -> void:
+	var panel := _panel()
+	for section in SettingsPanel.SECTIONS:
+		for row in section["rows"]:
+			if row[1] == "slider":
+				assert_true((panel.control_for(row[0]) as HSlider).custom_minimum_size.y >= UiTheme.TOUCH_MIN_PX, "%s slider is too thin to touch" % row[0])
+	panel.free()
+	var theme := UiTheme.build(1.0, false, false)
+	var font_height := ThemeDB.fallback_font.get_height(theme.default_font_size)
+	assert_true(font_height + theme.get_constant("v_separation", "PopupMenu") >= UiTheme.TOUCH_MIN_PX - 8.0, "drop-down rows are too short to tap")
+
+func test_safe_insets_apply_only_on_mobile_screens() -> void:
+	var safe := Rect2i(0, 100, 1080, 2250)
+	assert_eq(UIController.safe_insets(safe, Vector2i(1080, 2400), 1600.0, false), Vector2.ZERO, "a desktop window must get no insets")
+	var mobile := UIController.safe_insets(safe, Vector2i(1080, 2400), 1600.0, true)
+	assert_true(absf(mobile.x - 100.0 * 1600.0 / 2400.0) < 0.01)
+	assert_true(absf(mobile.y - 50.0 * 1600.0 / 2400.0) < 0.01)
+	assert_eq(UIController.safe_insets(Rect2i(), Vector2i(1080, 2400), 1600.0, true), Vector2.ZERO)
+	assert_eq(UIController.safe_insets(safe, Vector2i(0, 0), 1600.0, true), Vector2.ZERO)

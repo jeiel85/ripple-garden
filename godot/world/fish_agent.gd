@@ -53,6 +53,7 @@ func configure(fish_def: Dictionary) -> void:
 	body_color = Color.from_hsv(hue, 0.30 + 0.07 * rarity, 0.78 - 0.02 * rarity)
 	accent_color = Color.from_hsv(fposmod(hue + 0.08, 1.0), 0.55 + 0.08 * rarity, 0.9)
 	velocity = Vector2.ZERO
+	target = Vector2.ZERO  # a pooled agent must not keep swimming to the previous species' destination
 	heading = randf() * TAU
 	think_left = 0.0
 	burst_left = 0.0

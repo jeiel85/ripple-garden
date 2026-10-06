@@ -49,8 +49,11 @@ var reeling := false
 ## The fish on the line (null while nothing has bitten) and the active fight, if any.
 var encounter: EncounterResolver.Encounter = null
 var fight: FightSimulation = null
-## What the player earned by releasing the last catch; null until a release happens.
-var last_reward: CatchService.Reward = null
+## What the player earned by releasing the last catch (null until a release happens). It comes from
+## CatchService, which sets it before `fish_released` is announced.
+var last_reward: CatchService.Reward:
+	get:
+		return _catch_service().last_reward
 
 ## Injectable collaborators; tests replace them, the game uses the autoloads.
 var game_state: Node = null
@@ -161,7 +164,6 @@ func release_catch() -> bool:
 		_enter(State.RELEASE)  # the only exit from INSPECT
 		_finish_attempt()
 		return false
-	last_reward = reward
 	_request_save()
 	_timer = float(_config()["release_sec"])
 	return _enter(State.RELEASE)

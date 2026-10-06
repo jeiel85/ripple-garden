@@ -105,9 +105,12 @@ func _process(delta: float) -> void:
 	var active := _bobber_shown or _aim_active or not _rings.is_empty()
 	if not active:
 		return
-	for ring in _rings:
-		ring["age"] += delta
-	_rings = _rings.filter(func(ring: Dictionary) -> bool: return ring["age"] < RING_LIFETIME)
+	var index := _rings.size() - 1
+	while index >= 0:  # age and drop in place: no new array every frame
+		_rings[index]["age"] += delta
+		if _rings[index]["age"] >= RING_LIFETIME:
+			_rings.remove_at(index)
+		index -= 1
 
 	match _state:
 		FishingController.State.CAST:

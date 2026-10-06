@@ -50,6 +50,7 @@ func refresh() -> void:
 	_brings.visible = not requirement.at_cap
 	if requirement.at_cap:
 		_points.text = tr("ui.restore.points_total") % requirement.points
+		_bar.max_value = 100.0  # the bar may still hold the previous stage's maximum
 		_bar.value = 100.0
 		_hint.text = tr("ui.restore.at_cap")
 		_confirm.disabled = true

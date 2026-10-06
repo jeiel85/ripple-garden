@@ -105,7 +105,7 @@ func _row(spec: Array) -> Control:
 			slider.min_value = float(spec[2])
 			slider.max_value = float(spec[3])
 			slider.step = float(spec[4])
-			slider.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX * 0.7)
+			slider.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)  # the grabber is the touch target
 			slider.value_changed.connect(func(value: float) -> void:
 				if _syncing:
 					return

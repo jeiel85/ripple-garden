@@ -14,6 +14,7 @@ var _portrait: UiKit.FishPortrait
 var _name: Label
 var _size: Label
 var _meetings: Label
+var _hint: Label
 var _release: Button
 var _journal: Button
 
@@ -26,9 +27,10 @@ func _init() -> void:
 	_name = UiKit.label("", "TitleLabel", HORIZONTAL_ALIGNMENT_CENTER)
 	_size = UiKit.label("", "", HORIZONTAL_ALIGNMENT_CENTER)
 	_meetings = UiKit.label("", "DimLabel", HORIZONTAL_ALIGNMENT_CENTER)
+	_hint = UiKit.label("", "DimLabel", HORIZONTAL_ALIGNMENT_CENTER)
 	_release = UiKit.button(tr("ui.inspect.release"), func() -> void: release_pressed.emit(), true, UiTheme.TOUCH_MIN_PX * 1.15)
 	_journal = UiKit.button(tr("ui.inspect.journal"), func() -> void: journal_pressed.emit())
-	for node in [_badge, _portrait, _name, _size, _meetings, UiKit.spacer(6), _release, _journal]:
+	for node in [_badge, _portrait, _name, _size, _meetings, _hint, UiKit.spacer(6), _release, _journal]:
 		box.add_child(node)
 	add_child(UiKit.margin(box, 26))
 
@@ -37,8 +39,11 @@ func _focus_release() -> void:
 	if _release.is_inside_tree():
 		_release.grab_focus()
 
-## `pending` is the pending-catch info: fish_id, size_cm, first_discovery.
-func show_catch(pending: Dictionary) -> void:
+## `pending` is the pending-catch info: fish_id, size_cm, first_discovery. `hint_text` is an optional
+## one-line tutorial hint shown under the details.
+func show_catch(pending: Dictionary, hint_text: String = "") -> void:
+	_hint.text = hint_text
+	_hint.visible = not hint_text.is_empty()
 	var fish_id: String = pending["fish_id"]
 	var def := ContentDB.get_fish(fish_id)
 	var first: bool = pending.get("first_discovery", false) == true

@@ -23,6 +23,7 @@ var rng := RandomNumberGenerator.new()
 var _rain: CPUParticles2D
 var _clouds: Array[Dictionary] = []
 var _ripples: Array[Dictionary] = []
+var _visual: Dictionary = {}
 var _ripple_clock := 0.0
 var _pond_bounds := Rect2()
 
@@ -68,7 +69,8 @@ func apply_quality(new_quality: String, new_battery_saver: bool) -> void:
 func _process(delta: float) -> void:
 	if weather == null or weather.current_id.is_empty():
 		return
-	var visual := weather.visual()
+	_visual = weather.visual()  # once per frame; _draw reuses it
+	var visual := _visual
 	var rain: float = visual["rain"]
 	_rain.emitting = rain > 0.02
 	_rain.modulate.a = clampf(rain, 0.0, 1.0)
@@ -84,9 +86,12 @@ func _process(delta: float) -> void:
 		if _ripple_clock >= interval and _ripples.size() < MAX_RIPPLES:
 			_ripple_clock = 0.0
 			_ripples.append({"pos": _random_pond_point(), "age": 0.0})
-	for ripple in _ripples:
-		ripple["age"] += delta
-	_ripples = _ripples.filter(func(r: Dictionary) -> bool: return r["age"] < RIPPLE_LIFETIME)
+	var index := _ripples.size() - 1
+	while index >= 0:  # age and drop in place: no new array every frame
+		_ripples[index]["age"] += delta
+		if _ripples[index]["age"] >= RIPPLE_LIFETIME:
+			_ripples.remove_at(index)
+		index -= 1
 	if cloud > 0.02 or not _ripples.is_empty():
 		queue_redraw()
 
@@ -100,9 +105,9 @@ func _random_pond_point() -> Vector2:
 	return _pond_bounds.get_center()
 
 func _draw() -> void:
-	if weather == null or weather.current_id.is_empty():
+	if weather == null or weather.current_id.is_empty() or _visual.is_empty():
 		return
-	var visual := weather.visual()
+	var visual := _visual
 	var cloud: float = visual["cloud"]
 	var shade := Color.WHITE.lerp(Color("#9aa6b4"), clampf(float(visual["rain"]), 0.0, 1.0))
 	for puff in _clouds:

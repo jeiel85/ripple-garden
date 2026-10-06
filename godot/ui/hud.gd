@@ -130,9 +130,11 @@ func set_cta_for_state(state_name: String) -> void:
 	_can_fade = state_name == "ready"
 	wake()
 
-## A soft "ready" cue for restoration: the button turns accent-coloured, with no badge or count.
+## A soft "ready" cue for restoration, with no badge or count: the button turns accent-coloured and its
+## label changes, so the state is never carried by colour alone.
 func set_restore_ready(is_ready: bool) -> void:
 	restore_button.theme_type_variation = "PrimaryButton" if is_ready else ""
+	restore_button.text = tr("ui.button.restore_ready") if is_ready else tr("ui.button.restore")
 
 ## Applies safe-area insets and the minimum touch size (design pixels).
 func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> void:

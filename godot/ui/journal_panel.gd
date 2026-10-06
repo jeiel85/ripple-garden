@@ -43,6 +43,7 @@ func setup(p_journal: JournalModel, p_region_id: String) -> void:
 ## Rebuilds the cards from the current save.
 func refresh() -> void:
 	for child in _list.get_children():
+		_list.remove_child(child)  # gone at once: a queued free would leave old cards in the layout this frame
 		child.queue_free()
 	_cards.clear()
 	var completion := journal.completion(region_id, GameState)

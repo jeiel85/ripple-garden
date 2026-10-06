@@ -330,3 +330,84 @@ func test_only_a_snapped_line_shakes_the_camera() -> void:
 	EventBus.fish_escaped.emit("fish_minnow", "line_snapped")
 	assert_true(root.camera._shake_tween == null, "Camera Shake off must be honoured")
 	_stop(root)
+
+func _toast_texts(root: GameRoot) -> Array:
+	var texts: Array = root.ui.toast._queue.duplicate()
+	texts.append(root.ui.toast._label.text)
+	return texts
+
+func test_the_release_toast_reports_this_catchs_own_reward_every_time() -> void:
+	var root := _start()
+	for attempt in 2:
+		root.ui.toast._queue.clear()
+		root.ui.toast._label.text = ""
+		_play_attempt(root, 30 + attempt)
+		var reward := root.fishing.last_reward
+		assert_not_null(reward, "attempt %d paid nothing" % attempt)
+		var expected := String(TranslationServer.translate("ui.toast.ripple")) % reward.ripple
+		var shown := "\n".join(_toast_texts(root))
+		assert_true(shown.contains(expected), "attempt %d: expected '%s' in %s" % [attempt, expected, _toast_texts(root)])
+		if reward.memory > 0:
+			assert_true(shown.contains(String(TranslationServer.translate("ui.toast.memory")) % reward.memory), "attempt %d: memory missing" % attempt)
+	_stop(root)
+
+func test_the_release_hint_is_inside_the_inspect_panel_and_shown_once() -> void:
+	var root := _start()
+	root.fishing.spawn_fish("fish_crucian_carp")
+	root.ui.world_input.cast_quick()
+	var elapsed := 0.0
+	while root.fishing.state != FishingController.State.INSPECT and elapsed < 240.0:
+		if root.fishing.state == FishingController.State.HOOK:
+			root.fishing.tap()
+		if root.fishing.state == FishingController.State.FIGHT:
+			root.fishing.set_reeling(root.fishing.fight.tension < 0.5)
+		root.fishing.advance(1.0 / 30.0)
+		elapsed += 1.0 / 30.0
+	assert_true(root.ui.inspect_panel._hint.visible, "the first inspect screen explains releasing")
+	assert_false(root.ui.inspect_panel._hint.text.is_empty())
+	root.ui.inspect_panel.release_pressed.emit()
+	assert_false(root.ui.inspect_panel._hint.visible and root.ui.inspect_panel._hint.text.is_empty())
+	root.ui.inspect_panel.show_catch({"fish_id": "fish_minnow", "size_cm": 10.0, "first_discovery": false})
+	assert_false(root.ui.inspect_panel._hint.visible, "no hint without text")
+	_stop(root)
+
+func test_entering_water_mind_reels_in_a_line_that_is_out() -> void:
+	var root := _start()
+	root.ui.world_input.cast_quick()
+	assert_eq(root.fishing.state, FishingController.State.CAST)
+	root.ui.enter_water_mind()
+	assert_true(root.ui.water_mind.active)
+	assert_eq(root.fishing.state, FishingController.State.READY, "nothing may bite while the screen is hidden")
+	root.fishing.advance(60.0)
+	assert_eq(root.fishing.state, FishingController.State.READY)
+	_stop(root)
+
+func test_water_mind_waits_while_a_catch_is_in_hand() -> void:
+	var root := _start()
+	root.fishing.spawn_fish("fish_crucian_carp")
+	root.ui.world_input.cast_quick()
+	var elapsed := 0.0
+	while root.fishing.state != FishingController.State.LAND and elapsed < 240.0:
+		if root.fishing.state == FishingController.State.HOOK:
+			root.fishing.tap()
+		if root.fishing.state == FishingController.State.FIGHT:
+			root.fishing.set_reeling(root.fishing.fight.tension < 0.5)
+		root.fishing.advance(1.0 / 30.0)
+		elapsed += 1.0 / 30.0
+	assert_eq(root.fishing.state, FishingController.State.LAND)
+	root.ui.enter_water_mind()
+	assert_false(root.ui.water_mind.active, "a landed fish must be inspected and released first")
+	root.fishing.advance(5.0)
+	assert_eq(root.fishing.state, FishingController.State.INSPECT)
+	assert_eq(root.ui.current_panel(), root.ui.inspect_panel, "and its screen must be there")
+	_stop(root)
+
+func test_leaving_water_mind_brings_back_a_catch_that_arrived_meanwhile() -> void:
+	var root := _start()
+	root.ui.enter_water_mind()
+	GameState.set_pending_catch({"fish_id": "fish_minnow", "size_cm": 12.0, "region_id": root.region_id, "rarity": 1, "first_discovery": true})
+	assert_true(root.fishing.resume_pending_catch())
+	assert_false(root.ui.is_panel_open(), "nothing opens over water-mind")
+	root.ui.water_mind.exit()
+	assert_eq(root.ui.current_panel(), root.ui.inspect_panel)
+	_stop(root)

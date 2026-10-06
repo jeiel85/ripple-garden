@@ -18,6 +18,10 @@ class Reward:
 	var restoration_points := 0
 	var population := 0
 
+## The reward of the most recent release. Set *before* `fish_released` is announced, so anything that
+## reacts to that event already sees it.
+var last_reward: Reward = null
+
 var _game_state: Node
 var _rewards: Dictionary
 
@@ -71,6 +75,7 @@ func release_catch() -> Reward:
 		_game_state.add_memory(reward.memory)
 	reward.population = _game_state.get_population(region_id, fish_id)
 	_game_state.clear_pending_catch()
+	last_reward = reward
 	EventBus.fish_released.emit(fish_id, region_id, size_cm)
 	return reward
 

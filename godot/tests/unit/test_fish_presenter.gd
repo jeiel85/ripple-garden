@@ -169,3 +169,11 @@ func test_species_look_different_from_each_other() -> void:
 		agent.free()
 	assert_true(colors.size() >= 8, "only %d distinct colours across 10 species" % colors.size())
 	assert_true(lengths.size() >= 4, "species should differ in size too")
+
+func test_a_pooled_agent_forgets_the_previous_species_destination() -> void:
+	var agent := FishAgent.new()
+	agent.configure(ContentDB.get_fish("fish_minnow"))
+	agent.target = Vector2(300, 700)
+	agent.configure(ContentDB.get_fish("fish_catfish"))
+	assert_eq(agent.target, Vector2.ZERO)
+	agent.free()

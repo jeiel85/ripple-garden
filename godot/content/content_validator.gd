@@ -714,6 +714,13 @@ func _validate_audio(data: Variant) -> Dictionary:
 		for loop_id in loop_ids:
 			if typeof(mix.get(loop_id)) != TYPE_DICTIONARY:
 				_errors.append("%s.mix.%s: every loop needs mix settings" % [file_name, loop_id])
+		# The mix rules (AmbientMix.loop_targets) read these keys unconditionally.
+		var required := {"water": ["base", "rain_boost"], "wind": ["base", "cloud_boost", "night_factor"], "rain": ["gain"]}
+		for loop_id in required:
+			if typeof(mix.get(loop_id)) == TYPE_DICTIONARY:
+				for key in required[loop_id]:
+					if not mix[loop_id].has(key):
+						_errors.append("%s.mix.%s.%s: required by the mix rules" % [file_name, loop_id, key])
 		for loop_id in mix:
 			if not loop_ids.has(loop_id):
 				_errors.append("%s.mix.%s: no such loop" % [file_name, loop_id])

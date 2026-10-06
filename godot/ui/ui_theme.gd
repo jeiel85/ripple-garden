@@ -85,6 +85,8 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("normal", "OptionButton", _box(BUTTON, border, border_width, 18))
 	theme.set_stylebox("hover", "OptionButton", _box(BUTTON_HOVER, border, border_width, 18))
 	theme.set_stylebox("pressed", "OptionButton", _box(BUTTON_PRESSED, border, border_width, 18))
+	# Rows of the drop-down list are touch targets too: 30 px text plus padding reaches ~96 px.
+	theme.set_constant("v_separation", "PopupMenu", 48)
 	theme.set_stylebox("slider", "HSlider", _box(Color(1, 1, 1, 0.18), Color(0, 0, 0, 0), 0, 6, 10))
 	theme.set_stylebox("grabber_area", "HSlider", _box(ACCENT, Color(0, 0, 0, 0), 0, 6, 10))
 	theme.set_stylebox("grabber_area_highlight", "HSlider", _box(ACCENT.lightened(0.15), Color(0, 0, 0, 0), 0, 6, 10))

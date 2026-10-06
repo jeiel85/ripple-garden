@@ -371,3 +371,11 @@ func test_audio_wildlife_and_mix_rules_are_checked() -> void:
 	raw = _raw()
 	raw["audio"]["mix"].erase("rain")
 	_assert_error(ContentValidator.validate(raw), "audio.json.mix.rain: every loop needs mix settings")
+
+func test_audio_mix_rules_need_every_key_they_read() -> void:
+	for pair in [["wind", "night_factor"], ["water", "rain_boost"], ["rain", "gain"]]:
+		var raw := _raw()
+		raw["audio"]["mix"][pair[0]].erase(pair[1])
+		var result := ContentValidator.validate(raw)
+		_assert_error(result, "audio.json.mix.%s.%s: required by the mix rules" % [pair[0], pair[1]])
+		assert_true(result["audio"].is_empty(), "invalid mix kept")

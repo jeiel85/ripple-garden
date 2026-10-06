@@ -233,6 +233,8 @@ func _aliases() -> Dictionary:
 ## QA hook: keeps a copy of the primary save as save_qa_backup.json, then truncates the primary to
 ## simulate corruption so recovery from the backups can be exercised. Returns whether it did.
 func qa_corrupt_primary() -> bool:
+	if not BuildProfile.debug_tools_enabled():
+		return false  # defence in depth: DebugService already refuses, but this must never run in release
 	var primary := _path(SAVE_FILE)
 	if not FileAccess.file_exists(primary):
 		return false

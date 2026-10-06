@@ -8,6 +8,7 @@ extends PanelContainer
 
 signal close_pressed
 
+var _loadout: LoadoutService
 var _rods_box: VBoxContainer
 var _baits_box: VBoxContainer
 
@@ -27,6 +28,9 @@ func _init() -> void:
 	_baits_box = UiKit.vbox(10)
 	box.add_child(_baits_box)
 	add_child(UiKit.margin(box, 24))
+
+func setup(loadout: LoadoutService) -> void:
+	_loadout = loadout
 
 func refresh() -> void:
 	_fill(_rods_box, GameState.get_owned_rods(), GameState.get_equipped_rod(), true)
@@ -51,8 +55,9 @@ func _fill(box: VBoxContainer, ids: Array, equipped_id: String, is_rod: bool) ->
 		box.add_child(button)
 
 func _equip(item_id: String, is_rod: bool) -> void:
+	# The screen only asks; the service decides whether the item can be equipped.
 	if is_rod:
-		GameState.equip_rod(item_id)
+		_loadout.equip_rod(item_id)
 	else:
-		GameState.equip_bait(item_id)
+		_loadout.equip_bait(item_id)
 	refresh()
