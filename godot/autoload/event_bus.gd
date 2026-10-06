@@ -10,4 +10,4 @@ signal save_completed()
 signal save_failed(message: String)
 
 func emit_fish_released(payload: Dictionary) -> void:
-    fish_released.emit(payload)
+	fish_released.emit(payload)
