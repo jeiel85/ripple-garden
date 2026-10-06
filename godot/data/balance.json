@@ -33,5 +33,88 @@
     "pity_min_rarity": 3,
     "ecosystem_rarity_bonus_per_level": 0.08,
     "size_skew": 1.6
+  },
+  "fishing": {
+    "cast_sec": {
+      "min": 0.8,
+      "max": 1.2
+    },
+    "wait_sec": {
+      "min": 4.0,
+      "max": 14.0,
+      "floor": 3.5
+    },
+    "bite_hint_sec": {
+      "min": 0.7,
+      "max": 1.2
+    },
+    "hook_window_sec": {
+      "min": 1.5,
+      "max": 2.5
+    },
+    "hook_window_relaxed_sec": {
+      "min": 3.0,
+      "max": 4.0
+    },
+    "land_sec": 1.2,
+    "release_sec": 0.9,
+    "fight": {
+      "band": {
+        "min": 0.3,
+        "max": 0.75
+      },
+      "hold_target": 0.95,
+      "release_target": 0.05,
+      "response_per_sec": 1.8,
+      "start_progress": 0.25,
+      "duration_scale": 0.85,
+      "regress_above_band_per_sec": 0.12,
+      "regress_below_band_per_sec": 0.05,
+      "slack_threshold": 0.12,
+      "slack_grace_sec": 2.0,
+      "snap_threshold": 0.97,
+      "snap_grace_sec": 0.6
+    }
+  },
+  "rewards": {
+    "ripple_by_rarity": {
+      "1": {
+        "min": 8,
+        "max": 12
+      },
+      "2": {
+        "min": 12,
+        "max": 18
+      },
+      "3": {
+        "min": 20,
+        "max": 35
+      },
+      "4": {
+        "min": 35,
+        "max": 48
+      },
+      "5": {
+        "min": 48,
+        "max": 60
+      }
+    },
+    "memory_first_discovery_by_rarity": {
+      "1": 3,
+      "2": 5,
+      "3": 8,
+      "4": 12,
+      "5": 20
+    },
+    "restoration_points_by_rarity": {
+      "1": 6,
+      "2": 9,
+      "3": 14,
+      "4": 22,
+      "5": 35
+    },
+    "first_discovery_restoration_bonus": 12,
+    "repeat_decay_per_release": 0.04,
+    "repeat_floor": 0.4
   }
 }

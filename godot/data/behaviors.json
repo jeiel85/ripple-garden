@@ -1,0 +1,80 @@
+[
+  {
+    "id": "steady",
+    "pull_interval_sec": {
+      "min": 1.4,
+      "max": 2.6
+    },
+    "pull_duration_sec": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "pull_scale": 0.6,
+    "alternate": false
+  },
+  {
+    "id": "dasher",
+    "pull_interval_sec": {
+      "min": 2.2,
+      "max": 3.8
+    },
+    "pull_duration_sec": {
+      "min": 0.3,
+      "max": 0.5
+    },
+    "pull_scale": 1.1,
+    "alternate": false
+  },
+  {
+    "id": "heavy",
+    "pull_interval_sec": {
+      "min": 1.2,
+      "max": 2.0
+    },
+    "pull_duration_sec": {
+      "min": 1.0,
+      "max": 1.6
+    },
+    "pull_scale": 0.8,
+    "alternate": false
+  },
+  {
+    "id": "zigzag",
+    "pull_interval_sec": {
+      "min": 0.8,
+      "max": 1.4
+    },
+    "pull_duration_sec": {
+      "min": 0.4,
+      "max": 0.7
+    },
+    "pull_scale": 0.7,
+    "alternate": true
+  },
+  {
+    "id": "surface",
+    "pull_interval_sec": {
+      "min": 0.7,
+      "max": 1.2
+    },
+    "pull_duration_sec": {
+      "min": 0.2,
+      "max": 0.4
+    },
+    "pull_scale": 0.5,
+    "alternate": false
+  },
+  {
+    "id": "bottom",
+    "pull_interval_sec": {
+      "min": 1.8,
+      "max": 3.0
+    },
+    "pull_duration_sec": {
+      "min": 1.2,
+      "max": 2.0
+    },
+    "pull_scale": 0.9,
+    "alternate": false
+  }
+]

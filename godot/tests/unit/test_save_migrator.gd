@@ -128,7 +128,7 @@ func test_alias_renames_collection_population_inventory_and_pending() -> void:
 	save["inventory"]["rods"] = ["rod_old"]
 	save["inventory"]["equipped_rod"] = "rod_old"
 	save["inventory"]["baits"] = ["bait_old"]
-	save["session"]["pending_catch"] = {"fish_id": "fish_old", "region_id": "region_old"}
+	save["session"]["pending_catch"] = {"fish_id": "fish_old", "region_id": "region_old", "size_cm": 12.0, "rarity": 2, "first_discovery": false}
 	var aliases := {"fish": {"fish_old": "fish_new"}, "rods": {"rod_old": "rod_new"},
 		"baits": {"bait_old": "bait_new"}, "regions": {"region_old": "region_01_quiet_pond"}}
 	var result := SaveMigrator.new(1, {}, aliases).migrate(save, NOW)
