@@ -22,12 +22,14 @@ func _run() -> void:
 	var content := {
 		"fish": content_db.fish, "regions": content_db.regions, "rods": content_db.rods,
 		"baits": content_db.baits, "weather": content_db.weather,
+		"bags": content_db.bags, "accessories": content_db.accessories,
 	}
 	problems.append_array(localization.problems(localization.read_csv(), localization.references(content)))
 
 	if problems.is_empty():
-		print("CONTENT OK: %d fish, %d regions, %d rods, %d baits, %d behaviors, %d weather, %d layouts" % [
+		print("CONTENT OK: %d fish, %d regions, %d rods, %d baits, %d bags, %d accessories, %d behaviors, %d weather, %d layouts" % [
 			content_db.fish.size(), content_db.regions.size(), content_db.rods.size(), content_db.baits.size(),
+			content_db.bags.size(), content_db.accessories.size(),
 			content_db.behaviors.size(), content_db.weather.size(), content_db.layouts.size()])
 		quit(0)
 		return

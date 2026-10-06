@@ -33,7 +33,7 @@ var aliases_override: Dictionary = {}
 ## Tests replace the final tmp -> primary rename to simulate a locked destination:
 ## (from_path, to_path) -> Error.
 var finalize_override := Callable()
-## Tests inject a migrator with a synthetic version table; production uses SaveMigrator.MIGRATIONS.
+## Tests inject a migrator with a synthetic version table; production uses SaveMigrator.production_migrations().
 var migrator_override: SaveMigrator = null
 
 var _last_saved_revision := -1
@@ -177,7 +177,7 @@ func load_game() -> String:
 	var game_state := _state()
 	var migrator := migrator_override
 	if migrator == null:
-		migrator = SaveMigrator.new(SaveSchema.CURRENT_VERSION, SaveMigrator.MIGRATIONS, _aliases())
+		migrator = SaveMigrator.new(SaveSchema.CURRENT_VERSION, SaveMigrator.production_migrations(), _aliases())
 	var saw_newer := false
 	var damaged_primary := false
 

@@ -11,7 +11,20 @@
       "bait_insect"
     ],
     "equipped_rod": "rod_bamboo",
-    "equipped_bait": "bait_bread"
+    "equipped_bait": "bait_bread",
+    "bait_counts": {
+      "bait_worm": 6,
+      "bait_corn": 4,
+      "bait_insect": 4
+    },
+    "bags": [
+      "bag_basic"
+    ],
+    "equipped_bag": "bag_basic",
+    "accessories": [
+      "acc_straw_hat"
+    ],
+    "equipped_accessory": "acc_straw_hat"
   },
   "vertical_slice": {
     "region_id": "region_01_quiet_pond",
@@ -150,5 +163,8 @@
       "habitats": 5,
       "behavior": 10
     }
+  },
+  "equipment": {
+    "bait_pack_size": 10
   }
 }

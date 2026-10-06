@@ -40,6 +40,7 @@ func _ready() -> void:
 	if not region.setup(region_id, GameState.get_restoration_level(region_id), TimeService.get_time_band()):
 		return
 	fishing.region_id = region_id
+	fishing.loadout = loadout
 	fishing.context_provider = _fishing_context
 	if load_save:
 		# A landed fish and its release reach the disk at once (tests and tools leave this unset).
@@ -63,6 +64,8 @@ func _ready() -> void:
 	EventBus.region_restoration_changed.connect(_on_restoration_changed)
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.fish_escaped.connect(_on_fish_escaped)
+	# Keepsakes whose moment came while an older build was running arrive now.
+	loadout.grant_keepsakes()
 	# A fish caught but not released before the last exit is waiting to be inspected.
 	fishing.resume_pending_catch()
 
@@ -88,6 +91,7 @@ func _on_restoration_changed(changed_region: String, level: int) -> void:
 		return
 	region.apply_level(level, true)
 	camera.restoration_pulse()
+	loadout.grant_keepsakes()  # a restored stage may be the moment a keepsake was waiting for
 
 ## A snapped line gives the camera a small jolt (Camera Shake setting and Reduced Motion are
 ## honoured by the camera itself). Slack or a missed hook is quiet: failure stays gentle.

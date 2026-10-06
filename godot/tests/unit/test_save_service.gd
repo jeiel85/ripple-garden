@@ -268,6 +268,7 @@ func test_save_missing_version_is_treated_as_damaged() -> void:
 func test_migration_backs_up_the_original_then_loads_migrated_state() -> void:
 	_begin("migration")
 	var old_save := SaveSchema.default_save(1_700_000_000)
+	old_save["save_version"] = 1  # written by an older build
 	old_save["economy"]["ripple"] = 21
 	_write(SaveService.SAVE_FILE, JSON.stringify(old_save))
 	var upgrade := func(save: Dictionary) -> Dictionary:

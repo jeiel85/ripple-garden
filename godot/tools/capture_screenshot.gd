@@ -11,6 +11,7 @@ extends SceneTree
 ##   --state=NAME    wait | fight | inspect          --seed=N       RNG seed for the scenario
 ##   --frames=N      frames to run before capture (default 40)
 ##   --hc            high contrast + large UI        --reduced      reduced motion
+##   --ripple=N      add Ripple                      --memory=N     add Memory
 ##   --size=WxH      window size (default 405x720)
 
 var _args := {}
@@ -60,6 +61,10 @@ func _run() -> void:
 	if _args.has("weather"):
 		game.region.weather.set_weather(_args["weather"])
 		game.region.weather.advance(60.0)
+	if _args.has("ripple"):
+		game_state.add_ripple(int(_args["ripple"]))
+	if _args.has("memory"):
+		game_state.add_memory(int(_args["memory"]))
 	if _args.has("seed"):
 		game.fishing.set_seed(int(_args["seed"]))
 	game.region.fish_presenter.refresh()
@@ -81,7 +86,7 @@ func _run() -> void:
 
 	match _args.get("panel", ""):
 		"journal": game.ui.open_journal()
-		"gear": game.ui._open(game.ui.gear_panel)
+		"gear": game.ui.open_gear()
 		"restore": game.ui.open_restoration()
 		"settings": game.ui._open(game.ui.settings_panel)
 		"debug": game.ui.toggle_debug_menu()

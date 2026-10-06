@@ -57,6 +57,8 @@ var last_reward: CatchService.Reward:
 
 ## Injectable collaborators; tests replace them, the game uses the autoloads.
 var game_state: Node = null
+## Uses up the equipped bait when a fish takes it (D-019). Optional: without it baits are not counted.
+var loadout: LoadoutService = null
 ## () -> {"time_band": String, "weather_id": String}; defaults to TimeService + clear weather.
 var context_provider := Callable()
 ## Called right after a fish is landed and after it is released, so a crash cannot lose either.
@@ -221,6 +223,8 @@ func _on_timeout() -> void:
 			else:
 				_timer = _roll(_config()["bite_hint_sec"])
 				if _enter(State.BITE_HINT):
+					if loadout != null:
+						loadout.use_bait_for_bite()  # the fish took the bait, whatever happens next
 					EventBus.bite_hinted.emit()
 		State.BITE_HINT:
 			var window_key := "hook_window_relaxed_sec" if _state().get_setting("relaxed_hook") == true else "hook_window_sec"
@@ -260,10 +264,18 @@ func _make_request() -> EncounterResolver.Request:
 	request.habitat = habitat
 	request.time_band = context["time_band"]
 	request.weather_id = context["weather_id"]
-	request.bait_tags = ContentDB.get_bait(_state().get_equipped_bait()).get("tags", [])
+	request.bait_tags = _bait_tags()
 	request.ecosystem_level = _state().get_restoration_level(region_id)
 	request.miss_counts = _miss_counts
 	return request
+
+## Tags of the equipped bait, or none when it is a counted bait with nothing left (D-019).
+func _bait_tags() -> Array:
+	var bait_id: String = _state().get_equipped_bait()
+	var bait := ContentDB.get_bait(bait_id)
+	if bait.get("consumable", false) == true and _state().get_bait_count(bait_id) <= 0:
+		return []
+	return bait.get("tags", [])
 
 func _context() -> Dictionary:
 	if context_provider.is_valid():
@@ -292,7 +304,8 @@ func _start_fight() -> bool:
 	var fish_def := ContentDB.get_fish(encounter.fish_id)
 	var behavior := ContentDB.get_behavior(encounter.behavior)
 	var rod := ContentDB.get_rod(_state().get_equipped_rod())
-	fight = FightSimulation.new(fish_def, behavior, _config()["fight"], float(rod.get("tension_assist", 0.0)), rng)
+	fight = FightSimulation.new(fish_def, behavior, _config()["fight"], float(rod.get("tension_assist", 0.0)), rng,
+		float(rod.get("line_strength", 0.0)))
 	if not _enter(State.FIGHT):
 		fight = null
 		return false

@@ -37,6 +37,10 @@ signal region_population_changed(region_id: String, fish_id: String, population:
 signal region_restoration_points_changed(region_id: String, points: int)
 signal region_restoration_changed(region_id: String, level: int)
 signal inventory_changed()
+## The equipped bait ran out at a bite and `replacement_id` (an endless bait) was equipped instead.
+signal bait_ran_out(bait_id: String, replacement_id: String)
+## An item arrived by itself (an "event" keepsake whose moment came). `category` is rod | bait | bag | accessory.
+signal item_granted(category: String, item_id: String)
 ## Read the new value through GameState.get_setting(key).
 signal settings_changed(key: String)
 

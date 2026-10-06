@@ -2,13 +2,19 @@ extends TestCase
 
 ## P0-006: migration framework — ordered single-version steps, refusal of newer saves,
 ## default injection, unknown-field preservation and content id aliases.
-## Production has only v1, so these tests inject synthetic version tables.
+## The framework tests inject synthetic version tables; the production 1 -> 2 step (D-019) has its own test.
 
 const NOW := 1_700_000_000
 
 var call_order: Array = []
 
 func _v1_save() -> Dictionary:
+	var save := SaveSchema.default_save(NOW)
+	save["save_version"] = 1
+	save["economy"]["ripple"] = 40
+	return save
+
+func _current_save() -> Dictionary:
 	var save := SaveSchema.default_save(NOW)
 	save["economy"]["ripple"] = 40
 	return save
@@ -28,17 +34,28 @@ func _migrator(version: int, steps: Dictionary, aliases: Dictionary = {}) -> Sav
 	return SaveMigrator.new(version, steps, aliases)
 
 func test_current_version_save_passes_through_unchanged() -> void:
-	var save := _v1_save()
+	var save := _current_save()
 	var result := SaveMigrator.new().migrate(save, NOW)
 	assert_true(result["ok"], result["error"])
-	assert_eq(result["from_version"], 1)
+	assert_eq(result["from_version"], SaveSchema.CURRENT_VERSION)
 	assert_deep_eq(result["save"], save)
 
 func test_json_parsed_save_migrates_to_typed_save() -> void:
-	var parsed: Variant = JSON.parse_string(JSON.stringify(_v1_save()))
+	var parsed: Variant = JSON.parse_string(JSON.stringify(_current_save()))
 	var result := SaveMigrator.new().migrate(parsed, NOW)
 	assert_true(result["ok"], result["error"])
-	assert_deep_eq(result["save"], _v1_save())
+	assert_deep_eq(result["save"], _current_save())
+
+func test_version_1_inventories_without_bait_stock_are_marked_for_the_starting_stock() -> void:
+	var old := _v1_save()
+	old["inventory"].erase("bait_counts")
+	var result := SaveMigrator.new().migrate(JSON.parse_string(JSON.stringify(old)), NOW)
+	assert_true(result["ok"], result["error"])
+	assert_eq(result["save"]["save_version"], 2)
+	assert_eq(result["save"]["inventory"].get(SaveMigrator.LEGACY_BAIT_MARKER), true)
+	var already := _v1_save()  # a v1 save that somehow has stock is left alone
+	var kept := SaveMigrator.new().migrate(already, NOW)
+	assert_false(kept["save"]["inventory"].has(SaveMigrator.LEGACY_BAIT_MARKER))
 
 func test_steps_run_in_order_one_version_at_a_time() -> void:
 	call_order.clear()
@@ -120,6 +137,15 @@ func test_missing_fields_are_filled_after_migration() -> void:
 	assert_deep_eq(result["save"]["settings"], SaveSchema.default_settings())
 
 # --- aliases ---
+
+func test_alias_moves_bait_stock_with_its_bait() -> void:
+	var save := _v1_save()
+	save["save_version"] = SaveSchema.CURRENT_VERSION
+	save["inventory"]["baits"] = ["bait_old", "bait_new"]
+	save["inventory"]["bait_counts"] = {"bait_old": 7, "bait_new": 2}
+	var result := SaveMigrator.new(SaveSchema.CURRENT_VERSION, {}, {"baits": {"bait_old": "bait_new"}}).migrate(save, NOW)
+	assert_true(result["ok"], result["error"])
+	assert_deep_eq(result["save"]["inventory"]["bait_counts"], {"bait_new": 9}, "the old stock is not stranded under a dead id")
 
 func test_alias_renames_collection_population_inventory_and_pending() -> void:
 	var save := _v1_save()

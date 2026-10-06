@@ -35,11 +35,14 @@ var _pull_left := 0.0
 var _pull_sign := 1.0
 var _slack_time := 0.0
 var _snap_time := 0.0
+var _snap_grace := 0.6
 
 ## `fight_config` is balance.json fishing.fight, `behavior` a behaviors.json entry, `fish_def`
-## a fish_catalog entry and `rod_assist` the rod's tension_assist (0..1).
+## a fish_catalog entry and `rod_assist` the rod's tension_assist (0..1). `line_strength` (0..1, the
+## rod's durability) lets the line stay overtight longer before it snaps: grace x (1 + strength).
 func _init(fish_def: Dictionary, behavior: Dictionary, fight_config: Dictionary,
-		rod_assist: float, rng: RandomNumberGenerator) -> void:
+		rod_assist: float, rng: RandomNumberGenerator, line_strength: float = 0.0) -> void:
+	_snap_grace = float(fight_config["snap_grace_sec"]) * (1.0 + clampf(line_strength, 0.0, 1.0))
 	_config = fight_config
 	_behavior = behavior
 	_rng = rng
@@ -80,7 +83,7 @@ func step(delta: float, holding: bool) -> void:
 
 	if progress >= 1.0:
 		result = Result.LANDED
-	elif _snap_time >= float(_config["snap_grace_sec"]):
+	elif _snap_time >= _snap_grace:
 		result = Result.SNAPPED
 	elif _slack_time >= float(_config["slack_grace_sec"]):
 		result = Result.SLACK

@@ -7,7 +7,10 @@
     "tension_assist": 0.15,
     "tags": [
       "freshwater"
-    ]
+    ],
+    "grade": "common",
+    "line_strength": 0.5,
+    "desc_key": "rod.bamboo.desc"
   },
   {
     "id": "rod_light",
@@ -17,7 +20,10 @@
     "tension_assist": 0.2,
     "tags": [
       "freshwater"
-    ]
+    ],
+    "grade": "uncommon",
+    "line_strength": 0.15,
+    "desc_key": "rod.light.desc"
   },
   {
     "id": "rod_long",
@@ -27,7 +33,18 @@
     "tension_assist": 0.1,
     "tags": [
       "freshwater"
-    ]
+    ],
+    "grade": "common",
+    "line_strength": 0.35,
+    "price": {
+      "currency": "ripple",
+      "amount": 180
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 2
+    },
+    "desc_key": "rod.long.desc"
   },
   {
     "id": "rod_stream",
@@ -38,7 +55,18 @@
     "tags": [
       "freshwater",
       "stream"
-    ]
+    ],
+    "grade": "uncommon",
+    "line_strength": 0.25,
+    "price": {
+      "currency": "ripple",
+      "amount": 260
+    },
+    "unlock": {
+      "region": "region_02_forest_stream",
+      "restoration_level": 1
+    },
+    "desc_key": "rod.stream.desc"
   },
   {
     "id": "rod_deepwater",
@@ -49,7 +77,18 @@
     "tags": [
       "freshwater",
       "deep"
-    ]
+    ],
+    "grade": "uncommon",
+    "line_strength": 0.5,
+    "price": {
+      "currency": "ripple",
+      "amount": 320
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 1
+    },
+    "desc_key": "rod.deepwater.desc"
   },
   {
     "id": "rod_river",
@@ -60,7 +99,18 @@
     "tags": [
       "freshwater",
       "river"
-    ]
+    ],
+    "grade": "uncommon",
+    "line_strength": 0.4,
+    "price": {
+      "currency": "ripple",
+      "amount": 380
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 3
+    },
+    "desc_key": "rod.river.desc"
   },
   {
     "id": "rod_coastal",
@@ -70,7 +120,18 @@
     "tension_assist": 0.18,
     "tags": [
       "saltwater"
-    ]
+    ],
+    "grade": "uncommon",
+    "line_strength": 0.45,
+    "price": {
+      "currency": "ripple",
+      "amount": 360
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 1
+    },
+    "desc_key": "rod.coastal.desc"
   },
   {
     "id": "rod_pier",
@@ -80,7 +141,18 @@
     "tension_assist": 0.22,
     "tags": [
       "saltwater"
-    ]
+    ],
+    "grade": "common",
+    "line_strength": 0.3,
+    "price": {
+      "currency": "ripple",
+      "amount": 300
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 2
+    },
+    "desc_key": "rod.pier.desc"
   },
   {
     "id": "rod_reef",
@@ -91,7 +163,18 @@
     "tags": [
       "saltwater",
       "reef"
-    ]
+    ],
+    "grade": "rare",
+    "line_strength": 0.25,
+    "price": {
+      "currency": "ripple",
+      "amount": 520
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 1
+    },
+    "desc_key": "rod.reef.desc"
   },
   {
     "id": "rod_heavy",
@@ -103,7 +186,18 @@
       "freshwater",
       "saltwater",
       "heavy"
-    ]
+    ],
+    "grade": "rare",
+    "line_strength": 0.75,
+    "price": {
+      "currency": "ripple",
+      "amount": 420
+    },
+    "unlock": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 4
+    },
+    "desc_key": "rod.heavy.desc"
   },
   {
     "id": "rod_moonwood",
@@ -115,7 +209,18 @@
       "freshwater",
       "saltwater",
       "special"
-    ]
+    ],
+    "grade": "rare",
+    "line_strength": 0.2,
+    "price": {
+      "currency": "memory",
+      "amount": 60
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 4
+    },
+    "desc_key": "rod.moonwood.desc"
   },
   {
     "id": "rod_old_master",
@@ -127,6 +232,13 @@
       "freshwater",
       "saltwater",
       "special"
-    ]
+    ],
+    "grade": "event",
+    "line_strength": 0.3,
+    "granted_by": {
+      "region": "region_01_quiet_pond",
+      "restoration_level": 5
+    },
+    "desc_key": "rod.old_master.desc"
   }
 ]

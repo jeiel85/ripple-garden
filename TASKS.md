@@ -64,8 +64,8 @@
 ## P1 — Production Systems
 - [ ] P1-001 full 10 restoration levels
 - [ ] P1-002 camp system
-- [ ] P1-003 equipment/rod system
-- [ ] P1-004 bait system
+- [x] P1-003 equipment/rod system
+- [x] P1-004 bait system
 - [ ] P1-005 5 time bands
 - [ ] P1-006 6 weather types
 - [ ] P1-007 offline aggregate simulation

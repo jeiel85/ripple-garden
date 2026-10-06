@@ -340,23 +340,29 @@ func test_full_screen_panels_stay_inside_a_phone_screen() -> void:
 		var journal := JournalPanel.new()
 		journal.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), "region_01_quiet_pond")
 		var inspect := InspectPanel.new()
-		for panel in [journal, inspect]:
+		var gear := GearPanel.new()
+		gear.setup(LoadoutService.new(GameState))
+		for panel in [journal, inspect, gear]:
 			host.add_child(panel)
 		journal.refresh()
+		gear.select_tab("rod")
 		inspect.show_catch({"fish_id": "fish_crucian_carp", "size_cm": 12.0, "region_id": "region_01_quiet_pond", "first_discovery": true})
 		await tree.process_frame
 		await tree.process_frame
-		for panel in [journal, inspect]:
+		for panel in [journal, inspect, gear]:
 			_assert_inside(panel, 720.0, "%s (%s)" % [panel.get_script().get_path().get_file(), locale])
 		host.free()
 	TranslationServer.set_locale(previous)
 	GameState.new_game()
 
+## Checks every visible control. Content that scrolls sideways is clipped by its ScrollContainer, so
+## only the container has to fit; a container that only scrolls vertically must fit its content too.
 func _assert_inside(node: Node, width: float, label: String) -> void:
 	for child in node.get_children():
 		if child is Control and (child as Control).is_visible_in_tree():
 			var rect := (child as Control).get_global_rect()
-			if rect.end.x > width + 1.0 and not child.get_parent() is ScrollContainer:
+			if rect.end.x > width + 1.0:
 				fail("%s: %s ends at %.0f px, past the %.0f px screen" % [label, child.name, rect.end.x, width])
 				return
-		_assert_inside(child, width, label)
+		if not (child is ScrollContainer and (child as ScrollContainer).horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED):
+			_assert_inside(child, width, label)

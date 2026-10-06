@@ -1,0 +1,106 @@
+{
+  "bags": [
+    {
+      "id": "bag_basic",
+      "name_key": "bag.basic.name",
+      "desc_key": "bag.basic.desc",
+      "capacity": 20,
+      "color": "#6f8a5a"
+    },
+    {
+      "id": "bag_leather",
+      "name_key": "bag.leather.name",
+      "desc_key": "bag.leather.desc",
+      "capacity": 40,
+      "color": "#8a5a36",
+      "price": {
+        "currency": "ripple",
+        "amount": 300
+      },
+      "unlock": {
+        "region": "region_01_quiet_pond",
+        "restoration_level": 3
+      }
+    },
+    {
+      "id": "bag_sea",
+      "name_key": "bag.sea.name",
+      "desc_key": "bag.sea.desc",
+      "capacity": 60,
+      "color": "#3f5f8f",
+      "price": {
+        "currency": "ripple",
+        "amount": 500
+      },
+      "unlock": {
+        "region": "region_04_blue_coast",
+        "restoration_level": 1
+      }
+    },
+    {
+      "id": "bag_camping",
+      "name_key": "bag.camping.name",
+      "desc_key": "bag.camping.desc",
+      "capacity": 80,
+      "color": "#4f4f46",
+      "price": {
+        "currency": "memory",
+        "amount": 50
+      },
+      "unlock": {
+        "region": "region_01_quiet_pond",
+        "restoration_level": 5
+      }
+    }
+  ],
+  "accessories": [
+    {
+      "id": "acc_straw_hat",
+      "name_key": "acc.straw_hat.name",
+      "desc_key": "acc.straw_hat.desc",
+      "hat": "#ece0c2",
+      "band": "#5f7a4a"
+    },
+    {
+      "id": "acc_bucket_hat",
+      "name_key": "acc.bucket_hat.name",
+      "desc_key": "acc.bucket_hat.desc",
+      "hat": "#7d9468",
+      "band": "#4f6a3c",
+      "price": {
+        "currency": "memory",
+        "amount": 15
+      }
+    },
+    {
+      "id": "acc_river_cap",
+      "name_key": "acc.river_cap.name",
+      "desc_key": "acc.river_cap.desc",
+      "hat": "#4f7fa8",
+      "band": "#f2efe6",
+      "price": {
+        "currency": "memory",
+        "amount": 20
+      },
+      "unlock": {
+        "region": "region_01_quiet_pond",
+        "restoration_level": 2
+      }
+    },
+    {
+      "id": "acc_starry_hat",
+      "name_key": "acc.starry_hat.name",
+      "desc_key": "acc.starry_hat.desc",
+      "hat": "#2f3a5c",
+      "band": "#e3b24f",
+      "price": {
+        "currency": "memory",
+        "amount": 40
+      },
+      "unlock": {
+        "region": "region_01_quiet_pond",
+        "restoration_level": 5
+      }
+    }
+  ]
+}

@@ -99,7 +99,7 @@ func setup(deps: Dictionary) -> void:
 	hud.setup(_fishing, _region_id, _region.weather)
 	world_input.setup(_fishing, _region, hud)
 	hud.journal_pressed.connect(_on_journal_pressed)
-	hud.gear_pressed.connect(func() -> void: _toggle(gear_panel))
+	hud.gear_pressed.connect(open_gear)
 	hud.restore_pressed.connect(func() -> void: _toggle(restoration_panel))
 	hud.settings_pressed.connect(func() -> void: _toggle(settings_panel))
 	hud.water_mind_pressed.connect(enter_water_mind)
@@ -119,6 +119,10 @@ func setup(deps: Dictionary) -> void:
 	EventBus.fishing_cancelled.connect(func() -> void: show_message(tr("ui.toast.cancelled")))
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.collection_changed.connect(func(_fish_id: String) -> void: _refresh_journal_notice())
+	EventBus.bait_ran_out.connect(func(bait_id: String, replacement_id: String) -> void:
+		show_message(tr("ui.toast.bait_out") % [tr(ContentDB.get_bait(bait_id).get("name_key", "")), tr(ContentDB.get_bait(replacement_id).get("name_key", ""))]))
+	EventBus.item_granted.connect(func(category: String, item_id: String) -> void:
+		show_message(tr("ui.toast.gift") % tr(ContentDB.get_item(category, item_id).get("name_key", ""))))
 	EventBus.region_restoration_points_changed.connect(func(_region_id_changed: String, _points: int) -> void: _refresh_restore_hint())
 	EventBus.region_restoration_changed.connect(func(_region_id_changed: String, _level: int) -> void: _refresh_restore_hint())
 	EventBus.save_recovered.connect(func(_source: String) -> void: show_message(tr("ui.save.recovered")))
@@ -162,6 +166,7 @@ func _build_panels(deps: Dictionary) -> void:
 	gear_panel = GearPanel.new()
 	gear_panel.setup(deps["loadout"])
 	gear_panel.close_pressed.connect(close_panel)
+	gear_panel.message.connect(show_message)
 	restoration_panel = RestorationPanel.new()
 	restoration_panel.setup(_restoration, _region_id)
 	restoration_panel.close_pressed.connect(close_panel)
@@ -262,6 +267,14 @@ func _on_journal_pressed() -> void:
 		close_panel()
 	else:
 		open_journal()
+
+## Opens the equipment screen on the rods tab with the equipped rod chosen.
+func open_gear() -> void:
+	if _current_panel == gear_panel:
+		close_panel()
+		return
+	_open(gear_panel)
+	gear_panel.select_tab("rod")
 
 func open_restoration() -> void:
 	_open(restoration_panel)

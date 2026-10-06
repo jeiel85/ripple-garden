@@ -17,6 +17,8 @@ var behaviors: Dictionary = {}
 var weather: Dictionary = {}
 var layouts: Dictionary = {}
 var audio: Dictionary = {}
+var bags: Dictionary = {}
+var accessories: Dictionary = {}
 var errors := PackedStringArray()
 
 var _fish_by_region: Dictionary = {}
@@ -44,6 +46,8 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	weather = result["weather"]
 	layouts = result["layouts"]
 	audio = result["audio"]
+	bags = result["bags"]
+	accessories = result["accessories"]
 	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])
@@ -106,3 +110,18 @@ func _read_json(path: String, load_errors: PackedStringArray) -> Variant:
 			file_name, json.get_error_line(), json.get_error_message()])
 		return null
 	return json.data
+
+func get_bag(bag_id: String) -> Dictionary:
+	return bags.get(bag_id, {})
+
+func get_accessory(accessory_id: String) -> Dictionary:
+	return accessories.get(accessory_id, {})
+
+## Definition of an equipment item by category: "rod", "bait", "bag" or "accessory".
+func get_item(category: String, item_id: String) -> Dictionary:
+	match category:
+		"rod": return get_rod(item_id)
+		"bait": return get_bait(item_id)
+		"bag": return get_bag(item_id)
+		"accessory": return get_accessory(item_id)
+	return {}
