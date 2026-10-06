@@ -94,6 +94,13 @@ func _draw() -> void:
 				draw_colored_polygon(_wing(at, 10.0 * flap, 8.0, -1.0), tint)
 				draw_colored_polygon(_wing(at, 10.0 * flap, 8.0, 1.0), tint)
 				draw_line(at + Vector2(0, -5), at + Vector2(0, 5), Color("#4a3b36"), 2.0)
+			"bird":
+				# A little bluebird gliding over the pond, wings beating now and then.
+				var beat := sin(_clock * 12.0 + float(mote["phase"])) * (0.6 if sin(_clock * 0.7 + float(mote["phase"])) > 0.0 else 0.15)
+				draw_colored_polygon(_wing(at, 9.0, 5.0, 1.0), Color("#4f86c6"))
+				draw_line(at, at + Vector2(-10, -6.0 - beat * 8.0), Color("#3f6fa8"), 3.0)
+				draw_line(at, at + Vector2(10, -6.0 - beat * 8.0), Color("#3f6fa8"), 3.0)
+				draw_circle(at + Vector2(6, 1), 3.0, Color("#f2efe6"))
 			"firefly":
 				var glow := 0.45 + 0.55 * (sin(_clock * 2.2 + float(mote["phase"]) * 3.0) * 0.5 + 0.5)
 				draw_circle(at, 9.0, Color(1.0, 0.95, 0.45, 0.10 * glow))

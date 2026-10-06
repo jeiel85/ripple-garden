@@ -351,7 +351,7 @@ func test_layout_angler_waterfall_and_cast_direction_are_checked() -> void:
 func test_layout_needs_a_palette_for_every_slice_level() -> void:
 	var raw := _raw()
 	raw["layouts"]["region_01_quiet_pond"]["levels"].pop_back()
-	_assert_error(ContentValidator.validate(raw), "needs 6 palettes")
+	_assert_error(ContentValidator.validate(raw), "needs %d palettes" % (int(raw["balance"]["vertical_slice"]["max_restoration_level"]) + 1))
 
 func test_layout_for_unknown_region_is_rejected() -> void:
 	var raw := _raw()

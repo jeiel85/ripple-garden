@@ -6,8 +6,9 @@ extends RefCounted
 ## threshold, but it takes effect when the player chooses to restore, which is what triggers the
 ## visible change in the world. Levels cannot be lost and points are never spent.
 ##
-## In the vertical slice a region can reach `vertical_slice.max_restoration_level` (5); points
-## keep accumulating past that, so raising the cap later (P1-001) loses nothing.
+## The playable region can reach `vertical_slice.max_restoration_level` (10 since P1-001); points keep
+## accumulating past any cap, so raising it never loses progress. The free-trial boundary (BALANCE §8)
+## is applied with the full-game entitlement (P1-011/012).
 
 class Requirement:
 	var region_id := ""

@@ -54,6 +54,7 @@ static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: floa
 		"flower_pot": _flower_pot(canvas, at, scale)
 		"campfire": _campfire(canvas, at, scale)
 		"bench": _bench(canvas, at, scale)
+		"rainbow": _rainbow(canvas, at, scale)
 
 ## Stable 0..1 value for (position, index).
 static func noise(at: Vector2, index: int) -> float:
@@ -360,3 +361,9 @@ static func _bench(canvas: CanvasItem, at: Vector2, scale: float) -> void:
 	_quad(canvas, p.call(-46, -50), p.call(44, -58), p.call(44, -44), p.call(-46, -36), PLANK.lightened(0.08))
 	canvas.draw_line(p.call(-40, -36), p.call(-40, -20), PLANK_DARK, 4.0 * scale)
 	canvas.draw_line(p.call(38, -44), p.call(38, -28), PLANK_DARK, 4.0 * scale)
+
+## A soft rainbow in the waterfall's spray: the fully restored pond's last change (P1-001).
+static func _rainbow(canvas: CanvasItem, at: Vector2, scale: float) -> void:
+	var bands: Array[Color] = [Color("#f28b82"), Color("#f6c26b"), Color("#f4ec8a"), Color("#9fd88f"), Color("#8ec5ef"), Color("#b39ddb")]
+	for i in bands.size():
+		canvas.draw_arc(at, (70.0 - i * 6.0) * scale, PI * 1.05, PI * 1.95, 24, Color(bands[i], 0.45), 6.0 * scale, true)
