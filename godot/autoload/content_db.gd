@@ -14,6 +14,8 @@ var progression: Dictionary = {}
 var balance: Dictionary = {}
 var aliases: Dictionary = {}
 var behaviors: Dictionary = {}
+var weather: Dictionary = {}
+var layouts: Dictionary = {}
 var errors := PackedStringArray()
 
 var _fish_by_region: Dictionary = {}
@@ -38,6 +40,8 @@ func load_all(data_dir: String = DEFAULT_DATA_DIR) -> bool:
 	balance = result["balance"]
 	aliases = result["aliases"]
 	behaviors = result["behaviors"]
+	weather = result["weather"]
+	layouts = result["layouts"]
 	_fish_by_region.clear()
 	errors = load_errors
 	errors.append_array(result["errors"])
@@ -66,6 +70,13 @@ func get_fish_for_region(region_id: String) -> Array:
 					_fish_by_region[fish_region] = []
 				_fish_by_region[fish_region].append(fish_def)
 	return _fish_by_region.get(region_id, [])
+
+func get_weather(weather_id: String) -> Dictionary:
+	return weather.get(weather_id, {})
+
+## Layout (pond, habitat zones, restoration palettes, props) of a region; empty if it has none yet.
+func get_layout(region_id: String) -> Dictionary:
+	return layouts.get(region_id, {})
 
 func get_behavior(behavior_id: String) -> Dictionary:
 	return behaviors.get(behavior_id, {})

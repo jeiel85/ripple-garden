@@ -272,3 +272,76 @@ func test_relaxed_hook_windows_must_not_be_shorter_at_either_end() -> void:
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "relaxed windows must not be shorter than the normal ones")
 	assert_true(result["balance"].is_empty())
+
+# --- weather, layouts, population, journal ---
+
+func test_weather_must_outlast_its_transition() -> void:
+	var raw := _raw()
+	_find(raw["weather"], "rain")["duration_sec"] = {"min": 15, "max": 60}
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "the shortest stay must be at least twice transition_sec")
+	assert_false(result["weather"].has("rain"))
+
+func test_weather_transitions_must_lead_to_defined_weather() -> void:
+	var raw := _raw()
+	_find(raw["weather"], "clear")["next"] = {"snow": 1.0}
+	_assert_error(ContentValidator.validate(raw), "weather.json[clear].next: unknown weather 'snow'")
+
+func test_weather_visual_values_are_checked() -> void:
+	var raw := _raw()
+	_find(raw["weather"], "cloudy")["visual"]["tint"] = "grey"
+	_assert_error(ContentValidator.validate(raw), "visual.tint: must be a #rrggbb color")
+
+func test_region_with_layout_needs_its_weather_defined() -> void:
+	var raw := _raw()
+	raw["weather"].pop_back()  # rain
+	_assert_error(ContentValidator.validate(raw), "region lists weather 'rain' that weather.json does not define")
+
+func test_layout_zone_habitat_must_belong_to_the_region() -> void:
+	var raw := _raw()
+	raw["layouts"]["region_01_quiet_pond"]["zones"][1]["habitat"] = "lagoon"
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "is not a habitat of the region")
+	assert_true(result["layouts"].is_empty(), "invalid layout kept")
+
+func test_layout_must_cover_every_habitat() -> void:
+	var raw := _raw()
+	var zones: Array = raw["layouts"]["region_01_quiet_pond"]["zones"]
+	for i in range(zones.size() - 1, -1, -1):
+		if zones[i]["habitat"] == "bottom":
+			zones.remove_at(i)
+	_assert_error(ContentValidator.validate(raw), "habitat 'bottom' has no zone")
+
+func test_layout_props_and_animals_use_known_kinds_inside_the_viewport() -> void:
+	var raw := _raw()
+	var layout: Dictionary = raw["layouts"]["region_01_quiet_pond"]
+	layout["props"][0]["kind"] = "spaceship"
+	layout["props"][1]["x"] = 5000
+	layout["ambient_animals"][0]["kind"] = "dragon"
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "unknown prop 'spaceship'")
+	_assert_error(result, "x and y must be inside the viewport")
+	_assert_error(result, "unknown animal 'dragon'")
+
+func test_layout_needs_a_palette_for_every_slice_level() -> void:
+	var raw := _raw()
+	raw["layouts"]["region_01_quiet_pond"]["levels"].pop_back()
+	_assert_error(ContentValidator.validate(raw), "needs 6 palettes")
+
+func test_layout_for_unknown_region_is_rejected() -> void:
+	var raw := _raw()
+	raw["layouts"]["region_09_nowhere"] = raw["layouts"]["region_01_quiet_pond"].duplicate(true)
+	_assert_error(ContentValidator.validate(raw), "region_09_nowhere]: unknown or invalid region")
+
+func test_population_steps_must_increase() -> void:
+	var raw := _raw()
+	raw["balance"]["population"]["visible_by_population"][2]["visible"] = 1
+	_assert_error(ContentValidator.validate(raw), "visible_by_population[2]")
+	raw = _raw()
+	raw["balance"]["population"]["total_agents_by_quality"]["high"] = 10
+	_assert_error(ContentValidator.validate(raw), "must not be smaller than the lower quality tier")
+
+func test_journal_information_must_unlock_in_order() -> void:
+	var raw := _raw()
+	raw["balance"]["journal"]["reveal_at_encounters"]["habitats"] = 2
+	_assert_error(ContentValidator.validate(raw), "information must unlock in the order")

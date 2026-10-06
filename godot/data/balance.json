@@ -116,5 +116,39 @@
     "first_discovery_restoration_bonus": 12,
     "repeat_decay_per_release": 0.04,
     "repeat_floor": 0.4
+  },
+  "population": {
+    "visible_by_population": [
+      {
+        "up_to": 10,
+        "visible": 1
+      },
+      {
+        "up_to": 30,
+        "visible": 2
+      },
+      {
+        "up_to": 60,
+        "visible": 3
+      },
+      {
+        "up_to": 9999,
+        "visible": 4
+      }
+    ],
+    "total_agents_by_quality": {
+      "low": 20,
+      "medium": 35,
+      "high": 50
+    },
+    "battery_saver_agent_factor": 0.6
+  },
+  "journal": {
+    "reveal_at_encounters": {
+      "size": 1,
+      "time_bands": 3,
+      "habitats": 5,
+      "behavior": 10
+    }
   }
 }

@@ -25,6 +25,8 @@ const FILE_NAMES := {
 	"balance": "balance.json",
 	"aliases": "content_aliases.json",
 	"behaviors": "behaviors.json",
+	"weather": "weather.json",
+	"layouts": "region_layouts.json",
 }
 
 const ID_PATTERNS := {
@@ -33,7 +35,12 @@ const ID_PATTERNS := {
 	"rods": "^rod_[a-z0-9_]+$",
 	"baits": "^bait_[a-z0-9_]+$",
 	"behaviors": "^[a-z][a-z0-9_]*$",
+	"weather": "^[a-z][a-z0-9_]*$",
 }
+
+const PROP_KINDS: PackedStringArray = PropKinds.PROPS
+const ANIMAL_KINDS: PackedStringArray = PropKinds.ANIMALS
+const HEX_COLOR := "^#[0-9a-fA-F]{6}$"
 
 static func validate(raw: Dictionary) -> Dictionary:
 	var v := ContentValidator.new()
@@ -48,7 +55,10 @@ static func validate(raw: Dictionary) -> Dictionary:
 	v._behaviors = behaviors
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
 	var progression := v._validate_progression(raw.get("progression"), regions, fish)
+	var weather := v._validate_list(raw.get("weather"), "weather", v._check_weather)
+	v._check_weather_links(weather)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits)
+	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
 	var aliases := v._validate_aliases(raw.get("aliases"), {"fish": fish, "rods": rods, "baits": baits, "regions": regions})
 	return {
 		"fish": fish,
@@ -59,6 +69,8 @@ static func validate(raw: Dictionary) -> Dictionary:
 		"balance": balance,
 		"aliases": aliases,
 		"behaviors": behaviors,
+		"weather": weather,
+		"layouts": layouts,
 		"errors": v._errors,
 	}
 
@@ -123,6 +135,38 @@ func _check_rod(d: Dictionary) -> void:
 	_require_number(d, "bite_speed", 0.0, INF, false)
 	_require_number(d, "tension_assist", 0.0, 1.0, true)
 	_require_string_list(d, "tags")
+
+func _check_weather(d: Dictionary) -> void:
+	_require_string(d, "name_key")
+	_require_min_max(d, "duration_sec", 10.0, 3600.0)
+	_require_number(d, "transition_sec", 0.0, 120.0, false)
+	var duration: Variant = d.get("duration_sec")
+	if typeof(duration) == TYPE_DICTIONARY and _is_number(duration.get("min")) and _is_number(d.get("transition_sec")) \
+			and duration["min"] < 2.0 * d["transition_sec"]:
+		_item_errors.append("duration_sec: the shortest stay must be at least twice transition_sec so weather cannot flicker")
+	var nxt: Variant = d.get("next")
+	if typeof(nxt) != TYPE_DICTIONARY or nxt.is_empty():
+		_item_errors.append("next: must be a non-empty object of weather id -> weight")
+	else:
+		for weather_id in nxt:
+			if not _is_number(nxt[weather_id]) or nxt[weather_id] <= 0.0:
+				_item_errors.append("next.%s: weight must be a number > 0" % weather_id)
+	var visual: Variant = d.get("visual")
+	if typeof(visual) != TYPE_DICTIONARY:
+		_item_errors.append("visual: must be an object with cloud, rain, brightness and tint")
+	else:
+		_require_number(visual, "cloud", 0.0, 1.0, true, "visual.")
+		_require_number(visual, "rain", 0.0, 1.0, true, "visual.")
+		_require_number(visual, "brightness", 0.3, 1.2, true, "visual.")
+		if typeof(visual.get("tint")) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(visual["tint"]) == null:
+			_item_errors.append("visual.tint: must be a #rrggbb color")
+
+## Weather transitions may only lead to weather that exists.
+func _check_weather_links(weather: Dictionary) -> void:
+	for weather_id in weather:
+		for target in weather[weather_id]["next"]:
+			if not weather.has(target):
+				_errors.append("weather.json[%s].next: unknown weather '%s'" % [weather_id, target])
 
 func _check_behavior(d: Dictionary) -> void:
 	_require_min_max(d, "pull_interval_sec", 0.1, 60.0)
@@ -397,6 +441,52 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 		if _is_number(rewards.get("repeat_floor")) and rewards["repeat_floor"] <= 0.0:
 			_errors.append("%s.rewards.repeat_floor: must be above 0 so repeat catches never give nothing (BALANCE section 6)" % file_name)
 
+	var population: Variant = data.get("population")
+	if typeof(population) != TYPE_DICTIONARY:
+		_errors.append("%s.population: must be an object" % file_name)
+	else:
+		var steps: Variant = population.get("visible_by_population")
+		if typeof(steps) != TYPE_ARRAY or steps.is_empty():
+			_errors.append("%s.population.visible_by_population: must be a non-empty array of {up_to, visible}" % file_name)
+		else:
+			var previous_limit := 0
+			var previous_visible := 0
+			for i in steps.size():
+				var step: Variant = steps[i]
+				if typeof(step) != TYPE_DICTIONARY or not _is_int(step.get("up_to")) or not _is_int(step.get("visible")):
+					_errors.append("%s.population.visible_by_population[%d]: needs integer up_to and visible" % [file_name, i])
+					break
+				if step["up_to"] <= previous_limit or step["visible"] < previous_visible or step["visible"] < 1:
+					_errors.append("%s.population.visible_by_population[%d]: up_to and visible must keep increasing (visible >= 1)" % [file_name, i])
+					break
+				previous_limit = int(step["up_to"])
+				previous_visible = int(step["visible"])
+		var totals: Variant = population.get("total_agents_by_quality")
+		if typeof(totals) != TYPE_DICTIONARY:
+			_errors.append("%s.population.total_agents_by_quality: must be an object with low, medium and high" % file_name)
+		else:
+			var last := 0
+			for quality in ["low", "medium", "high"]:
+				_check_balance_number(totals, "population.total_agents_by_quality", quality, 1.0, 500.0, true)
+				if _is_number(totals.get(quality)):
+					if totals[quality] < last:
+						_errors.append("%s.population.total_agents_by_quality.%s: must not be smaller than the lower quality tier" % [file_name, quality])
+					last = int(totals[quality])
+		_check_balance_number(population, "population", "battery_saver_agent_factor", 0.1, 1.0)
+
+	var journal: Variant = data.get("journal")
+	if typeof(journal) != TYPE_DICTIONARY or typeof(journal.get("reveal_at_encounters")) != TYPE_DICTIONARY:
+		_errors.append("%s.journal.reveal_at_encounters: must be an object" % file_name)
+	else:
+		var reveal: Dictionary = journal["reveal_at_encounters"]
+		var previous_encounters := 0
+		for field in ["size", "time_bands", "habitats", "behavior"]:
+			_check_balance_number(reveal, "journal.reveal_at_encounters", field, 1.0, 1000.0, true)
+			if _is_number(reveal.get(field)):
+				if reveal[field] < previous_encounters:
+					_errors.append("%s.journal.reveal_at_encounters.%s: information must unlock in the order size, time_bands, habitats, behavior" % [file_name, field])
+				previous_encounters = int(reveal[field])
+
 	var slice: Variant = data.get("vertical_slice")
 	if typeof(slice) != TYPE_DICTIONARY:
 		_errors.append("%s.vertical_slice: must be an object" % file_name)
@@ -439,6 +529,166 @@ func _validate_aliases(data: Variant, current: Dictionary) -> Dictionary:
 				_errors.append("%s: must lead to an existing %s id without looping (ends at %s)" % [
 					label, category, var_to_str(target)])
 	return data if _errors.size() == before else {}
+
+## Region layouts (data/region_layouts.json): {region_id: layout}. Returns the valid layouts only.
+## A region that has a layout must have every weather it lists defined, every habitat covered by
+## at least one zone, and one visual palette per restoration level the slice can reach.
+func _validate_layouts(data: Variant, regions: Dictionary, weather: Dictionary, balance: Dictionary) -> Dictionary:
+	var file_name: String = FILE_NAMES["layouts"]
+	var result: Dictionary = {}
+	if data == null:
+		return result
+	if typeof(data) != TYPE_DICTIONARY:
+		_errors.append("%s: top level must be an object keyed by region id" % file_name)
+		return result
+	var used_weather: Dictionary = {}
+	for region_id in data:
+		var label := "%s[%s]" % [file_name, region_id]
+		if not regions.has(region_id):
+			_errors.append("%s: unknown or invalid region" % label)
+			continue
+		var layout: Variant = data[region_id]
+		if typeof(layout) != TYPE_DICTIONARY:
+			_errors.append("%s: must be an object" % label)
+			continue
+		var before := _errors.size()
+		var region: Dictionary = regions[region_id]
+		for weather_id in region["weather"]:
+			used_weather[weather_id] = true
+			if not weather.has(weather_id):
+				_errors.append("%s: region lists weather '%s' that weather.json does not define" % [label, weather_id])
+		_check_layout(layout, region, balance, label)
+		if _errors.size() == before:
+			result[region_id] = layout
+	for weather_id in weather:
+		var in_any_region := false
+		for region_def in regions.values():
+			if weather_id in region_def["weather"]:
+				in_any_region = true
+		if not in_any_region:
+			_errors.append("weather.json[%s]: no region lists this weather" % weather_id)
+	return result
+
+func _check_layout(layout: Dictionary, region: Dictionary, balance: Dictionary, label: String) -> void:
+	var viewport: Variant = layout.get("viewport")
+	var width := 0.0
+	var height := 0.0
+	if _is_point(viewport) and viewport[0] > 0 and viewport[1] > 0:
+		width = float(viewport[0])
+		height = float(viewport[1])
+	else:
+		_errors.append("%s.viewport: must be [width, height] > 0" % label)
+	for field in ["rod_origin"]:
+		if not _is_point_within(layout.get(field), width, height):
+			_errors.append("%s.%s: must be a point inside the viewport" % [label, field])
+	if not _is_number(layout.get("horizon_y")) or layout["horizon_y"] < 0 or layout["horizon_y"] > height:
+		_errors.append("%s.horizon_y: must be a number inside the viewport height" % label)
+	var reach: Variant = layout.get("cast_reach_px")
+	if typeof(reach) != TYPE_DICTIONARY or not _is_number(reach.get("near")) or not _is_number(reach.get("far")) \
+			or reach["near"] <= 0 or reach["far"] <= reach["near"]:
+		_errors.append("%s.cast_reach_px: requires 0 < near < far" % label)
+	_check_polygon(layout.get("pond"), width, height, "%s.pond" % label)
+
+	var covered: Dictionary = {}
+	var zones: Variant = layout.get("zones")
+	if typeof(zones) != TYPE_ARRAY or zones.is_empty():
+		_errors.append("%s.zones: must be a non-empty array" % label)
+	else:
+		for i in zones.size():
+			var zone: Variant = zones[i]
+			if typeof(zone) != TYPE_DICTIONARY:
+				_errors.append("%s.zones[%d]: must be an object" % [label, i])
+				continue
+			if typeof(zone.get("habitat")) != TYPE_STRING or not zone["habitat"] in region["habitats"]:
+				_errors.append("%s.zones[%d].habitat: '%s' is not a habitat of the region" % [label, i, zone.get("habitat")])
+			else:
+				covered[zone["habitat"]] = true
+			_check_polygon(zone.get("polygon"), width, height, "%s.zones[%d].polygon" % [label, i])
+		for habitat in region["habitats"]:
+			if not covered.has(habitat):
+				_errors.append("%s.zones: habitat '%s' has no zone, so it could never be fished" % [label, habitat])
+
+	var levels: Variant = layout.get("levels")
+	var level_count := 0
+	var color_pattern := RegEx.create_from_string(HEX_COLOR)
+	if typeof(levels) != TYPE_ARRAY or levels.is_empty():
+		_errors.append("%s.levels: must be a non-empty array, one palette per restoration level starting at 0" % label)
+	else:
+		level_count = levels.size()
+		for i in levels.size():
+			for field in ["water_deep", "water_shallow", "grass", "canopy"]:
+				if typeof(levels[i]) != TYPE_DICTIONARY or typeof(levels[i].get(field)) != TYPE_STRING \
+						or color_pattern.search(levels[i][field]) == null:
+					_errors.append("%s.levels[%d].%s: must be a #rrggbb color" % [label, i, field])
+		var slice: Variant = balance.get("vertical_slice")
+		if typeof(slice) == TYPE_DICTIONARY and not slice.is_empty() and _is_int(slice.get("max_restoration_level")) \
+				and region["id"] == slice.get("region_id") and levels.size() < int(slice["max_restoration_level"]) + 1:
+			_errors.append("%s.levels: needs %d palettes (levels 0..%d of the vertical slice) but has %d" % [
+				label, int(slice["max_restoration_level"]) + 1, int(slice["max_restoration_level"]), levels.size()])
+
+	var props: Variant = layout.get("props")
+	if typeof(props) != TYPE_ARRAY:
+		_errors.append("%s.props: must be an array" % label)
+	else:
+		for i in props.size():
+			var prop: Variant = props[i]
+			var prop_label := "%s.props[%d]" % [label, i]
+			if typeof(prop) != TYPE_DICTIONARY:
+				_errors.append("%s: must be an object" % prop_label)
+				continue
+			if typeof(prop.get("kind")) != TYPE_STRING or not prop["kind"] in PROP_KINDS:
+				_errors.append("%s.kind: unknown prop '%s' (known: %s)" % [prop_label, prop.get("kind"), ", ".join(PROP_KINDS)])
+			if not _is_number(prop.get("x")) or not _is_number(prop.get("y")) \
+					or prop["x"] < 0 or prop["x"] > width or prop["y"] < 0 or prop["y"] > height:
+				_errors.append("%s: x and y must be inside the viewport" % prop_label)
+			if prop.has("scale") and (not _is_number(prop["scale"]) or prop["scale"] < 0.2 or prop["scale"] > 3.0):
+				_errors.append("%s.scale: must be a number in 0.2..3" % prop_label)
+			var min_level: int = int(prop["min_level"]) if prop.has("min_level") and _is_int(prop["min_level"]) else 0
+			var max_level: int = int(prop["max_level"]) if prop.has("max_level") and _is_int(prop["max_level"]) else 999
+			for field in ["min_level", "max_level"]:
+				if prop.has(field) and (not _is_int(prop[field]) or prop[field] < 0):
+					_errors.append("%s.%s: must be an integer >= 0" % [prop_label, field])
+			if min_level > max_level:
+				_errors.append("%s: min_level must not exceed max_level" % prop_label)
+
+	var animals: Variant = layout.get("ambient_animals")
+	if typeof(animals) != TYPE_ARRAY:
+		_errors.append("%s.ambient_animals: must be an array" % label)
+	else:
+		for i in animals.size():
+			var animal: Variant = animals[i]
+			var animal_label := "%s.ambient_animals[%d]" % [label, i]
+			if typeof(animal) != TYPE_DICTIONARY:
+				_errors.append("%s: must be an object" % animal_label)
+				continue
+			if typeof(animal.get("kind")) != TYPE_STRING or not animal["kind"] in ANIMAL_KINDS:
+				_errors.append("%s.kind: unknown animal '%s' (known: %s)" % [animal_label, animal.get("kind"), ", ".join(ANIMAL_KINDS)])
+			if not _is_int(animal.get("count")) or animal["count"] < 1 or animal["count"] > 32:
+				_errors.append("%s.count: must be an integer 1..32" % animal_label)
+			if not _is_int(animal.get("min_level")) or animal["min_level"] < 0:
+				_errors.append("%s.min_level: must be an integer >= 0" % animal_label)
+			var bands: Variant = animal.get("time_bands")
+			if typeof(bands) != TYPE_ARRAY or bands.is_empty():
+				_errors.append("%s.time_bands: must be a non-empty array" % animal_label)
+			else:
+				for band in bands:
+					if not band in TIME_BANDS:
+						_errors.append("%s.time_bands: '%s' is not a known time band" % [animal_label, band])
+
+func _check_polygon(points: Variant, width: float, height: float, label: String) -> void:
+	if typeof(points) != TYPE_ARRAY or points.size() < 3:
+		_errors.append("%s: must be a polygon with at least 3 points" % label)
+		return
+	for point in points:
+		if not _is_point_within(point, width, height):
+			_errors.append("%s: every point must be [x, y] inside the viewport (got %s)" % [label, var_to_str(point)])
+			return
+
+static func _is_point(value: Variant) -> bool:
+	return typeof(value) == TYPE_ARRAY and value.size() == 2 and _is_number(value[0]) and _is_number(value[1])
+
+static func _is_point_within(value: Variant, width: float, height: float) -> bool:
+	return _is_point(value) and value[0] >= 0 and value[0] <= width and value[1] >= 0 and value[1] <= height
 
 ## `section[field]` must be {"min": number, "max": number} with lo <= min <= max <= hi.
 func _check_balance_range(section: Dictionary, section_name: String, field: String,

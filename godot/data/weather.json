@@ -1,0 +1,26 @@
+[
+  {
+    "id": "clear",
+    "name_key": "weather.clear.name",
+    "duration_sec": {"min": 150, "max": 420},
+    "transition_sec": 10,
+    "next": {"cloudy": 1.0},
+    "visual": {"cloud": 0.1, "rain": 0.0, "brightness": 1.0, "tint": "#ffffff"}
+  },
+  {
+    "id": "cloudy",
+    "name_key": "weather.cloudy.name",
+    "duration_sec": {"min": 120, "max": 300},
+    "transition_sec": 10,
+    "next": {"clear": 0.55, "rain": 0.45},
+    "visual": {"cloud": 0.75, "rain": 0.0, "brightness": 0.88, "tint": "#dfe6ee"}
+  },
+  {
+    "id": "rain",
+    "name_key": "weather.rain.name",
+    "duration_sec": {"min": 100, "max": 240},
+    "transition_sec": 12,
+    "next": {"cloudy": 1.0},
+    "visual": {"cloud": 1.0, "rain": 1.0, "brightness": 0.78, "tint": "#c4d0dc"}
+  }
+]
