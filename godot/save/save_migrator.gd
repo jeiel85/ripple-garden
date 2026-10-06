@@ -124,7 +124,7 @@ static func _remap_keys(source: Dictionary, aliases: Dictionary, merge: Callable
 	return result
 
 static func _sum_ints(a: int, b: int) -> int:
-	return a + b
+	return mini(a + b, SaveSchema.MAX_POPULATION)
 
 static func _merge_collection_records(a: Dictionary, b: Dictionary) -> Dictionary:
 	var merged := a.duplicate(true)
@@ -144,7 +144,8 @@ static func _merge_regions(a: Dictionary, b: Dictionary) -> Dictionary:
 	merged["restoration_level"] = maxi(a["restoration_level"], b["restoration_level"])
 	merged["restoration_points"] = maxi(a["restoration_points"], b["restoration_points"])
 	for fish_id in b["species_population"]:
-		merged["species_population"][fish_id] = merged["species_population"].get(fish_id, 0) + b["species_population"][fish_id]
+		merged["species_population"][fish_id] = mini(
+			merged["species_population"].get(fish_id, 0) + b["species_population"][fish_id], SaveSchema.MAX_POPULATION)
 	for key in ["unlocked_spots", "seen_events"]:
 		for entry in b[key]:
 			if not merged[key].has(entry):

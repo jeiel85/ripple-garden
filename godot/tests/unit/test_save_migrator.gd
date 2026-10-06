@@ -191,3 +191,15 @@ func test_region_alias_merge_keeps_best_progress() -> void:
 	assert_eq(region["restoration_points"], 150)
 	assert_eq(region["species_population"]["fish_a"], 3)
 	assert_eq(region["seen_events"].size(), 2)
+
+func test_alias_merges_never_exceed_the_population_limit() -> void:
+	var save := _v1_save()
+	var near_limit := SaveSchema.MAX_POPULATION - 5
+	save["regions"] = {
+		"region_01_quiet_pond": {"species_population": {"fish_old": near_limit, "fish_new": near_limit}},
+		"region_old": {"species_population": {"fish_new": near_limit}},
+	}
+	var aliases := {"fish": {"fish_old": "fish_new"}, "regions": {"region_old": "region_01_quiet_pond"}}
+	var result := SaveMigrator.new(1, {}, aliases).migrate(save, NOW)
+	assert_true(result["ok"], result["error"])
+	assert_eq(result["save"]["regions"]["region_01_quiet_pond"]["species_population"]["fish_new"], SaveSchema.MAX_POPULATION)

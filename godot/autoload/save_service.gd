@@ -30,6 +30,9 @@ var last_error := ""
 
 ## Content id aliases applied on load; empty means "use ContentDB.aliases". Tests inject their own.
 var aliases_override: Dictionary = {}
+## Tests replace the final tmp -> primary rename to simulate a locked destination:
+## (from_path, to_path) -> Error.
+var finalize_override := Callable()
 ## Tests inject a migrator with a synthetic version table; production uses SaveMigrator.MIGRATIONS.
 var migrator_override: SaveMigrator = null
 
@@ -106,13 +109,21 @@ func save_game() -> bool:
 		_remove(tmp_path)
 		return _fail("The temporary save did not read back correctly.")
 
+	# Remember the backups so a failure from here on leaves the previous generations intact.
+	var previous_backups := _read_backups()
 	var rotate_error := _rotate_backups()
 	if rotate_error != OK:
+		_restore_backups(previous_backups)
 		_remove(tmp_path)
 		return _fail("Cannot rotate backups (%s)." % error_string(rotate_error))
-	var rename_error := DirAccess.rename_absolute(
-		ProjectSettings.globalize_path(tmp_path), ProjectSettings.globalize_path(_path(SAVE_FILE)))
+	var rename_error: Error
+	if finalize_override.is_valid():
+		rename_error = finalize_override.call(tmp_path, _path(SAVE_FILE))
+	else:
+		rename_error = DirAccess.rename_absolute(
+			ProjectSettings.globalize_path(tmp_path), ProjectSettings.globalize_path(_path(SAVE_FILE)))
 	if rename_error != OK:
+		_restore_backups(previous_backups)
 		_remove(tmp_path)
 		return _fail("Cannot finalize the save (%s)." % error_string(rename_error))
 
@@ -120,6 +131,25 @@ func save_game() -> bool:
 	last_error = ""
 	EventBus.save_completed.emit()
 	return true
+
+## Contents of both backup files ({file name: bytes}); a missing file is simply absent.
+func _read_backups() -> Dictionary:
+	var backups := {}
+	for file_name in [BACKUP_1_FILE, BACKUP_2_FILE]:
+		if FileAccess.file_exists(_path(file_name)):
+			backups[file_name] = FileAccess.get_file_as_bytes(_path(file_name))
+	return backups
+
+## Puts the backups back exactly as `_read_backups` found them (best effort).
+func _restore_backups(backups: Dictionary) -> void:
+	for file_name in [BACKUP_1_FILE, BACKUP_2_FILE]:
+		if backups.has(file_name):
+			var file := FileAccess.open(_path(file_name), FileAccess.WRITE)
+			if file != null:
+				file.store_buffer(backups[file_name])
+				file.close()
+		else:
+			_remove(_path(file_name))
 
 ## Moves primary -> backup 1 -> backup 2. A primary that does not validate is quarantined
 ## instead, so one bad save can never push the last good copies out of the rotation.

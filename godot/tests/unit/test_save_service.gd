@@ -336,3 +336,30 @@ func test_pause_saves_clock_progress_without_other_changes() -> void:
 	_service._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	assert_eq(JSON.parse_string(_read(SaveService.SAVE_FILE))["profile"]["game_minutes"], 900.0)
 	_end()
+
+func test_failed_finalize_leaves_every_previous_generation_intact() -> void:
+	_begin("finalize_failure")
+	for i in 3:
+		_state.add_ripple(1)
+		_service.save_game()
+	var primary := _read(SaveService.SAVE_FILE)
+	var backup_1 := _read(SaveService.BACKUP_1_FILE)
+	var backup_2 := _read(SaveService.BACKUP_2_FILE)
+	_service.finalize_override = func(_from: String, _to: String) -> Error: return ERR_FILE_NO_PERMISSION
+	_state.add_ripple(1)
+	var failures: Array = []
+	var handler := func(message: String) -> void: failures.append(message)
+	EventBus.save_failed.connect(handler)
+	assert_false(_service.save_game())
+	EventBus.save_failed.disconnect(handler)
+	assert_eq(failures.size(), 1)
+	assert_eq(_read(SaveService.SAVE_FILE), primary, "primary changed by a failed save")
+	assert_eq(_read(SaveService.BACKUP_1_FILE), backup_1, "backup 1 lost by a failed save")
+	assert_eq(_read(SaveService.BACKUP_2_FILE), backup_2, "backup 2 lost by a failed save")
+	assert_false(FileAccess.file_exists(_file(SaveService.TMP_FILE)), "temporary file left behind")
+	assert_true(_service.has_unsaved_changes(), "a failed save must leave the state dirty so it is retried")
+	# Once the destination is writable again, saving works and rotates normally.
+	_service.finalize_override = Callable()
+	assert_true(_service.save_game())
+	assert_eq(_saved_ripple(SaveService.SAVE_FILE), 4)
+	_end()
