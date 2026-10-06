@@ -58,6 +58,7 @@ func _ready() -> void:
 	EventBus.game_state_replaced.connect(_on_state_replaced)
 	EventBus.region_restoration_changed.connect(_on_restoration_changed)
 	EventBus.fish_released.connect(_on_fish_released)
+	EventBus.fish_escaped.connect(_on_fish_escaped)
 	# A fish caught but not released before the last exit is waiting to be inspected.
 	fishing.resume_pending_catch()
 
@@ -83,6 +84,12 @@ func _on_restoration_changed(changed_region: String, level: int) -> void:
 		return
 	region.apply_level(level, true)
 	camera.restoration_pulse()
+
+## A snapped line gives the camera a small jolt (Camera Shake setting and Reduced Motion are
+## honoured by the camera itself). Slack or a missed hook is quiet: failure stays gentle.
+func _on_fish_escaped(_fish_id: String, reason: String) -> void:
+	if reason == "line_snapped":
+		camera.shake()
 
 func _on_fish_released(fish_id: String, released_region: String, _size_cm: float) -> void:
 	if released_region == region_id:

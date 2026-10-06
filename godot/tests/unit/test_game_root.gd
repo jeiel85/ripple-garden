@@ -316,3 +316,17 @@ func test_the_hud_lays_out_without_squashed_buttons_in_korean_and_english() -> v
 			assert_true(button.size.y < UiTheme.TOUCH_MIN_PX * 1.8, "%s (%s) wraps into a tall pill" % [button.text, locale])
 		_stop(root)
 	TranslationServer.set_locale(previous)
+
+func test_only_a_snapped_line_shakes_the_camera() -> void:
+	var root := _start()
+	root.camera.offset = Vector2.ZERO
+	EventBus.fish_escaped.emit("fish_minnow", "missed_hook")
+	EventBus.fish_escaped.emit("fish_minnow", "line_slack")
+	assert_false(root.camera._shake_tween != null and root.camera._shake_tween.is_valid(), "gentle failures must not shake the screen")
+	EventBus.fish_escaped.emit("fish_minnow", "line_snapped")
+	assert_true(root.camera._shake_tween != null and root.camera._shake_tween.is_valid(), "a snapped line should jolt the camera")
+	GameState.set_setting("camera_shake", false)
+	root.camera._shake_tween = null
+	EventBus.fish_escaped.emit("fish_minnow", "line_snapped")
+	assert_true(root.camera._shake_tween == null, "Camera Shake off must be honoured")
+	_stop(root)
