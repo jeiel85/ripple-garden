@@ -24,7 +24,9 @@ func _run() -> void:
 		"baits": content_db.baits, "weather": content_db.weather,
 		"bags": content_db.bags, "accessories": content_db.accessories, "decorations": content_db.decorations, "moments": content_db.moments,
 	}
-	problems.append_array(localization.problems(localization.read_csv(), localization.references(content)))
+	var rows: Dictionary = localization.read_csv()
+	problems.append_array(localization.problems(rows, localization.references(content)))
+	problems.append_array(localization.row_problems(rows))
 
 	if problems.is_empty():
 		print("CONTENT OK: %d fish, %d regions, %d rods, %d baits, %d bags, %d accessories, %d decorations, %d behaviors, %d weather, %d layouts" % [

@@ -32,12 +32,12 @@ var hints: TutorialHints
 @onready var ui: UIController = $UIController
 
 func _ready() -> void:
-	_pick_language()
 	region_id = ContentDB.balance["vertical_slice"]["region_id"]
 	if load_save:
 		SaveService.load_game()
 	else:
 		GameState.ensure_initialized()
+	_pick_language()  # after the load: the language is a saved setting
 	restoration = RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
 	journal = JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"])
 	loadout = LoadoutService.new(GameState)
@@ -70,6 +70,9 @@ func _ready() -> void:
 	})
 
 	EventBus.settings_changed.connect(settings.apply)
+	EventBus.settings_changed.connect(func(key: String) -> void:
+		if key == "language":
+			_on_language_changed())
 	EventBus.game_state_replaced.connect(_on_state_replaced)
 	EventBus.region_restoration_changed.connect(_on_restoration_changed)
 	EventBus.fish_released.connect(_on_fish_released)
@@ -93,10 +96,18 @@ func _ready() -> void:
 	_handle_time_away()
 	moments.check()  # whatever is already true when the game opens
 
-## KO and EN are translated; any other system language falls back to English until JA arrives (P1-013).
+## The saved language, or the device's when it is "auto" (KO / EN / JA; anything else reads English).
 func _pick_language() -> void:
-	var language := OS.get_locale_language()
-	TranslationServer.set_locale(language if language in ["ko", "en"] else "en")
+	TranslationServer.set_locale(LocalizationCheck.locale_for(String(GameState.get_setting("language")), OS.get_locale_language()))
+
+## Most labels are written once when a screen is built, so a new language rebuilds the scene from the
+## save (the game is saved first). Tests and tools (no save) only switch the locale.
+func _on_language_changed() -> void:
+	_pick_language()
+	if not load_save:
+		return
+	SaveService.save_game()
+	get_tree().reload_current_scene.call_deferred()
 
 func _fishing_context() -> Dictionary:
 	return {"time_band": TimeService.get_time_band(), "weather_id": region.weather.current_id}

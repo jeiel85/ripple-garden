@@ -348,7 +348,7 @@ func test_full_screen_panels_stay_inside_a_phone_screen() -> void:
 	var previous := TranslationServer.get_locale()
 	GameState.new_game()
 	GameState.record_encounter("fish_crucian_carp", 12.0, "steady", "clear")
-	for locale in ["ko", "en"]:
+	for locale in ["ko", "en", "ja"]:
 		TranslationServer.set_locale(locale)
 		var host := Control.new()
 		host.size = Vector2(720, 1280)

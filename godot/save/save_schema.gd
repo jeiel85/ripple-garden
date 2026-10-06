@@ -19,6 +19,8 @@ const MAX_POPULATION := 9999
 const MAX_BAIT_COUNT := 9999
 
 const QUALITY_OPTIONS: PackedStringArray = ["low", "medium", "high"]
+## "auto" follows the device language (LocalizationCheck.locale_for).
+const LANGUAGE_OPTIONS: PackedStringArray = ["auto", "ko", "en", "ja"]
 const FPS_OPTIONS: Array = [30, 60]
 
 ## Player-facing settings (UI_UX §9). `type` is the JSON-level type; numbers may carry a range,
@@ -29,6 +31,7 @@ const SETTING_SPECS := {
 	"auto_hook": {"default": false},
 	"real_time_mode": {"default": false},
 	"tutorial_hints": {"default": true},
+	"language": {"default": "auto", "options": LANGUAGE_OPTIONS},
 	# Accessibility
 	"text_scale": {"default": 1.0, "min": 0.8, "max": 1.6},
 	"large_ui": {"default": false},

@@ -8,6 +8,7 @@ extends SceneTree
 ##   --level=N       restoration level 0..5          --hour=H       game hour 0..24
 ##   --weather=ID    clear | cloudy | rain           --populate=N   N of every species released
 ##   --panel=NAME    journal | gear | camp | map | restore | settings | debug | licenses | water_mind | photo
+##   --lang=ko|en|ja the language (otherwise the device's)
 ##   --frame=ID      photo mode frame (none | polaroid | wood | soft), --zoom=X photo mode zoom
 ##   --state=NAME    wait | fight | inspect          --seed=N       RNG seed for the scenario
 ##   --frames=N      frames to run before capture (default 40)
@@ -34,6 +35,8 @@ func _run() -> void:
 	var time_service: Node = root.get_node("TimeService")
 	save_service.write_blocked = true  # a capture must never touch the player's save
 	game_state.new_game()
+	if _args.has("lang"):
+		game_state.set_setting("language", _args["lang"])  # ko | en | ja (default: the device's)
 
 	var packed: PackedScene = load("res://world/game_root.tscn")
 	var game: Node = packed.instantiate()

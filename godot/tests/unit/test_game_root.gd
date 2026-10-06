@@ -297,9 +297,9 @@ func test_resuming_with_a_pending_catch_goes_straight_to_inspect() -> void:
 	assert_eq(root.ui.current_panel(), root.ui.inspect_panel)
 	_stop(root)
 
-func test_the_hud_lays_out_without_squashed_buttons_in_korean_and_english() -> void:
+func test_the_hud_lays_out_without_squashed_buttons_in_every_language() -> void:
 	var previous := TranslationServer.get_locale()
-	for locale in ["ko", "en"]:
+	for locale in ["ko", "en", "ja"]:
 		TranslationServer.set_locale(locale)
 		var root := _start()
 		await tree.process_frame

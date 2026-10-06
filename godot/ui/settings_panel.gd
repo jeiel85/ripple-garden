@@ -13,7 +13,8 @@ signal licenses_pressed
 ## [setting key, kind, extra...]: toggle | slider(min, max, step) | option(values)
 const SECTIONS: Array = [
 	{"title": "ui.settings.gameplay", "rows": [
-		["relaxed_hook", "toggle"], ["auto_hook", "toggle"], ["real_time_mode", "toggle"], ["tutorial_hints", "toggle"]]},
+		["relaxed_hook", "toggle"], ["auto_hook", "toggle"], ["real_time_mode", "toggle"], ["tutorial_hints", "toggle"],
+		["language", "option", ["auto", "ko", "en", "ja"]]]},
 	{"title": "ui.settings.accessibility", "rows": [
 		["text_scale", "slider", 0.8, 1.6, 0.1], ["large_ui", "toggle"], ["reduced_motion", "toggle"],
 		["camera_shake", "toggle"], ["haptics", "toggle"], ["high_contrast_meter", "toggle"], ["visual_bite_cue", "toggle"]]},
@@ -125,7 +126,7 @@ func _row(spec: Array) -> Control:
 			option.custom_minimum_size = Vector2(220, UiTheme.TOUCH_MIN_PX)
 			var values: Array = spec[2]
 			for value in values:
-				option.add_item(tr("ui.%s.%s" % [key, str(value)]) if key == "quality" else str(value))
+				option.add_item(tr("ui.%s.%s" % [key, str(value)]) if key in ["quality", "language"] else str(value))
 			option.set_meta("values", values)
 			option.item_selected.connect(func(index: int) -> void:
 				if not _syncing:
