@@ -238,20 +238,33 @@ func refresh() -> void:
 		selected_id = _first_interesting(entries)
 	_show_page(selected_id)
 	_all_dot.visible = GameState.has_unseen_journal_entries()
+	if _cards.has(selected_id):
+		_scroll.ensure_control_visible.call_deferred(_cards[selected_id])
 
 func select_tab(tab_id: String) -> void:
 	tab = tab_id
 	selected_id = ""
 	refresh()
 
-## Opens the page of `fish_id`, switching to the "all" tab if the current one does not hold it.
-func focus_fish(fish_id: String) -> void:
-	if not _cards.has(fish_id):
+## Chooses the page to show at the next refresh without building anything yet, switching to the "all"
+## tab when the current one does not hold the fish. Used before the panel opens, so the refresh that
+## opening does lands on this fish (and never shows, and marks as seen, another one first).
+func preselect(fish_id: String) -> void:
+	if ContentDB.get_fish(fish_id).is_empty():
+		return
+	var in_tab := false
+	for entry in _entries_for(tab):
+		if entry.fish_id == fish_id:
+			in_tab = true
+			break
+	if not in_tab:
 		tab = "all"
 	selected_id = fish_id
+
+## Opens the page of `fish_id` now (see `preselect`).
+func focus_fish(fish_id: String) -> void:
+	preselect(fish_id)
 	refresh()
-	if _cards.has(fish_id):
-		_scroll.ensure_control_visible.call_deferred(_cards[fish_id])
 
 func card_count() -> int:
 	return _cards.size()

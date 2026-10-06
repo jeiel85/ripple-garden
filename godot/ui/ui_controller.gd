@@ -253,9 +253,9 @@ func current_panel() -> Control:
 	return _current_panel
 
 func open_journal(fish_id: String = "") -> void:
-	_open(journal_panel)
 	if not fish_id.is_empty():
-		journal_panel.focus_fish(fish_id)
+		journal_panel.preselect(fish_id)  # before opening: the opening refresh must land on this fish
+	_open(journal_panel)
 
 func _on_journal_pressed() -> void:
 	if _current_panel == journal_panel:

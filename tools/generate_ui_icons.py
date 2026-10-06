@@ -199,11 +199,11 @@ def main():
     for name, body in ICONS.items():
         svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 48 48">'
                f"{body}</svg>\n")
-        (OUT / f"{name}.svg").write_text(svg, encoding="utf-8")
+        (OUT / f"{name}.svg").write_text(svg, encoding="utf-8", newline="\n")
     for name, (width, height, view_box, body) in THEME_ICONS.items():
         svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="{view_box}">'
                f"{body}</svg>\n")
-        (OUT / f"{name}.svg").write_text(svg, encoding="utf-8")
+        (OUT / f"{name}.svg").write_text(svg, encoding="utf-8", newline="\n")
     print(f"wrote {len(ICONS) + len(THEME_ICONS)} icons to {OUT.relative_to(ROOT)}")
 
 

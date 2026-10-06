@@ -68,11 +68,15 @@ func test_the_top_bar_drops_optional_words_before_squeezing_the_region_name() ->
 	var root := _start()
 	await tree.process_frame
 	var hud: Hud = root.ui.hud
-	hud.fit_top_bar(2000.0)
+	hud.fit_top_bar(4000.0)
 	assert_true(hud.currency_words[0].visible and hud.weather_label.visible, "a wide screen shows every word")
 	assert_false(hud.region_label.clip_text)
-	hud.fit_top_bar(720.0)
-	assert_true(hud.weather_label.visible, "a phone keeps the weather word")
+	# Widths come from the row itself, so the test holds for any font the platform draws with.
+	var full := (hud.top_bar.get_child(0) as Control).get_combined_minimum_size().x + 32.0
+	hud.fit_top_bar(full - 1.0)
+	assert_false(hud.currency_words[0].visible, "the currency words go first")
+	assert_true(hud.weather_label.visible, "the weather word stays while there is room")
+	assert_false(hud.region_label.clip_text)
 	hud.fit_top_bar(360.0)
 	assert_false(hud.currency_words[0].visible)
 	assert_false(hud.weather_label.visible)
@@ -254,6 +258,16 @@ func test_journal_tabs_split_the_world_and_the_page_clears_new() -> void:
 	assert_eq(panel.selected_id, "fish_crucian_carp")
 	panel.free()
 	GameState.new_game()
+
+func test_opening_the_journal_on_a_fish_leaves_other_new_fish_new() -> void:
+	var root := _start()
+	GameState.record_encounter("fish_minnow", 9.0, "dasher", "clear")
+	GameState.record_encounter("fish_crucian_carp", 12.0, "steady", "clear")
+	root.ui.open_journal("fish_crucian_carp")
+	assert_eq(root.ui.journal_panel.selected_id, "fish_crucian_carp")
+	assert_eq(GameState.get_collection_record("fish_crucian_carp")["journal_seen"], true)
+	assert_eq(GameState.get_collection_record("fish_minnow")["journal_seen"], false, "a fish never shown stays NEW")
+	_stop(root)
 
 func test_journal_sorting_keeps_unmet_species_last() -> void:
 	GameState.new_game()
