@@ -326,8 +326,12 @@ func set_cta_for_state(state_name: String) -> void:
 	var tip_key: String = TIP_BY_STATE.get(state_name, "")
 	tip_label.text = tr(tip_key) if not tip_key.is_empty() else ""
 	tip_label.get_parent().visible = not tip_key.is_empty()
-	# Opening the journal mid-fight would leave the fish unattended: only while waiting.
-	fishing_journal_button.disabled = state_name in ["bite_hint", "hook", "fight", "land"]
+	# Opening the journal mid-fight would leave the fish unattended: only while waiting. Settings follow
+	# the same rule, and restoration (a change to the world, not a look) waits until the line is in.
+	var fish_on := state_name in ["bite_hint", "hook", "fight", "land"]
+	fishing_journal_button.disabled = fish_on
+	settings_button.disabled = fish_on
+	restore_button.disabled = fishing
 	cancel_button.disabled = state_name == "land"
 	_can_fade = state_name == "ready"
 	wake()

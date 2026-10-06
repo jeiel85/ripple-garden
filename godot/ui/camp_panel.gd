@@ -152,6 +152,12 @@ func choose(decoration_id: String) -> void:
 		_camp.place(region_id, selected_slot, decoration_id)
 		return
 	var deal := _loadout.offer("decoration", decoration_id)
+	# The latest tap wins: a decoration that cannot be bought drops an earlier offer, so the done
+	# button never buys something the player has moved on from.
+	if deal["state"] != LoadoutService.BUY and not pending.is_empty():
+		pending = ""
+		_fill_cards()
+		_place_buttons()
 	match deal["state"]:
 		LoadoutService.BUY:
 			pending = decoration_id
