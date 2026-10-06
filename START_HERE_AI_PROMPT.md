@@ -29,6 +29,7 @@
 - 기존 ID를 임의 rename하지 않는다.
 - 한 번에 5개 지역을 모두 만들지 말고 Region 01 Vertical Slice를 먼저 완성한다.
 
-첫 작업:
-`P0-001 Godot project bootstrap` 상태를 현재 파일 구조와 비교하고,
-누락된 bootstrap 요소를 보완한 뒤 변경 내용과 검증 결과를 보고하라.
+다음 작업:
+`TASKS.md`에서 체크되지 않은 첫 P0 항목부터 진행한다. (P0-001 완료)
+
+검증 명령은 `README.md`의 "실행과 검증"을 따른다. 기술 결정은 `DECISIONS.md`를 확인한다.

@@ -1,0 +1,116 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+env:
+  GODOT_VERSION: 4.7.2-stable
+
+jobs:
+  validate:
+    name: Validate content and run Godot tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate content data
+        run: python tools/validate_content.py
+
+      - name: Check version consistency
+        run: python tools/check_version.py
+
+      - name: Install Godot (checksum verified)
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}"
+          file="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o "$file" "$base/$file"
+          curl -fsSL -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+          sha512sum -c --ignore-missing SHA512-SUMS.txt
+          unzip -q "$file"
+          echo "GODOT_BIN=$RUNNER_TEMP/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Import project
+        run: '"$GODOT_BIN" --headless --path godot --import'
+
+      - name: Run Godot tests
+        run: '"$GODOT_BIN" --headless --path godot -s res://tests/run_tests.gd'
+
+  release:
+    name: Build Windows release
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check tag matches game version
+        run: python tools/check_version.py "${{ github.ref_name }}"
+
+      - name: Install Godot and Windows export templates (checksum verified)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = "https://github.com/godotengine/godot/releases/download/$env:GODOT_VERSION"
+          $dir = "$env:RUNNER_TEMP\godot"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          Set-Location $dir
+          $editor = "Godot_v$($env:GODOT_VERSION)_win64.exe.zip"
+          $templates = "Godot_v$($env:GODOT_VERSION)_export_templates.tpz"
+          curl.exe -fsSL -o $editor "$base/$editor"
+          curl.exe -fsSL -o $templates "$base/$templates"
+          curl.exe -fsSL -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+          foreach ($file in @($editor, $templates)) {
+            $line = Select-String -Path SHA512-SUMS.txt -SimpleMatch " $file" | Select-Object -First 1
+            if (-not $line) { throw "No checksum listed for $file" }
+            $expected = ($line.Line -split '\s+')[0]
+            $actual = (Get-FileHash -Algorithm SHA512 $file).Hash
+            if ($actual -ne $expected) { throw "Checksum mismatch for $file" }
+          }
+          7z x $editor -o"$dir" | Out-Null
+          $templateVersion = $env:GODOT_VERSION -replace '-', '.'
+          $templateDir = "$env:APPDATA\Godot\export_templates\$templateVersion"
+          New-Item -ItemType Directory -Force -Path $templateDir | Out-Null
+          7z e $templates templates/windows_release_x86_64.exe templates/version.txt -o"$templateDir" | Out-Null
+          "GODOT_BIN=$dir\Godot_v$($env:GODOT_VERSION)_win64_console.exe" >> $env:GITHUB_ENV
+
+      - name: Export Windows build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:GODOT_BIN --headless --path godot --import
+          New-Item -ItemType Directory -Force -Path build\windows | Out-Null
+          & $env:GODOT_BIN --headless --path godot --export-release "Windows Desktop" ..\build\windows\RippleGarden.exe
+          if (-not (Test-Path build\windows\RippleGarden.exe)) { throw "Export produced no executable" }
+
+      - name: Package and publish release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = "${{ github.ref_name }}"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $zip = "dist\RippleGarden-$tag-windows-x64.zip"
+          Compress-Archive -Path build\windows\* -DestinationPath $zip
+          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+          "$hash  $(Split-Path $zip -Leaf)" | Out-File -Encoding ascii dist\SHA256SUMS.txt
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $zip dist\SHA256SUMS.txt --clobber
+          } else {
+            gh release create $tag $zip dist\SHA256SUMS.txt --title "Ripple Garden $tag" --generate-notes
+          }
