@@ -92,6 +92,12 @@ static func validate(raw: Dictionary) -> Dictionary:
 	for entry in raw.get("weather", []) if typeof(raw.get("weather")) == TYPE_ARRAY else []:
 		if typeof(entry) == TYPE_DICTIONARY:
 			v._weather_ids[entry.get("id")] = true
+	# Moment thresholds must be reachable: no deeper than any region restores, no more camp spots than a camp has.
+	v._max_camp_slots = 0
+	if typeof(raw.get("layouts")) == TYPE_DICTIONARY:
+		for layout in raw["layouts"].values():
+			if typeof(layout) == TYPE_DICTIONARY and typeof(layout.get("camp_slots")) == TYPE_ARRAY:
+				v._max_camp_slots = maxi(v._max_camp_slots, layout["camp_slots"].size())
 	var moments := v._validate_list(raw.get("moments"), "moments", v._check_moment)
 	var balance := v._validate_balance(raw.get("balance"), regions, rods, baits, bags, accessories)
 	var layouts := v._validate_layouts(raw.get("layouts"), regions, weather, balance)
@@ -123,6 +129,7 @@ var _bait_tags: Dictionary = {}
 var _behaviors: Dictionary = {}
 var _item_errors := PackedStringArray()
 var _weather_ids: Dictionary = {}
+var _max_camp_slots := 0
 
 func _validate_list(items: Variant, category: String, check: Callable) -> Dictionary:
 	var file_name: String = LIST_FILES.get(category, FILE_NAMES.get(category, ""))
@@ -276,8 +283,10 @@ func _check_starting_camp(balance: Dictionary, layouts: Dictionary, decorations:
 
 ## Moments (P1-008): what to show, a small Memory gift, and a `when` condition made of known keys.
 func _check_moment(d: Dictionary) -> void:
-	for field in ["name_key", "desc_key", "hint_key", "icon"]:
+	for field in ["name_key", "desc_key", "hint_key"]:
 		_require_string(d, field)
+	if typeof(d.get("icon")) != TYPE_STRING or not UiIcons.has_icon(d["icon"]):
+		_item_errors.append("icon: must be a name from UiIcons.NAMES")
 	_require_int(d, "memory", 0, 50)
 	var when: Variant = d.get("when")
 	if typeof(when) != TYPE_DICTIONARY or when.is_empty():
@@ -299,9 +308,19 @@ func _check_moment(d: Dictionary) -> void:
 				_item_errors.append("when.weather: unknown weather '%s'" % entry)
 			elif list_key == "band" and not entry in TIME_BANDS:
 				_item_errors.append("when.band: unknown time band '%s'" % entry)
-	for number_key in ["min_level", "caught_rarity", "camp_filled"]:
-		if when.has(number_key) and (not _is_int(when[number_key]) or when[number_key] < 0):
-			_item_errors.append("when.%s: must be an integer >= 0" % number_key)
+	var max_level := 0
+	for region in _regions.values():
+		max_level = maxi(max_level, int(region.get("restoration_levels", 0)))
+	var ranges := {"min_level": [0, max_level], "caught_rarity": [1, 5], "camp_filled": [1, _max_camp_slots]}
+	for number_key in ranges:
+		var bounds: Array = ranges[number_key]
+		if when.has(number_key) and (not _is_int(when[number_key]) or when[number_key] < bounds[0] or when[number_key] > bounds[1]):
+			_item_errors.append("when.%s: must be an integer %d..%d (anything else can never happen)" % [number_key, bounds[0], bounds[1]])
+	# water_mind is compared with the scene's true/false; after_away only ever arrives as true.
+	if when.has("water_mind") and typeof(when["water_mind"]) != TYPE_BOOL:
+		_item_errors.append("when.water_mind: must be true or false")
+	if when.has("after_away") and not (typeof(when["after_away"]) == TYPE_BOOL and when["after_away"]):
+		_item_errors.append("when.after_away: must be true")
 
 func _require_color(d: Dictionary, field: String) -> void:
 	if typeof(d.get(field)) != TYPE_STRING or RegEx.create_from_string(HEX_COLOR).search(d[field]) == null:

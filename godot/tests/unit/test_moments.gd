@@ -132,3 +132,21 @@ func test_moment_lists_must_hold_names() -> void:
 		var errors := "
 ".join(ContentValidator.validate(raw)["errors"])
 		assert_true(errors.contains("when.weather: must be a non-empty array of names"), "%s: %s" % [bad, errors])
+
+func test_moments_that_could_never_happen_are_rejected() -> void:
+	var cases := [
+		["icon", "rian", "icon: must be a name from UiIcons.NAMES"],
+		["when", {"caught_rarity": 6}, "when.caught_rarity: must be an integer 1..5"],
+		["when", {"min_level": 11}, "when.min_level: must be an integer 0..10"],
+		["when", {"camp_filled": 99}, "when.camp_filled"],
+		["when", {"water_mind": "yes"}, "when.water_mind: must be true or false"],
+		["when", {"after_away": false}, "when.after_away: must be true"],
+	]
+	for entry in cases:
+		var raw: Dictionary = {}
+		for category in ContentValidator.FILE_NAMES:
+			raw[category] = JSON.parse_string(FileAccess.get_file_as_string("res://data".path_join(ContentValidator.FILE_NAMES[category])))
+		raw["moments"][0][entry[0]] = entry[1]
+		var errors := "
+".join(ContentValidator.validate(raw)["errors"])
+		assert_true(errors.contains(entry[2]), "%s: %s" % [entry, errors])
