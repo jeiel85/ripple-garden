@@ -38,7 +38,7 @@ static func validate(raw: Dictionary) -> Dictionary:
 			v._bait_tags[tag] = true
 	var rods := v._validate_list(raw.get("rods"), "rods", v._check_rod)
 	var fish := v._validate_list(raw.get("fish"), "fish", v._check_fish)
-	var progression := v._validate_progression(raw.get("progression"), regions)
+	var progression := v._validate_progression(raw.get("progression"), regions, fish)
 	return {
 		"fish": fish,
 		"regions": regions,
@@ -156,8 +156,14 @@ func _check_fish(d: Dictionary) -> void:
 		_require_number(fight, "strength", 0.0, 1.0, true, "fight.")
 		_require_number(fight, "duration_sec", 0.0, INF, false, "fight.")
 
-func _validate_progression(data: Variant, regions: Dictionary) -> Dictionary:
+func _validate_progression(data: Variant, regions: Dictionary, fish: Dictionary) -> Dictionary:
 	var file_name: String = FILE_NAMES["progression"]
+	# unique_fish is read as species discovered in the prerequisite region (the stricter
+	# reading), so it must not exceed the species that live there.
+	var species_per_region: Dictionary = {}
+	for fish_def in fish.values():
+		for region_id in fish_def["regions"]:
+			species_per_region[region_id] = species_per_region.get(region_id, 0) + 1
 	if data == null:
 		return {}
 	if typeof(data) != TYPE_DICTIONARY:
@@ -220,6 +226,10 @@ func _validate_progression(data: Variant, regions: Dictionary) -> Dictionary:
 							label, int(regions[required_region]["restoration_levels"])])
 				if not _is_int(condition.get("unique_fish")) or condition["unique_fish"] < 0:
 					_errors.append("%s.condition.unique_fish: must be a non-negative integer" % label)
+				elif regions.has(required_region) \
+						and condition["unique_fish"] > species_per_region.get(required_region, 0):
+					_errors.append("%s.condition.unique_fish: %d exceeds the %d species that live in %s" % [
+						label, int(condition["unique_fish"]), species_per_region.get(required_region, 0), required_region])
 		if start_count != 1:
 			_errors.append("%s.region_unlocks: exactly one region must have condition type 'start' (found %d)" % [
 				file_name, start_count])

@@ -204,3 +204,14 @@ func test_non_finite_numbers_are_rejected() -> void:
 	_assert_error(result, "[fish_crucian_carp].fight.duration_sec: must be a number")
 	_assert_error(result, "[fish_crucian_carp].time_bands.day: multiplier must be a number >= 0")
 	assert_false(result["fish"].has("fish_crucian_carp"))
+
+func test_unreachable_unique_fish_threshold_is_rejected() -> void:
+	# Codex re-review PR #4: a threshold above the species living in the
+	# prerequisite region can never be met (progression softlock).
+	var raw := _raw()
+	for entry in raw["progression"]["region_unlocks"]:
+		if entry["region_id"] == "region_02_forest_stream":
+			entry["condition"]["unique_fish"] = 11  # Region 01 has 10 species
+	var result := ContentValidator.validate(raw)
+	_assert_error(result, "condition.unique_fish: 11 exceeds the 10 species that live in region_01_quiet_pond")
+	assert_true(result["progression"].is_empty(), "unreachable progression kept")
