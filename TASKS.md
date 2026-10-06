@@ -1,7 +1,8 @@
 # TASKS — Production Backlog
 
 ## P0 — Vertical Slice Foundation
-- [ ] P0-001 Godot project bootstrap, folders, autoload registration
+- [x] P0-001 Godot project bootstrap, folders, autoload registration
+  - EntitlementService autoload는 P1-011에서 등록 (TECH_SPEC §2 목록 중 유일한 미등록 항목)
 - [ ] P0-002 ContentDB JSON loader + validation errors
 - [ ] P0-003 EventBus typed event conventions
 - [ ] P0-004 GameState domain model
