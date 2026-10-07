@@ -69,3 +69,5 @@
   (잎 장식 256px)로 줄이고, 바인더는 고리 한 마디만 잘라 192px로 줄인다(수정됨). 9-slice 비율·배율은 `art.json` `ui`에 있다.
 - **그림 — Asset Drop 11** (`godot/art/moments/` 10장): OpenAI 이미지 생성으로 2026-10-07 만든 도감 순간 그림(`ripple_garden_asset_drop_11.zip`, 저장소 밖 보관).
   상업적 이용은 OpenAI 이용 약관을 따른다. 1254 정사각 원본을 512px로 줄여 넣었다(수정됨). 이로써 순간 11개 모두 그림이 있다.
+- **그림 — Asset Drop 12** (`godot/art/map/map_island_region_01~05_*.png` 5장): OpenAI 이미지 생성으로 2026-10-08 만든 지역 섬(`ripple_garden_asset_drop_12.zip`, 저장소 밖 보관).
+  상업적 이용은 OpenAI 이용 약관을 따른다. 큰 투명 여백을 잘라 가장 긴 변 512px로 줄여 넣었다(수정됨). 넣지 않은 것: `map_background`(섬 5개가 이미 그려져 있어 게임의 섬과 겹침).

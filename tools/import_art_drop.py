@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_11) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_12) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -184,6 +184,9 @@ UI_10 = ["ui_wood_cta", "ui_wood_sign", "ui_wood_panel", "ui_paper_card", "ui_cr
          "ui_leaf_corner_01", "ui_leaf_corner_02", "ui_leaf_corner_03", "ui_leaf_corner_04", "ui_notebook_binding"]
 BINDING_10 = (313, 595, 636, 1027)  # x0, y0, x1, y1: the middle ring and its strip
 UI_VISIBLE = 8  # alpha above this is the frame, below it the shadow haze
+# drop_12's five region islands, each on a large canvas with empty margins; cut to the island and scaled to 512.
+# Its map_background is not taken: the islands are painted into it, and the game draws its own on top.
+ISLANDS_12 = ["quiet_pond", "forest_stream", "reed_river", "blue_coast", "moonlight_isle"]
 CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
 CHECKER_GREY = 238  # its average
 RIM_SPREAD = 80  # an outline pixel this far from the grey (largest channel) is fully the picture's
@@ -481,6 +484,8 @@ def main() -> None:
                     image = image.transpose(Image.FLIP_LEFT_RIGHT)
                 write_group([(image, path)], f"{REFERENCE_06} {box}")
             copy(drop, "drop_06")
+        elif names == {"drop_12"}:
+            region_islands(drop)
         elif names == {"drop_10"}:
             ui_frames(drop)
         elif names == {"drop_09"}:
@@ -527,6 +532,14 @@ def ui_frames(drop: zipfile.ZipFile) -> None:
         target = f"ui/{name}.png"
         longest = LONGEST_FOR.get(target, LONGEST["ui"])
         _write(shrink(image, longest / max(image.size)), source, target)
+
+
+def region_islands(drop: zipfile.ZipFile) -> None:
+    for index, name in enumerate(ISLANDS_12, 1):
+        source = f"map/map_island_region_0{index}_{name}.png"
+        image = Image.open(BytesIO(drop.read(PREFIX % "drop_12" + source))).convert("RGBA")
+        image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
+        _write(shrink(image, 512 / max(image.size)), source, "map/" + source.removeprefix("map/"))
 
 
 def copy(drop: zipfile.ZipFile, name: str) -> None:
