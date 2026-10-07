@@ -11,7 +11,7 @@
     "lily_pad": {"width": 66, "anchor": [0.5, 0.5]},
     "flower": {"width": 40},
     "camp_ground": {"width": 260, "anchor": [0.5, 0.5]},
-    "tent": {"width": 190},
+    "tent": {"width": 150},
     "camp_chair": {"width": 64},
     "crate": {"width": 84},
     "lantern": {"width": 30},

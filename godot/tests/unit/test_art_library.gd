@@ -5,12 +5,17 @@ extends TestCase
 
 const REGION := "region_01_quiet_pond"
 const FIXTURES := "res://tests/fixtures/art"
+## A folder without any picture: the game as it looks before (or without) drawn art.
+const NO_ART := "res://tests/fixtures/no_art"
 
 func _with_fixtures() -> void:
 	ArtLibrary.use_root(FIXTURES)
 
 func _restore() -> void:
 	ArtLibrary.use_root(ArtLibrary.DEFAULT_ROOT)
+
+func _without_art() -> void:
+	ArtLibrary.use_root(NO_ART)
 
 func _environment(level: int) -> RegionEnvironment:
 	var env := RegionEnvironment.new()
@@ -29,10 +34,11 @@ func test_a_missing_picture_is_null_and_an_existing_one_loads() -> void:
 	assert_false(ArtLibrary.has("world", "r99_scene"))
 	_restore()
 
-func test_the_game_folder_has_no_pictures_yet_so_shapes_stay() -> void:
+func test_the_game_folder_ships_the_region_01_scene_but_no_angler_yet() -> void:
 	_restore()
 	assert_true(ArtLibrary.texture("character", "angler_idle") == null, "the shipped game draws the angler from shapes until art arrives")
-	assert_true(ArtLibrary.texture("world", "r01_scene") == null)
+	assert_not_null(ArtLibrary.texture("world", "r01_scene"), "Asset Drop 08")
+	assert_not_null(ArtLibrary.texture("world", "r01_scene_barren"), "the restored painting fades in over its barren twin")
 
 func test_variants_cycle_and_are_stable_for_the_same_pick() -> void:
 	_with_fixtures()
@@ -84,7 +90,7 @@ func test_rects_keep_the_picture_proportions() -> void:
 # --- the world ---
 
 func test_a_painted_scene_replaces_the_drawn_backdrop_and_fades_with_restoration() -> void:
-	_restore()
+	_without_art()
 	var plain := _environment(0)
 	assert_false(plain.has_scene_art())
 	plain.queue_free()
@@ -134,7 +140,7 @@ func test_over_a_painted_scene_the_painted_props_are_not_drawn_again() -> void:
 		assert_true(kind in PropKinds.PROPS, "%s is not a prop kind" % kind)
 	props.queue_free()
 	env.queue_free()
-	_restore()
+	_without_art()
 	var plain := _environment(5)
 	var plain_props := PropsLayer.new()
 	tree.root.add_child(plain_props)
@@ -142,6 +148,7 @@ func test_over_a_painted_scene_the_painted_props_are_not_drawn_again() -> void:
 	assert_eq(plain_props.drawn_props(5).size(), plain_props.visible_props(5).size(), "without a painting every prop is drawn")
 	plain_props.queue_free()
 	plain.queue_free()
+	_restore()
 
 func test_the_foreground_only_exists_as_art() -> void:
 	ArtLibrary.use_root("res://tests/fixtures/art_barren_only")  # a folder without a foreground picture

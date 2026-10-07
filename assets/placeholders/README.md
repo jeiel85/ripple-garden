@@ -57,3 +57,6 @@
 - **그림 — Asset Drop 07** (`godot/art/moments/moment_rainbow.png`): OpenAI 이미지 생성으로 2026-10-07 만든 그림(`ripple_garden_asset_drop_07.zip`, 저장소 밖 보관),
   512px로 줄여 넣었다(수정됨). 넣지 않은 것: 나머지 순간 그림 10장(목업 01을 잘라 스티커를 얹은 같은 장면), 아이콘 39개(지금 아이콘보다 단순하고 뜻이 틀린 것이 있으며
   일부만 섞으면 일관성이 깨짐), 사진 액자 4장(게임이 그리는 액자와 같은 수준). 다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.
+- **그림 — Asset Drop 08** (`godot/art/world/r01_scene.png`, `r01_scene_barren.png`): OpenAI 이미지 생성으로 2026-10-07 만든 Region 01 풍경 두 장
+  (`ripple_garden_asset_drop_08.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다. 1024×1536 원본 그대로 넣었다(수정 없음).
+  두 장은 같은 구도라 복원 단계 사이에 섞어 보여 준다. `data/region_layouts.json`의 연못 경계·구역·낚시꾼·캠프 자리·소품 위치를 이 그림에 맞췄다.
