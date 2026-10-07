@@ -147,7 +147,10 @@ func test_a_korean_line_breaks_only_between_words() -> void:
 func test_the_korean_translation_keeps_words_together_once_installed() -> void:
 	KeepWordsTranslation.install()
 	KeepWordsTranslation.install()  # twice is harmless
-	assert_true(TranslationServer.get_translation_object("ko") is KeepWordsTranslation)
+	var installed := TranslationServer.get_translation_object("ko")
+	assert_true(installed.has_meta(KeepWordsTranslation.MARK))
+	assert_true(installed.get_script() == null, "a script-backed Translation left registered crashes the engine on exit")
+	assert_true(installed.get_message_list().size() > 100, "every Korean message was copied")
 	var previous := TranslationServer.get_locale()
 	TranslationServer.set_locale("ko")
 	var shown := String(TranslationServer.translate("ui.cta.cast"))

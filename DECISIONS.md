@@ -301,7 +301,10 @@
   개별 컨트롤은 `UiKit.text_size(control, "caption")`으로 이름을 지정해 테마가 다시 만들어질 때(글자 크기·큰 UI 설정) 함께 바뀐다. 아이콘은 `UiTheme.ICON_S/M/L/XL`(24·32·44·64):
   캡션 옆 S, 본문 옆·탭·알약 M, 버튼에 홀로 L, 화면의 큰 그림 XL. `test_fonts.gd`가 화면 스크립트에 숫자 크기가 다시 들어오면 실패한다.
 - 한국어 줄바꿈: 텍스트 서버(ICU)의 한국어 줄바꿈 규칙은 음절 사이마다 끊을 수 있게 한다. 언어 태그 `ko@lw=keepall`은 실험에서 여전히 단어 중간에서 끊겨 쓰지 않았다.
-  대신 한국어 번역을 `KeepWordsTranslation`으로 감싸 한 단어 안의 글자 사이에 WORD JOINER(U+2060, 보이지 않음)를 넣는다. 띄어쓰기에서만 줄이 바뀌고,
+  대신 불러온 한국어 번역을 한 단어 안의 글자 사이에 WORD JOINER(U+2060, 보이지 않음)를 넣은 사본으로 바꾼다(`KeepWordsTranslation.install`). 띄어쓰기에서만 줄이 바뀌고,
   한 줄보다 긴 단어는 라벨의 adaptive 줄바꿈이 자른다. `%s`·`%d` 자리표시자는 건드리지 않는다. 대가로 `tr()`이 돌려주는 한국어 문자열에 U+2060이 들어 있어,
   한국어 문장을 글자 그대로 비교하는 코드는 이를 빼고 비교해야 한다.
+  사본은 스크립트 서브클래스가 아닌 일반 `Translation`이다. 처음에는 `_get_message`를 덮어쓴 스크립트 Translation으로 감쌌는데, 엔진이 종료할 때
+  등록된 스크립트 Translation을 정리하다 접근 위반으로 죽었다(CI exit 134, PR #33). 메시지 목록을 읽기 위해 CSV를 압축하지 않고 가져온다
+  (`localization.csv.import`의 `compress=0`, 세 언어 합쳐 약 150 KB).
 
