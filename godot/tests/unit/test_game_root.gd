@@ -214,8 +214,15 @@ func test_aiming_on_land_shows_an_invalid_ring_and_casting_is_refused_gently() -
 	var root := _start()
 	var rejected: Array = []
 	root.fishing.cast_rejected.connect(func(reason: String) -> void: rejected.append(reason))
-	root.ui.world_input._on_press(Vector2(360, 1000))
-	root.ui.world_input._on_release(Vector2(60, 1150))  # far left and low: not water
+	# From the dock end the forward cone is water near the rod; only a long rod reaches the shore rocks.
+	GameState.grant_rod("rod_pier")
+	assert_true(GameState.equip_rod("rod_pier"))
+	var input := root.ui.world_input
+	input.refresh_aim()
+	var target := root.region.rod_origin() + Vector2(0, -1000)  # straight ahead past the far bank
+	assert_false(root.region.habitat_map.is_water(input._aim.landing_for(target)), "the landing must be on the shore")
+	input._on_press(Vector2(360, 1000))
+	input._on_release(target)
 	assert_eq(root.fishing.state, FishingController.State.READY)
 	assert_deep_eq(rejected, ["no_fish_here"])
 	_stop(root)

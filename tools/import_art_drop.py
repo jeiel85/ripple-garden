@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06, drop_07) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_08) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -28,7 +28,7 @@ carry the sheet's drawn checkerboard, parts of the neighbouring pictures and the
 the pictures are cut again from the sheet (CUTS_06): `key_checker` takes away the grey checkerboard (and
 the soft shadow on it) reached from the box's edge and un-mixes the grey from the outline, `keep_picture`
 drops what the box caught of a panel line or a label. They stay at the sheet's size (100..200 px), which
-covers the size the game draws them. Its foreground was painted separately at full size and is copied.
+covers the size the game draws them. Its foreground was painted separately at full size and is copied, like drop_08's two region scenes.
 
 Only pictures listed in DROP_01 / SHEETS / CUTS_06 / COPIES are imported; the rest of the drop is waiting for a decision
 (assets/placeholders/README.md lists what was taken and why the others were not).
@@ -153,6 +153,9 @@ COPIES = {
     "drop_06": {"source_masters/r01_foreground_hires_source.png": "world/r01_foreground.png"},
     # The only moment drawn as its own scene; the other ten are the mockup cropped with stickers on it.
     "drop_07": {"moments/moment_rainbow.png": "moments/moment_rainbow.png"},
+    # Region 01's scene painted from scratch at 1024x1536, restored and barren in the same framing.
+    "drop_08": {"world/region_01/r01_scene.png": "world/r01_scene.png",
+                "world/region_01/r01_scene_barren.png": "world/r01_scene_barren.png"},
 }
 CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
 CHECKER_GREY = 238  # its average
@@ -450,8 +453,8 @@ def main() -> None:
                     image = image.transpose(Image.FLIP_LEFT_RIGHT)
                 write_group([(image, path)], f"{REFERENCE_06} {box}")
             copy(drop, "drop_06")
-        elif names == {"drop_07"}:
-            copy(drop, "drop_07")
+        elif len(names) == 1 and next(iter(names)) in COPIES:
+            copy(drop, next(iter(names)))
         else:
             sys.exit(f"not a known drop (found {sorted(names) or 'no drop folder'})")
 

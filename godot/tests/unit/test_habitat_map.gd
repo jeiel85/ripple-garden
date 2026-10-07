@@ -52,10 +52,10 @@ func test_pond_points_resolve_to_a_habitat_and_overlays_win() -> void:
 	assert_true(map.is_water(center))
 	assert_true(map.habitat_at(center) != "")
 	# The bottom zone is an overlay on the open-water base zone.
-	assert_eq(map.habitat_at(Vector2(540, 680)), "bottom")
-	assert_eq(map.habitat_at(Vector2(600, 450)), "open_water")
+	assert_eq(map.habitat_at(Vector2(560, 520)), "bottom")
+	assert_eq(map.habitat_at(Vector2(450, 450)), "open_water")
 	assert_eq(map.habitat_at(Vector2(660, 480)), "vegetation")
-	assert_eq(map.habitat_at(Vector2(500, 330)), "shallow")
+	assert_eq(map.habitat_at(Vector2(500, 250)), "shallow")
 	_free_zones()
 
 func test_random_points_land_in_the_requested_habitat() -> void:
@@ -125,10 +125,15 @@ func test_props_appear_progressively_with_restoration() -> void:
 	assert_true(visible_by_level[cap] > visible_by_level[0], "a restored pond should be fuller than a barren one")
 
 func test_a_zone_poking_past_the_pond_does_not_make_the_bank_a_habitat() -> void:
-	var map := _map()
-	# (205, 961) lies inside the lower vegetation zone's polygon but just outside the pond outline.
-	assert_false(map.is_water(Vector2(205, 961)))
-	assert_eq(map.habitat_at(Vector2(205, 961)), "", "the bank must not count as fishable water")
+	_zone_nodes = []
+	# A zone drawn a little past the pond outline (easy to do by hand when tracing a painting).
+	var map := HabitatMap.from_layout({
+		"pond": [[0, 0], [100, 0], [100, 100], [0, 100]],
+		"zones": [{"habitat": "shallow", "polygon": [[50, 50], [150, 50], [150, 150], [50, 150]]}],
+	}, _zone_nodes)
+	assert_eq(map.habitat_at(Vector2(75, 75)), "shallow")
+	assert_false(map.is_water(Vector2(120, 120)))
+	assert_eq(map.habitat_at(Vector2(120, 120)), "", "the bank must not count as fishable water")
 	_free_zones()
 
 func test_random_points_are_always_on_the_water() -> void:
