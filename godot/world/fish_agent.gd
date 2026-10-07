@@ -9,7 +9,9 @@ extends Node2D
 ## Look: a silhouette whose size follows the species' size range and whose colour is derived
 ## deterministically from the fish id (placeholder art, D-011); rarer fish are more saturated.
 ## When ArtLibrary has `fish/<id>_top.png` (head to the right, D-029) that picture swims instead,
-## a little see-through so it reads as under the surface, swaying in place of the tail wiggle.
+## a little see-through so it reads as under the surface, swaying in place of the tail wiggle. With
+## tail frames (`_top_f2`, `_top_f3`: tail bent one way, then the other) the picture follows the swim
+## phase; Reduced Motion keeps the straight one.
 
 const MIN_LENGTH_PX := 16.0
 const MAX_LENGTH_PX := 46.0
@@ -34,6 +36,7 @@ var highlight := 0.0
 
 var _tail: Node2D
 var _sprite: Sprite2D
+var _frames: Array[Texture2D] = []
 var _swim_phase := 0.0
 
 func _init() -> void:
@@ -69,7 +72,8 @@ func configure(fish_def: Dictionary) -> void:
 	wander_phase = randf() * TAU
 	rotation = heading
 	_tail.position = Vector2(-length_px * 0.42, 0)
-	var art := ArtLibrary.texture("fish", fish_id + "_top")
+	_frames = ArtLibrary.frames("fish", fish_id + "_top")
+	var art: Texture2D = null if _frames.is_empty() else _frames[0]
 	_sprite.texture = art
 	_sprite.visible = art != null
 	_tail.visible = art == null
@@ -89,9 +93,18 @@ func animate(delta: float, reduced_motion: bool) -> void:
 	_swim_phase += delta * (3.0 + velocity.length() / 14.0)
 	_tail.rotation = sin(_swim_phase) * (0.18 if reduced_motion else 0.45)
 	_sprite.rotation = sin(_swim_phase) * (0.03 if reduced_motion else 0.08)
+	if _frames.size() > 1:
+		_sprite.texture = _frames[0] if reduced_motion else _frames[tail_frame(sin(_swim_phase), _frames.size())]
 	if highlight > 0.0:
 		highlight = maxf(0.0, highlight - delta)
 		queue_redraw()
+
+## Which tail frame shows at swim wave `wave` (-1..1): the straight picture through the middle of the
+## stroke, the bent ones (`_f2` one side, `_f3` the other) near its ends.
+static func tail_frame(wave: float, count: int) -> int:
+	if count < 2 or absf(wave) < 0.35:
+		return 0
+	return 1 if wave < 0.0 or count < 3 else 2
 
 ## True when this fish swims as drawn art rather than shapes.
 func has_art() -> bool:

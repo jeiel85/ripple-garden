@@ -6,16 +6,26 @@ extends Node2D
 ## `max_level` in the layout): junk and stumps disappear, grass, reeds, lily pads, flowers and bushes
 ## appear. The camp comes from the save: each placed decoration is drawn at its slot, turned if the
 ## player turned it. Everything is drawn back to front by y. Props are static, so the layer only
-## redraws when the level, the palette or the camp changes.
+## redraws when the level, the palette or the camp changes — or when an animated prop (drawn art with
+## pose frames, `<kind>_f2`, ...: a frog that blinks or croaks) takes up or leaves a pose, a few times a
+## minute. Reduced Motion keeps every prop in its first pose.
 ##
 ## With a painted scene (ArtLibrary, D-029) the props that exist at every level and are of a kind the
 ## painting shows (trees, rocks, the dock: PropKinds.SCENE_PAINTED) are part of it and not drawn again.
 ## Everything else — restoration props, the camp, and permanent props the painting leaves out (a crate,
 ## bushes) — is drawn on top.
 
+## Every few seconds (POSE_EVERY..2x, per prop) an animated prop holds one of its other poses this long.
+const POSE_EVERY := 6.0
+const POSE_SEC := 0.7
+
 var layout: Dictionary = {}
 var environment: RegionEnvironment = null
 var reduced_motion := false
+var _clock := 0.0
+## Animated props drawn last time and the pose each was drawn in.
+var _animated: Array = []
+var _poses: Array = []
 var region_id := ""
 
 func setup(p_layout: Dictionary, p_environment: RegionEnvironment, p_region_id: String = "") -> void:
@@ -74,6 +84,19 @@ func drawn_props(level: int) -> Array:
 func refresh() -> void:
 	queue_redraw()
 
+## The pose an animated prop shows at `time`: 0 (its picture) most of the time, now and then one of
+## its other frames for POSE_SEC, in turn. Always 0 for a still prop or under Reduced Motion.
+func pose_at(prop: Dictionary, time: float) -> int:
+	var count := ArtLibrary.frames("props", prop["kind"]).size()
+	if count < 2 or reduced_motion:
+		return 0
+	var at := Vector2(float(prop["x"]), float(prop["y"]))
+	var every := POSE_EVERY * (1.0 + PropPainter.noise(at, 21))
+	var shifted := time + PropPainter.noise(at, 22) * every
+	if fmod(shifted, every) >= POSE_SEC:
+		return 0
+	return 1 + int(shifted / every) % (count - 1)
+
 func _draw() -> void:
 	if environment == null:
 		return
@@ -84,6 +107,8 @@ func _draw() -> void:
 	var blend := environment.palette_blend
 	var everything := drawn_props(level) + camp_props()
 	everything.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["y"]) < float(b["y"]))
+	_animated.clear()
+	_poses.clear()
 	for prop in everything:
 		var at := Vector2(float(prop["x"]), float(prop["y"]))
 		var is_new: bool = not prop.has("camp") and not (from_level >= int(prop.get("min_level", 0)) and from_level <= int(prop.get("max_level", 999)))
@@ -91,14 +116,25 @@ func _draw() -> void:
 		var grow := 0.4 + 0.6 * fade
 		var mirror := -1.0 if prop.get("flip", false) == true else 1.0
 		var variant := int(PropPainter.noise(at, 11) * 1000.0)
+		var pose := 0
+		if ArtLibrary.frames("props", prop["kind"]).size() > 1:
+			pose = pose_at(prop, _clock)
+			_animated.append(prop)
+			_poses.append(pose)
 		if fade < 1.0 or mirror < 0.0:
 			draw_set_transform(at, 0.0, Vector2(grow * mirror, grow))
-			PropPainter.draw_prop(self, prop["kind"], Vector2.ZERO, float(prop.get("scale", 1.0)), level, palette, variant)
+			PropPainter.draw_prop(self, prop["kind"], Vector2.ZERO, float(prop.get("scale", 1.0)), level, palette, variant, pose)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
-			PropPainter.draw_prop(self, prop["kind"], at, float(prop.get("scale", 1.0)), level, palette, variant)
+			PropPainter.draw_prop(self, prop["kind"], at, float(prop.get("scale", 1.0)), level, palette, variant, pose)
 
-func _process(_delta: float) -> void:
-	# Only while a palette transition is running; a settled level costs nothing.
+func _process(delta: float) -> void:
+	_clock += delta
+	# Only while a palette transition is running or an animated prop changes pose; a settled level costs nothing.
 	if environment != null and environment.palette_blend < 1.0:
 		queue_redraw()
+		return
+	for i in _animated.size():
+		if pose_at(_animated[i], _clock) != _poses[i]:
+			queue_redraw()
+			return

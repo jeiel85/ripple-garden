@@ -17,7 +17,11 @@ an even grid (they cross the cell lines), so `pieces` finds them as the large vi
 in reading order (`rows` rows, left to right) and gives each the small parts inside its box (a fishing
 line, a sparkle); the remaining specks are dropped. `finish` makes a chosen picture opaque, crops, turns
 and scales it down to the size the game draws (premultiplied, so the transparent pixels' colour cannot
-bleed into the edge). The game has no sprite animation yet, so one pose per animal.
+bleed into the edge). Several pictures of one sheet can be the animation frames of one picture
+(`name.png`, `name_f2.png`, ...): they are cropped to one shared canvas, lined up on ALIGN (a fish's
+head, a frog's feet, an insect's middle) and scaled alike, so the picture does not jump between frames.
+A fish's tail frames are drawn with the whole body turned; `level_head` turns each back so its head lies
+over the straight picture's head (only the tail moves) before they are lined up.
 
 Only pictures listed in DROP_01 / SHEETS are imported; the rest of the drop is waiting for a decision
 (assets/placeholders/README.md lists what was taken and why the others were not).
@@ -65,10 +69,21 @@ DROP_01 = {
 # equipment.json); the sheet's own item names are in the drop's docs/drop_03_item_mapping.json.
 SHEETS = {
     "drop_02": {
-        # Head up, seen from straight above; the middle pose is the straight one. Turned to head right.
-        "fish/region_01/fish_common_carp_top_anim_sheet_alt.png": (1, 3, [None, ("fish/fish_common_carp_top.png", 90), None]),
+        # Head up, seen from straight above: tail bent one way, straight, bent the other. Turned to head right.
+        "fish/region_01/fish_common_carp_top_anim_sheet_alt.png": (1, 3, [
+            ("fish/fish_common_carp_top_f2.png", 90), ("fish/fish_common_carp_top.png", 90), ("fish/fish_common_carp_top_f3.png", 90)]),
+        # The cat's four poses are different sleeping positions, not one breathing cycle: one is used.
         "animals/region_01/animal_cat_sleeping_01_anim_sheet.png": (2, 4, ["props/cat.png", None, None, None]),
-        "animals/region_01/animal_frog_01_anim_sheet.png": (2, 4, ["props/frog.png", None, None, None]),
+        # eyes open, blinking / looking up, croaking
+        "animals/region_01/animal_frog_01_anim_sheet.png": (2, 4, ["props/frog.png", "props/frog_f2.png", "props/frog_f3.png", "props/frog_f4.png"]),
+        # sitting, eyes closed / beak open, wings up: in flight it beats wings up, wings down
+        "animals/region_01/animal_bird_blue_01_anim_sheet.png": (2, 4, ["animals/bird_f2.png", None, None, "animals/bird.png"]),
+        # wings raised, wings level / two more of the same
+        "animals/region_01/animal_dragonfly_01_anim_sheet.png": (2, 4, ["animals/dragonfly.png", "animals/dragonfly_f2.png", None, None]),
+        # open from above, half-closed / closed, blurred: open and closed make the beat
+        "animals/region_01/animal_butterfly_01_anim_sheet.png": (2, 4, ["animals/butterfly.png", None, "animals/butterfly_f2.png", None]),
+        # facing left, from behind / facing right, wings up and down
+        "animals/region_01/animal_firefly_01_anim_sheet.png": (2, 4, [None, None, "animals/firefly.png", "animals/firefly_f2.png"]),
     },
     "drop_03": {
         # forest_rest, river_breeze, moonlight_flow, spring_promise / misty_dawn, mossy_creek, sunset_reed,
@@ -95,7 +110,9 @@ SHEETS = {
         "camp/props/camp_prop_collection_sheet_b_6.png": (2, 6, ["props/campfire.png", "props/signboard.png", None, None, None, None]),
     },
 }
-LONGEST = {"fish": 256, "props": 256, "items": 256}  # px, the longest side written per folder
+LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128}  # px, the longest side written per folder
+# How the frames of an animated picture line up on their shared canvas (x, y as 0 left/top .. 1 right/bottom).
+ALIGN = {"fish": (1.0, 0.5), "props": (0.5, 1.0), "animals": (0.5, 0.5)}
 LONGEST_FOR = {"props/frog.png": 192, "props/tent.png": 384}  # the tent is drawn 190 design px wide
 OPAQUE_FROM = 235  # the sheets' body alpha is ~253; this and above becomes 255
 ITEM_SHARE = 0.25  # a part at least this share of the sheet's largest picture is a picture of its own
@@ -215,7 +232,8 @@ def pieces(sheet: Image.Image, rows: int) -> list[Image.Image]:
     return result
 
 
-def finish(image: Image.Image, turn: int, longest: int) -> Image.Image:
+def prepare(image: Image.Image, turn: int) -> Image.Image:
+    """Opaque body, no key debris alpha, cropped to the picture plus PAD, turned."""
     px = image.load()
     for y in range(image.height):
         for x in range(image.width):
@@ -226,13 +244,75 @@ def finish(image: Image.Image, turn: int, longest: int) -> Image.Image:
                 px[x, y] = (0, 0, 0, 0)
     left, top, right, bottom = image.getbbox()
     image = image.crop((max(0, left - PAD), max(0, top - PAD), min(image.width, right + PAD), min(image.height, bottom + PAD)))
-    if turn:
-        image = image.rotate(-turn, expand=True)
-    scale = longest / max(image.size)
-    if scale < 1:
-        size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
-        image = image.convert("RGBa").resize(size, Image.LANCZOS).convert("RGBA")
-    return image
+    return image.rotate(-turn, expand=True) if turn else image
+
+
+def shrink(image: Image.Image, scale: float) -> Image.Image:
+    if scale >= 1:
+        return image
+    size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
+    return image.convert("RGBa").resize(size, Image.LANCZOS).convert("RGBA")
+
+
+def animation_base(path: str) -> str:
+    """`props/frog_f3.png` -> `props/frog.png`; a still picture is its own base."""
+    return re.sub(r"_f\d+\.png$", ".png", path)
+
+
+HEAD_SHARE = 0.4  # the front share of a fish (head right) that stays rigid while the tail beats
+
+
+def _head(image: Image.Image, length: int) -> tuple[list[tuple[int, int]], float, float]:
+    """The opaque pixels of the front `length` px of a head-right picture, and their centre."""
+    px = image.load()
+    left = max(0, image.width - length)
+    points = [(x, y) for y in range(image.height) for x in range(left, image.width) if px[x, y][3] > 128]
+    cx = sum(x for x, _ in points) / len(points)
+    cy = sum(y for _, y in points) / len(points)
+    return points, cx, cy
+
+
+def level_head(straight: Image.Image, bent: Image.Image) -> tuple[Image.Image, float, float]:
+    """`bent` turned so its head best covers the straight picture's head; returns it with its head centre."""
+    length = round(straight.width * HEAD_SHARE)
+    target, tx, ty = _head(straight, length)
+    wanted = {(round(x - tx), round(y - ty)) for x, y in target}
+    best = (-1.0, bent, 0.0, 0.0)
+    for degrees in range(-45, 46, 3):
+        turned = bent.rotate(degrees, resample=Image.BICUBIC, expand=True)
+        turned = turned.crop(turned.getbbox())
+        points, cx, cy = _head(turned, length)
+        got = {(round(x - cx), round(y - cy)) for x, y in points}
+        overlap = len(wanted & got) / len(wanted | got)
+        if overlap > best[0]:
+            best = (overlap, turned, cx, cy)
+    return best[1], best[2], best[3]
+
+
+def write_group(images: list[tuple[Image.Image, str]], source: str) -> None:
+    """Writes one picture with its frames: one canvas, lined up on ALIGN (fish: on the head), one scale for all."""
+    folder = images[0][1].split("/")[0]
+    if folder == "fish" and len(images) > 1:
+        straight = images[0][0]
+        _, hx, hy = _head(straight, round(straight.width * HEAD_SHARE))
+        placed = [(straight, images[0][1], -hx, -hy)]
+        for image, path in images[1:]:
+            turned, cx, cy = level_head(straight, image)
+            placed.append((turned, path, -cx, -cy))
+    else:
+        width = max(image.width for image, _ in images)
+        height = max(image.height for image, _ in images)
+        ax, ay = ALIGN.get(folder, (0.5, 0.5))  # a still picture has nothing to line up
+        placed = [(image, path, (width - image.width) * ax, (height - image.height) * ay) for image, path in images]
+    left = min(x for _, _, x, _ in placed)
+    top = min(y for _, _, _, y in placed)
+    width = round(max(x + image.width for image, _, x, _ in placed) - left)
+    height = round(max(y + image.height for image, _, _, y in placed) - top)
+    scale = LONGEST_FOR.get(animation_base(images[0][1]), LONGEST[folder]) / max(width, height)
+    for image, path, x, y in placed:
+        canvas = Image.new("RGBA", (width, height))
+        canvas.paste(image, (round(x - left), round(y - top)))
+        _write(shrink(canvas, scale), source, path)
 
 
 def main() -> None:
@@ -249,12 +329,15 @@ def main() -> None:
                 found = pieces(Image.open(BytesIO(drop.read(PREFIX % name + source))), rows)
                 if len(found) != count:
                     sys.exit(f"{source}: expected {count} pictures, found {len(found)}")
+                groups: dict[str, list[tuple[Image.Image, str]]] = {}
                 for image, target in zip(found, targets):
                     if target is None:
                         continue
                     path, turn = target if isinstance(target, tuple) else (target, 0)
-                    longest = LONGEST_FOR.get(path, LONGEST[path.split("/")[0]])
-                    _write(finish(image, turn, longest), source, path)
+                    groups.setdefault(animation_base(path), []).append((prepare(image, turn), path))
+                for base, images in groups.items():
+                    images.sort(key=lambda pair: pair[1] != base)  # the picture first, then its frames
+                    write_group(images, source)
         else:
             sys.exit(f"not a known drop (found {sorted(names) or 'no drop folder'})")
 

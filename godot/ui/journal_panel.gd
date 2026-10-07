@@ -48,6 +48,8 @@ var _page: VBoxContainer
 var _page_name: Label
 var _page_line: Label
 var _page_portrait: UiKit.FishPortrait
+## A moment's drawn picture (`moments/<id>.png`), in the portrait's place on a moment's page.
+var _page_moment: TextureRect
 var _page_rows: VBoxContainer
 var _home_title: Label
 var _home_text: Label
@@ -177,6 +179,9 @@ func _init() -> void:
 	_page_portrait = UiKit.FishPortrait.new()
 	_page_portrait.custom_minimum_size = Vector2(0, 170)
 	picture.add_child(_page_portrait)
+	_page_moment = _moment_picture(null, 170.0)
+	_page_moment.visible = false
+	picture.add_child(_page_moment)
 	_page.add_child(picture)
 	_page_rows = UiKit.vbox(0)
 	_page.add_child(_page_rows)
@@ -223,6 +228,8 @@ func refresh() -> void:
 		return
 	_page_rows.get_parent().get_child(_page_rows.get_index() + 1).visible = true  # the home-waters card
 	_page_portrait.get_parent().visible = true
+	_page_portrait.visible = true
+	_page_moment.visible = false
 	for child in _list.get_children():
 		_list.remove_child(child)  # gone at once: a queued free would leave old cards in the layout this frame
 		child.queue_free()
@@ -530,8 +537,14 @@ func _moment_card(moment_id: String) -> Button:
 	box.offset_top = 18
 	box.offset_bottom = -8
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var picture := UiKit.icon(def["icon"] if seen else "lock", 64.0, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
-	picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var art := ArtLibrary.texture("moments", moment_id) if seen else null
+	var picture: Control
+	if art != null:
+		picture = _moment_picture(art, 96.0)
+		picture.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	else:
+		picture = UiKit.icon(def["icon"] if seen else "lock", 64.0, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
+		picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(picture)
 	var caption := UiKit.label(tr(def["name_key"]) if seen else tr("ui.journal.unknown_name"), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	caption.add_theme_color_override("font_color", UiTheme.INK)
@@ -550,10 +563,30 @@ func _show_moment(moment_id: String) -> void:
 	if def.is_empty():
 		return
 	var seen: bool = GameState.has_moment(moment_id)
+	var art := ArtLibrary.texture("moments", moment_id) if seen else null
+	if art != null:  # a seen moment with a picture shows it; the others keep the page text-only
+		_page_portrait.get_parent().visible = true
+		_page_portrait.visible = false
+		_page_moment.texture = art
+		_page_moment.visible = true
 	_page_name.text = tr(def["name_key"]) if seen else tr("ui.journal.unknown_name")
 	_page_line.text = tr(def["desc_key"]) if seen else tr(def["hint_key"])
 	_row("calendar", "ui.journal.row.seen_on", InspectPanel.date_text(GameState.moment_seen_at(moment_id), false) if seen else "", seen, 1)
 	_row("memory", "ui.journal.row.memory", "+%d" % int(def.get("memory", 0)), true, 0)
+
+## A moment's picture filling `height` px of its box, cropped to keep its proportions.
+static func _moment_picture(art: Texture2D, height: float) -> TextureRect:
+	var picture := TextureRect.new()
+	picture.texture = art
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	picture.custom_minimum_size = Vector2(0, height)
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return picture
+
+## True when the open moment page shows the moment's drawn picture.
+func page_shows_moment_art() -> bool:
+	return _page_moment.visible and _page_moment.get_parent().visible
 
 ## A tiny painted view of the species' home water (until region thumbnails arrive as art).
 class HomeView extends Control:

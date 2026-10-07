@@ -9,5 +9,8 @@
   },
   "fish": {
     "*": {"top_length": 2.0, "underwater_alpha": 0.5}
+  },
+  "animals": {
+    "*": {"width": 30, "faces": "left", "fps": 10}
   }
 }

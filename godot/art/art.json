@@ -31,5 +31,12 @@
   },
   "fish": {
     "*": {"top_length": 1.3, "underwater_alpha": 0.88}
+  },
+  "animals": {
+    "*": {"width": 28, "faces": "left", "fps": 10},
+    "dragonfly": {"width": 34, "fps": 16},
+    "butterfly": {"width": 28, "faces": "right", "fps": 7},
+    "bird": {"width": 32, "fps": 6},
+    "firefly": {"width": 20, "faces": "right", "fps": 8}
   }
 }
