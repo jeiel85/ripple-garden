@@ -11,7 +11,7 @@
     "lily_pad": {"width": 66, "anchor": [0.5, 0.5]},
     "flower": {"width": 40},
     "camp_ground": {"width": 260, "anchor": [0.5, 0.5]},
-    "tent": {"width": 150},
+    "tent": {"width": 210},
     "camp_chair": {"width": 64},
     "crate": {"width": 84},
     "lantern": {"width": 30},
@@ -27,7 +27,11 @@
     "bench": {"width": 100}
   },
   "character": {
-    "*": {"height": 150, "anchor": [0.5, 0.9], "hands": [0.62, 0.42], "head": [0.5, 0.2], "hat_width": 0.5}
+    "*": {"height": 165, "anchor": [0.43, 0.9], "hands": [0.68, 0.47], "head": [0.45, 0.23], "hat_width": 0.56},
+    "angler_bite": {"hands": [0.8, 0.455], "head": [0.525, 0.255], "hat_width": 0.6},
+    "angler_reel": {"hands": [0.65, 0.4], "head": [0.27, 0.28], "hat_width": 0.52},
+    "angler_cast": {"hands": [0.78, 0.27], "head": [0.375, 0.18], "hat_width": 0.575},
+    "angler_hold": {"hands": [0.71, 0.37], "head": [0.345, 0.27], "hat_width": 0.59}
   },
   "hats": {
     "*": {"anchor": [0.5, 0.6]}

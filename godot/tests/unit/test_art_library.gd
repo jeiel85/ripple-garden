@@ -34,9 +34,10 @@ func test_a_missing_picture_is_null_and_an_existing_one_loads() -> void:
 	assert_false(ArtLibrary.has("world", "r99_scene"))
 	_restore()
 
-func test_the_game_folder_ships_the_region_01_scene_but_no_angler_yet() -> void:
+func test_the_game_folder_ships_the_region_01_scene_and_the_angler() -> void:
 	_restore()
-	assert_true(ArtLibrary.texture("character", "angler_idle") == null, "the shipped game draws the angler from shapes until art arrives")
+	for pose in ["idle", "cast", "bite", "reel", "hold"]:
+		assert_not_null(ArtLibrary.texture("character", "angler_" + pose), "Asset Drop 09: %s" % pose)
 	assert_not_null(ArtLibrary.texture("world", "r01_scene"), "Asset Drop 08")
 	assert_not_null(ArtLibrary.texture("world", "r01_scene_barren"), "the restored painting fades in over its barren twin")
 
@@ -191,7 +192,7 @@ func test_the_angler_picture_follows_the_fishing_state_and_holds_the_rod_in_its_
 	_restore()
 
 func test_without_pictures_the_angler_is_drawn_from_shapes() -> void:
-	_restore()
+	_without_art()
 	var controller := FishingController.new()
 	tree.root.add_child(controller)
 	var view := FishingView.new()
@@ -201,6 +202,7 @@ func test_without_pictures_the_angler_is_drawn_from_shapes() -> void:
 	assert_eq(view.current_rod_base(), Vector2(300, 640) + FishingView.HANDS)
 	view.queue_free()
 	controller.queue_free()
+	_restore()
 
 # --- fish ---
 
