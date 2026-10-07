@@ -222,3 +222,25 @@ func test_a_fish_portrait_uses_the_side_view_when_there_is_one() -> void:
 	carp.free()
 	minnow.free()
 	_restore()
+
+func test_an_equipment_item_uses_its_picture_when_there_is_one() -> void:
+	_with_fixtures()
+	var art := ItemArt.new("rod", "rod_bamboo")
+	assert_true(art.has_art())
+	art.show_item("rod", "rod_light")
+	assert_false(art.has_art(), "an item without a picture keeps its shapes")
+	art.free()
+	_restore()
+
+func test_shipped_item_pictures_are_named_after_real_items() -> void:
+	_restore()
+	const CATEGORIES := {"rod_": "rod", "bait_": "bait", "bag_": "bag", "acc_": "accessory"}
+	for file in DirAccess.get_files_at(ArtLibrary.DEFAULT_ROOT + "/items"):
+		if not file.ends_with(".png"):
+			continue
+		var id := file.get_basename()
+		var category := ""
+		for prefix in CATEGORIES:
+			if id.begins_with(prefix):
+				category = CATEGORIES[prefix]
+		assert_false(category.is_empty() or ContentDB.get_item(category, id).is_empty(), "art/items/%s names no equipment item" % file)
