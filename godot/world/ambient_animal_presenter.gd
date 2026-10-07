@@ -17,6 +17,10 @@ extends Node2D
 ## keeps its drawn glow, laid over the lantern at the back of the picture (FIREFLY_LANTERN) so it still
 ## shines through the night tint.
 
+## Where a firefly picture's glowing lantern is, as a share of the picture from its centre (picture
+## facing right; mirrored with it).
+const FIREFLY_LANTERN := Vector2(-0.24, 0.28)
+
 var layout: Dictionary = {}
 var level := 0
 var time_band := "day"
@@ -30,9 +34,6 @@ var _clock := 0.0
 var _beat_clock := 0.0
 ## kind -> {"frames", "width", "faces_left", "fps"} for kinds that have drawn art.
 var _art := {}
-## Where a firefly picture's glowing lantern is, as a share of the picture from its centre (picture
-## facing right; mirrored with it).
-const FIREFLY_LANTERN := Vector2(-0.24, 0.28)
 
 func setup(p_layout: Dictionary, p_level: int, p_time_band: String) -> void:
 	layout = p_layout
