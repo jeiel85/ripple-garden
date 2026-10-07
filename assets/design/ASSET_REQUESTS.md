@@ -76,8 +76,9 @@ ChatGPT에는 "transparent background, no text, same art style and camera angle 
 | `angler_hold.png` | 물고기를 들어 올리는 자세, 물고기 없이 (선택) |
 
 낚시꾼은 **밀짚모자를 쓴 채로** 그려 주세요. 다른 모자(악세서리, D-019)는 게임이 그 위에 겹쳐 그립니다. 낚시꾼 그림이 온 뒤에
-낚시꾼 그림을 첨부해 **모자만, 같은 각도(뒷모습)로, 밀짚모자를 다 덮는 크기**로 3장 요청드립니다: `angler_hat_bucket_hat.png`(숲 버킷햇),
-`angler_hat_river_cap.png`(강바람 캡), `angler_hat_starry_hat.png`(별밤 모자). 장비 화면의 정면 모자 그림(§4)과는 다른 그림입니다.
+낚시꾼 그림을 첨부해 **모자만, 같은 각도(뒷모습)로, 밀짚모자를 다 덮는 크기**로 3장 요청드립니다. 게임이 읽는 이름 그대로
+**`hats/` 폴더 안에** 주세요: `hats/acc_bucket_hat.png`(숲 버킷햇), `hats/acc_river_cap.png`(강바람 캡), `hats/acc_starry_hat.png`(별밤 모자).
+장비 화면의 정면 모자 그림(§4, 같은 이름이지만 다른 폴더)과는 다른 그림입니다.
 
 ### 3. 연못 속 물고기 — 위에서 본 모습 ✔ 받음(Drop 06)
 
