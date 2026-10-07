@@ -11,6 +11,12 @@ extends RefCounted
 ##   fish/<fish id>_top.png, <fish id>_side.png                     (head right / head left)
 ##   props/<prop kind>.png, <prop kind>_02.png, ...                 (variants are picked per position)
 ##   items/<item id>.png                                            (equipment screen: rods, baits, bags, accessories)
+##   animals/<kind>.png                                             (ambient wildlife: dragonfly, butterfly, firefly, bird)
+##   moments/<moment id>.png                                        (the journal's moments)
+##
+## A picture can have animation frames next to it: `<name>_f2.png`, `<name>_f3.png`, ... (`frames`).
+## The painter decides how they play (a fish's tail follows its swimming, wings beat, a frog blinks now
+## and then); without them the single picture is shown still.
 ##
 ## How large a picture is drawn and which point of it sits on the anchor comes from `art.json`
 ## ({category: {"*": defaults, name: overrides}}), so tuning the placement is a data change.
@@ -25,6 +31,7 @@ const TALLEST_PORTRAIT := 20.0 / 9.0
 static var root := DEFAULT_ROOT
 static var _textures := {}
 static var _variants := {}
+static var _frames := {}
 static var _meta: Dictionary = {}
 static var _meta_loaded := false
 
@@ -33,6 +40,7 @@ static func use_root(path: String) -> void:
 	root = path
 	_textures.clear()
 	_variants.clear()
+	_frames.clear()
 	_meta = {}
 	_meta_loaded = false
 
@@ -59,6 +67,19 @@ static func variant(category: String, name: String, pick: int) -> Texture2D:
 		_variants[key] = found
 	var list: Array = _variants[key]
 	return null if list.is_empty() else list[posmod(pick, list.size())]
+
+## The animation frames of `name`: the picture itself, then `name_f2`, `name_f3`, ... while they exist.
+## Empty when not even `name` exists; one entry for a still picture.
+static func frames(category: String, name: String) -> Array[Texture2D]:
+	var key := category + "/" + name
+	if not _frames.has(key):
+		var found: Array[Texture2D] = []
+		var next := texture(category, name)
+		while next != null:
+			found.append(next)
+			next = texture(category, "%s_f%d" % [name, found.size() + 1])
+		_frames[key] = found
+	return _frames[key]
 
 ## Placement data for a picture: the category's "*" defaults, then `base`'s entry (a prop kind, the
 ## angler), then the exact name's, later ones overriding earlier keys.

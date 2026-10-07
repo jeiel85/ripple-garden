@@ -10,6 +10,16 @@ extends Node2D
 ## update or save, and the total is capped by the layout (a few dozen at most) and trimmed by the
 ## graphics profile's wildlife share (low quality, Battery Saver). With Reduced Motion the animals
 ## still appear but drift much more slowly.
+##
+## An animal with drawn art (`animals/<kind>.png`, D-029) is drawn as that picture, `width` design px
+## wide (`art.json`), turned to face the way it drifts (`faces`: which way the picture looks) and
+## beating through its frames (`_f2`, ... at `fps`); Reduced Motion holds the first frame. A firefly
+## keeps its drawn glow, laid over the lantern at the back of the picture (FIREFLY_LANTERN) so it still
+## shines through the night tint.
+
+## Where a firefly picture's glowing lantern is, as a share of the picture from its centre (picture
+## facing right; mirrored with it).
+const FIREFLY_LANTERN := Vector2(-0.24, 0.28)
 
 var layout: Dictionary = {}
 var level := 0
@@ -20,6 +30,10 @@ var wildlife := 1.0
 
 var _motes: Array[Dictionary] = []
 var _clock := 0.0
+## Seconds of real time, for wing beats (the drift clock slows down under Reduced Motion).
+var _beat_clock := 0.0
+## kind -> {"frames", "width", "faces_left", "fps"} for kinds that have drawn art.
+var _art := {}
 
 func setup(p_layout: Dictionary, p_level: int, p_time_band: String) -> void:
 	layout = p_layout
@@ -66,6 +80,13 @@ func _rebuild() -> void:
 		bounds = bounds.expand(point)
 	bounds = bounds.grow(60.0)
 	var counts := current_counts()
+	_art.clear()
+	for kind in counts:
+		var frames := ArtLibrary.frames("animals", kind)
+		if not frames.is_empty():
+			var data := ArtLibrary.meta("animals", kind)
+			_art[kind] = {"frames": frames, "width": float(data.get("width", 28.0)),
+				"faces_left": data.get("faces", "left") == "left", "fps": float(data.get("fps", 10.0))}
 	for kind in counts:
 		for i in int(counts[kind]):
 			var seed_point := Vector2(i * 37.0 + kind.length() * 11.0, 5.0 + i)
@@ -83,6 +104,7 @@ func _rebuild() -> void:
 
 func _process(delta: float) -> void:
 	_clock += delta * (0.25 if reduced_motion else 1.0)
+	_beat_clock += delta
 	queue_redraw()
 
 func _position_of(mote: Dictionary) -> Vector2:
@@ -90,9 +112,45 @@ func _position_of(mote: Dictionary) -> Vector2:
 	var radius: Vector2 = mote["radius"]
 	return mote["home"] + Vector2(cos(t) * radius.x, sin(t * 1.3) * radius.y)
 
+## True when this kind of animal is drawn from its picture rather than shapes.
+func has_art(kind: String) -> bool:
+	return _art.has(kind)
+
+## Which frame of `count` shows for a mote: the first one under Reduced Motion, else cycling at `fps`
+## from the mote's own phase so a swarm does not beat in step.
+func frame_index(mote: Dictionary, count: int, fps: float) -> int:
+	if reduced_motion or count < 2:
+		return 0
+	return int(_beat_clock * fps + float(mote["phase"]) * 7.0) % count
+
+## True while the mote drifts to the right (the x part of `_position_of`'s derivative).
+func _moving_right(mote: Dictionary) -> bool:
+	return -sin(_clock * float(mote["speed"]) + float(mote["phase"])) > 0.0
+
+func _draw_art(mote: Dictionary, at: Vector2, art: Dictionary, glow: float = -1.0) -> void:
+	var frames: Array = art["frames"]
+	var tex: Texture2D = frames[frame_index(mote, frames.size(), art["fps"])]
+	var width: float = art["width"]
+	var size := Vector2(width, width * tex.get_height() / maxf(1.0, tex.get_width()))
+	var mirror := -1.0 if _moving_right(mote) == art["faces_left"] else 1.0
+	draw_set_transform(at, 0.0, Vector2(mirror, 1.0))
+	draw_texture_rect(tex, Rect2(-size / 2.0, size), false)
+	if glow >= 0.0:
+		var lantern := FIREFLY_LANTERN * size
+		draw_circle(lantern, 9.0, Color(1.0, 0.95, 0.45, 0.16 * glow))
+		draw_circle(lantern, 5.0, Color(1.0, 0.95, 0.45, 0.38 * glow))
+		draw_circle(lantern, 2.2, Color(1.0, 1.0, 0.8, glow))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 func _draw() -> void:
 	for mote in _motes:
 		var at := _position_of(mote)
+		if _art.has(mote["kind"]):
+			var glow := -1.0
+			if mote["kind"] == "firefly":
+				glow = 0.45 + 0.55 * (sin(_clock * 2.2 + float(mote["phase"]) * 3.0) * 0.5 + 0.5)
+			_draw_art(mote, at, _art[mote["kind"]], glow)
+			continue
 		match mote["kind"]:
 			"dragonfly":
 				var flutter := absf(sin(_clock * 28.0 + float(mote["phase"])))

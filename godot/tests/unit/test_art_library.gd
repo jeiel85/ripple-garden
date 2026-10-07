@@ -244,3 +244,103 @@ func test_shipped_item_pictures_are_named_after_real_items() -> void:
 			if id.begins_with(prefix):
 				category = CATEGORIES[prefix]
 		assert_false(category.is_empty() or ContentDB.get_item(category, id).is_empty(), "art/items/%s names no equipment item" % file)
+
+# --- animation frames ---
+
+func test_frames_are_the_picture_then_its_numbered_frames() -> void:
+	_with_fixtures()
+	assert_eq(ArtLibrary.frames("animals", "dragonfly").size(), 2)
+	assert_eq(ArtLibrary.frames("animals", "dragonfly")[0], ArtLibrary.texture("animals", "dragonfly"), "the picture itself comes first")
+	assert_eq(ArtLibrary.frames("props", "tent").size(), 1, "a still picture is one frame")
+	assert_true(ArtLibrary.frames("animals", "bird").is_empty(), "no picture, no frames")
+	_restore()
+
+func test_shipped_frames_share_their_pictures_canvas() -> void:
+	_restore()
+	var frame_name := RegEx.create_from_string("_f\\d+$")
+	for category in ["fish", "props", "animals"]:
+		for file in DirAccess.get_files_at(ArtLibrary.DEFAULT_ROOT + "/" + category):
+			if not file.ends_with(".png") or frame_name.search(file.get_basename()) != null:
+				continue
+			var frames := ArtLibrary.frames(category, file.get_basename())
+			for frame in frames:
+				assert_eq(frame.get_size(), frames[0].get_size(), "%s/%s: every frame on the same canvas, or the picture jumps" % [category, file])
+
+func test_a_fish_tail_frame_follows_the_swim_stroke() -> void:
+	assert_eq(FishAgent.tail_frame(0.0, 3), 0, "straight through the middle of the stroke")
+	assert_eq(FishAgent.tail_frame(-0.9, 3), 1)
+	assert_eq(FishAgent.tail_frame(0.9, 3), 2)
+	assert_eq(FishAgent.tail_frame(0.9, 2), 1, "with one bent frame both ends use it")
+	assert_eq(FishAgent.tail_frame(0.9, 1), 0)
+	_with_fixtures()
+	var fish := FishAgent.new()
+	fish.configure(ContentDB.get_fish("fish_crucian_carp"))
+	var sprite := fish.get_node("Art") as Sprite2D
+	var seen := {}
+	for i in 40:
+		fish.animate(0.05, false)
+		seen[sprite.texture] = true
+	assert_eq(seen.size(), 2, "the tail beats through both frames")
+	for i in 40:
+		fish.animate(0.05, true)
+		assert_eq(sprite.texture, ArtLibrary.texture("fish", "fish_crucian_carp_top"), "Reduced Motion keeps the straight picture")
+	fish.free()
+	_restore()
+
+func test_an_animal_with_art_beats_its_wings_and_holds_still_under_reduced_motion() -> void:
+	_with_fixtures()
+	var animals := AmbientAnimalPresenter.new()
+	tree.root.add_child(animals)
+	animals.setup({"pond": ContentDB.get_layout(REGION)["pond"], "ambient_animals": [
+		{"kind": "dragonfly", "count": 2, "min_level": 0, "time_bands": ["day"]},
+		{"kind": "bird", "count": 1, "min_level": 0, "time_bands": ["day"]},
+	]}, 0, "day")
+	assert_true(animals.has_art("dragonfly"))
+	assert_false(animals.has_art("bird"), "a kind without a picture keeps its shapes")
+	var mote := {"phase": 0.3}
+	var frames := {}
+	for i in 30:
+		animals._process(0.03)
+		frames[animals.frame_index(mote, 2, 10.0)] = true
+	assert_eq(frames.size(), 2, "wings beat through both frames")
+	animals.reduced_motion = true
+	assert_eq(animals.frame_index(mote, 2, 10.0), 0)
+	animals.free()
+	_restore()
+
+func test_an_animated_prop_takes_a_pose_now_and_then() -> void:
+	_with_fixtures()
+	var props := PropsLayer.new()
+	var frog := {"kind": "frog", "x": 100.0, "y": 200.0}
+	var poses := {}
+	var time := 0.0
+	while time < 40.0:
+		poses[props.pose_at(frog, time)] = int(poses.get(props.pose_at(frog, time), 0)) + 1
+		time += 0.1
+	assert_true(poses.has(1), "it takes its other pose")
+	assert_true(poses[0] > poses[1] * 4, "but mostly sits in its picture: %s" % poses)
+	assert_eq(props.pose_at({"kind": "tent", "x": 1.0, "y": 1.0}, 3.0), 0, "a still prop never changes")
+	props.reduced_motion = true
+	for t in [0.0, 5.0, 11.0, 23.0]:
+		assert_eq(props.pose_at(frog, t), 0)
+	props.free()
+	_restore()
+
+func test_a_seen_moment_shows_its_picture_and_an_unseen_one_does_not() -> void:
+	_with_fixtures()
+	GameState.new_game()
+	GameState.record_moment("moment_rain_rings")
+	var panel := JournalPanel.new()
+	tree.root.add_child(panel)
+	panel.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), REGION)
+	panel.select_tab("moments")
+	panel._show_moment("moment_rain_rings")
+	assert_true(panel.page_shows_moment_art())
+	panel._show_moment("moment_sunshower")
+	assert_false(panel.page_shows_moment_art(), "no picture for a moment not seen yet")
+	panel.select_tab("all")
+	assert_false(panel.page_shows_moment_art())
+	assert_true(panel._page_portrait.visible, "fish pages show the fish again")
+	panel.free()
+	GameState.new_game()
+	_restore()

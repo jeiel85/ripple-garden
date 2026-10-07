@@ -30,8 +30,13 @@ const SOIL := Color("#b39566")
 
 ## Draws a prop at `at` (its foot). Drawn art (`props/<kind>.png`, ArtLibrary) wins over the shapes;
 ## `variant` picks among `<kind>_02`, `<kind>_03`, ... so the same spot always shows the same one.
-static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: float, level: int, palette: Dictionary, variant: int = 0) -> void:
+## `frame` > 0 shows that pose of an animated prop (`<kind>_f2`, ...) instead.
+static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: float, level: int, palette: Dictionary, variant: int = 0, frame: int = 0) -> void:
 	var art := ArtLibrary.variant("props", kind, variant)
+	if frame > 0:
+		var frames := ArtLibrary.frames("props", kind)
+		if frame < frames.size():
+			art = frames[frame]
 	if art != null:
 		var data := ArtLibrary.meta("props", kind)
 		canvas.draw_texture_rect(art, ArtLibrary.placed_rect(art, at, float(data.get("width", 60.0)) * scale,
