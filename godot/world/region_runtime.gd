@@ -6,7 +6,7 @@ extends Node2D
 ## habitat map for casts, the aim geometry for the equipped rod, and the restoration look.
 ##
 ## Scene children (world/game_root.tscn): Environment, HabitatZones, FishPopulationPresenter,
-## Props, AmbientAnimalPresenter, FishingView, WeatherPresenter and the WeatherService.
+## Props, AmbientAnimalPresenter, FishingView, Foreground, WeatherPresenter and the WeatherService.
 
 var region_id := ""
 var layout: Dictionary = {}
@@ -18,6 +18,7 @@ var habitat_map: HabitatMap = null
 @onready var props: PropsLayer = $Props
 @onready var animals: AmbientAnimalPresenter = $AmbientAnimalPresenter
 @onready var fishing_view: FishingView = $FishingView
+@onready var foreground: ForegroundLayer = $Foreground
 @onready var weather_presenter: WeatherPresenter = $WeatherPresenter
 @onready var weather: WeatherService = $WeatherService
 
@@ -37,6 +38,7 @@ func setup(p_region_id: String, level: int, time_band: String) -> bool:
 	props.setup(layout, environment, region_id)
 	fish_presenter.setup(region_id, habitat_map)
 	animals.setup(layout, level, time_band)
+	foreground.setup(layout)
 	weather_presenter.setup(weather, habitat_map.pond)
 	return true
 

@@ -15,4 +15,7 @@ const PROPS: PackedStringArray = [
 	# The last restoration stage's payoff (P1-001).
 	"rainbow",
 ]
+## What a region's scene painting (D-029, assets/design/ASSET_REQUESTS.md §1 "남길 것") already shows:
+## over a painting, layout props of these kinds that exist at every level are not drawn again.
+const SCENE_PAINTED: PackedStringArray = ["tree", "rock", "camp_ground", "stepping_stone", "dock"]
 const ANIMALS: PackedStringArray = ["dragonfly", "butterfly", "firefly", "bird"]

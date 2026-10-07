@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://world/game_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://world/region_runtime.gd" id="2_region"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://world/camera_controller.gd" id="12_cam"]
 [ext_resource type="Script" path="res://ui/ui_controller.gd" id="13_ui"]
 [ext_resource type="Script" path="res://audio/ambient_audio.gd" id="14_audio"]
+[ext_resource type="Script" path="res://world/foreground_layer.gd" id="15_front"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_root")
@@ -39,6 +40,9 @@ script = ExtResource("6_animals")
 
 [node name="FishingView" type="Node2D" parent="World/RegionRuntime"]
 script = ExtResource("7_view")
+
+[node name="Foreground" type="Node2D" parent="World/RegionRuntime"]
+script = ExtResource("15_front")
 
 [node name="WeatherPresenter" type="Node2D" parent="World/RegionRuntime"]
 script = ExtResource("8_weather")

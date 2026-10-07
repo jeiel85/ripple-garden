@@ -1,6 +1,7 @@
 {
   "region_01_quiet_pond": {
     "viewport": [720, 1280],
+    "art": "r01",
     "horizon_y": -600,
     "rod_origin": [430, 450],
     "cast_forward_deg": 115,

@@ -11,6 +11,12 @@ extends Node2D
 ##
 ## Restoration changes are blended: `set_level(level, true)` eases water, grass and canopy colors
 ## from the previous palette to the new one while PropsLayer fades the new props in.
+##
+## Painted scene (D-029): when ArtLibrary has `world/<art>_scene.png` for the layout's `art` prefix, the
+## painting replaces the drawn meadow, bank and waterfall. With `_scene_barren.png` as well, the barren
+## painting shows at level 0 and the restored one fades in with the level; the barren one alone is not
+## used (it could never show a restored pond). The water then only adds its moving
+## glints on top, since the painting already has the water's colour.
 
 const SKY_TOP := -3000.0
 const GROUND_BOTTOM := 3600.0
@@ -18,6 +24,8 @@ const WORLD_LEFT := -2600.0
 const WORLD_RIGHT := 3300.0
 const BANK_WIDTH := 26.0
 const LIGHT_STEP_SEC := 0.2
+## A restored painting without its barren twin is dulled towards this at low levels.
+const UNRESTORED_TINT := Color(0.78, 0.7, 0.55)
 
 var region_id := ""
 var layout: Dictionary = {}
@@ -44,6 +52,9 @@ var _bank: PackedVector2Array
 var _light_timer := 0.0
 var _tween: Tween
 var _time_light := Color.WHITE
+var _scene: Texture2D = null
+## Only set together with `_scene`.
+var _scene_barren: Texture2D = null
 
 func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService, p_level: int) -> void:
 	region_id = p_region_id
@@ -54,6 +65,11 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 	_pond = smooth(HabitatZone.to_polygon(layout["pond"]), 3)
 	var offset := Geometry2D.offset_polygon(_pond, BANK_WIDTH)
 	_bank = smooth(offset[0], 1) if not offset.is_empty() else _pond
+	var art_prefix := String(layout.get("art", ""))
+	if not art_prefix.is_empty():
+		_scene = ArtLibrary.texture("world", art_prefix + "_scene")
+		if _scene != null:
+			_scene_barren = ArtLibrary.texture("world", art_prefix + "_scene_barren")
 	_to_palette = palette_for(level)
 	_from_palette = _to_palette
 	_from_level = float(level)
@@ -74,6 +90,7 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 	material.shader = load("res://world/water.gdshader")
 	material.set_shader_parameter("pond_top", _bounds_y(true))
 	material.set_shader_parameter("pond_bottom", _bounds_y(false))
+	material.set_shader_parameter("overlay", has_scene_art())
 	_water.material = material
 	add_child(_water)
 	var fall: Variant = layout.get("waterfall")
@@ -81,12 +98,21 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 		_waterfall = WaterfallView.new()
 		_waterfall.name = "Waterfall"
 		_waterfall.setup(Rect2(float(fall["x"]), float(fall["y"]), float(fall["width"]), float(fall["height"])))
+		_waterfall.visible = not has_scene_art()  # a painted scene has its own waterfall
 		add_child(_waterfall)
 	_modulate = CanvasModulate.new()
 	_modulate.name = "Lighting"
 	add_child(_modulate)
 	_apply_palette()
 	_update_lighting()
+
+## True when a painting replaces the drawn backdrop.
+func has_scene_art() -> bool:
+	return _scene != null
+
+## How strongly the restored painting shows over the barren one (0..1, follows the level).
+func scene_restored_share() -> float:
+	return _level_progress()
 
 func _process(delta: float) -> void:
 	_light_timer += delta
@@ -265,6 +291,10 @@ func _draw_ground() -> void:
 		PackedVector2Array([Vector2(WORLD_LEFT, horizon), Vector2(WORLD_RIGHT, horizon), Vector2(WORLD_RIGHT, GROUND_BOTTOM), Vector2(WORLD_LEFT, GROUND_BOTTOM)]),
 		PackedColorArray([far_tone, far_tone, near_tone, near_tone]))
 
+	if has_scene_art():
+		_draw_scene_art()
+		return
+
 	# Bank around the water, then a darker rim where grass meets water.
 	var bank_color := grass.lerp(Color("#8a6f4d"), 0.55 - 0.45 * _level_progress())
 	_ground.draw_colored_polygon(_bank, bank_color)
@@ -289,3 +319,12 @@ func _bounds_y(top: bool) -> float:
 	for point in _pond:
 		extreme = minf(extreme, point.y) if top else maxf(extreme, point.y)
 	return extreme
+
+func _draw_scene_art() -> void:
+	var viewport: Array = layout["viewport"]
+	var design := Vector2(float(viewport[0]), float(viewport[1]))
+	var share := scene_restored_share()
+	if _scene_barren != null:
+		_ground.draw_texture_rect(_scene_barren, ArtLibrary.scene_rect(_scene_barren, design), false)
+	var tint := Color(1, 1, 1, share) if _scene_barren != null else Color.WHITE.lerp(UNRESTORED_TINT, 1.0 - share)
+	_ground.draw_texture_rect(_scene, ArtLibrary.scene_rect(_scene, design), false, tint)

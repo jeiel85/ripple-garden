@@ -1,0 +1,13 @@
+{
+  "props": {
+    "*": {"width": 60, "anchor": [0.5, 0.92]},
+    "lily_pad": {"width": 40, "anchor": [0.5, 0.5]}
+  },
+  "character": {
+    "*": {"height": 100, "anchor": [0.5, 1.0], "hands": [0.5, 0.5]},
+    "angler_reel": {"hands": [0.25, 0.25]}
+  },
+  "fish": {
+    "*": {"top_length": 2.0, "underwater_alpha": 0.5}
+  }
+}
