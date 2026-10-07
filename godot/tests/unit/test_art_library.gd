@@ -70,9 +70,13 @@ func test_rects_keep_the_picture_proportions() -> void:
 	var placed := ArtLibrary.placed_rect(tent, Vector2(100, 200), 80.0, Vector2(0.5, 1.0))
 	assert_eq(placed, Rect2(60, 140, 80, 60), "foot centred on the anchor point")
 	var scene := ArtLibrary.texture("world", "r01_scene")  # 60 x 90 (2:3)
-	var cover := ArtLibrary.cover_rect(scene, Vector2(720, 1280))
-	assert_eq(cover.size.y, 1280.0)
-	assert_true(cover.size.x > 720.0 and is_equal_approx(cover.get_center().x, 360.0), "a 2:3 scene overflows a 9:16 screen evenly")
+	var cover := ArtLibrary.scene_rect(scene, Vector2(720, 1280))
+	assert_true(is_equal_approx(cover.get_center().x, 360.0) and is_equal_approx(cover.get_center().y, 640.0), "centred where the camera looks")
+	# The camera (centred on the design area, stretch aspect "expand") shows 720 x 1600 on a 20:9 phone
+	# and 960 x 1280 on a 3:4 tablet: the painting must reach past both.
+	for visible in [Vector2(720, 1600), Vector2(960, 1280), Vector2(720, 1280)]:
+		var seen := Rect2(Vector2(360, 640) - visible / 2.0, visible)
+		assert_true(cover.encloses(seen), "a %s view sees past the painting %s" % [visible, cover])
 	var fit := ArtLibrary.fit_rect(tent, Rect2(0, 0, 100, 100))
 	assert_eq(fit, Rect2(0, 12.5, 100, 75))
 	_restore()
@@ -95,6 +99,16 @@ func test_a_painted_scene_replaces_the_drawn_backdrop_and_fades_with_restoration
 	assert_eq((water.material as ShaderMaterial).get_shader_parameter("overlay"), true, "water only adds its glints")
 	barren.queue_free()
 	restored.queue_free()
+	_restore()
+
+func test_a_barren_painting_alone_does_not_replace_the_backdrop() -> void:
+	# Pictures arrive one at a time: without the restored painting a fully restored pond would stay barren.
+	ArtLibrary.use_root("res://tests/fixtures/art_barren_only")
+	assert_true(ArtLibrary.has("world", "r01_scene_barren"))
+	var env := _environment(10)
+	assert_false(env.has_scene_art(), "the drawn backdrop stays until the restored painting exists")
+	assert_true(env.get_node("Waterfall").visible)
+	env.queue_free()
 	_restore()
 
 func test_over_a_painted_scene_only_the_changing_props_are_drawn() -> void:

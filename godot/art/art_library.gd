@@ -16,6 +16,9 @@ extends RefCounted
 ## A PNG is only loadable after Godot imported it (open the editor once or run `--import`).
 
 const DEFAULT_ROOT := "res://art"
+## The tallest portrait screen a scene painting must fill (20:9 phones). The camera shows the design
+## area centred and, with `stretch/aspect = expand`, more of the world above and below on taller screens.
+const TALLEST_PORTRAIT := 20.0 / 9.0
 
 ## Tests point this at a fixture folder (`use_root`).
 static var root := DEFAULT_ROOT
@@ -87,12 +90,13 @@ static func placed_rect(tex: Texture2D, at: Vector2, width: float, anchor: Vecto
 	var size := Vector2(width, width * tex.get_height() / maxf(1.0, tex.get_width()))
 	return Rect2(at - anchor * size, size)
 
-## A full-scene layer fills the design height and is centred on the design width; a picture wider
-## than the design area shows its sides on wide screens instead of stretching.
-static func cover_rect(tex: Texture2D, design: Vector2) -> Rect2:
-	var height := design.y
+## Where a full-scene layer lies in the world: centred on the design area and tall enough to fill the
+## tallest portrait screen, so no device sees past it. The placement is the same on every device (the
+## region layout is aligned to the painting once); a 16:9 screen shows the middle of it.
+static func scene_rect(tex: Texture2D, design: Vector2) -> Rect2:
+	var height := maxf(design.y, design.x * TALLEST_PORTRAIT)
 	var width := height * tex.get_width() / maxf(1.0, tex.get_height())
-	return Rect2(Vector2((design.x - width) / 2.0, 0.0), Vector2(width, height))
+	return Rect2(design / 2.0 - Vector2(width, height) / 2.0, Vector2(width, height))
 
 ## The largest rect with the picture's proportions that fits in `box`, centred.
 static func fit_rect(tex: Texture2D, box: Rect2) -> Rect2:

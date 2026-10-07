@@ -12,9 +12,10 @@ extends Node2D
 ## Restoration changes are blended: `set_level(level, true)` eases water, grass and canopy colors
 ## from the previous palette to the new one while PropsLayer fades the new props in.
 ##
-## Painted scene (D-029): when ArtLibrary has `world/<art>_scene.png` (and `_scene_barren.png`) for the
-## layout's `art` prefix, the painting replaces the drawn meadow, bank and waterfall; the barren painting
-## shows at level 0 and the restored one fades in with the level. The water then only adds its moving
+## Painted scene (D-029): when ArtLibrary has `world/<art>_scene.png` for the layout's `art` prefix, the
+## painting replaces the drawn meadow, bank and waterfall. With `_scene_barren.png` as well, the barren
+## painting shows at level 0 and the restored one fades in with the level; the barren one alone is not
+## used (it could never show a restored pond). The water then only adds its moving
 ## glints on top, since the painting already has the water's colour.
 
 const SKY_TOP := -3000.0
@@ -52,6 +53,7 @@ var _light_timer := 0.0
 var _tween: Tween
 var _time_light := Color.WHITE
 var _scene: Texture2D = null
+## Only set together with `_scene`.
 var _scene_barren: Texture2D = null
 
 func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService, p_level: int) -> void:
@@ -66,7 +68,8 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 	var art_prefix := String(layout.get("art", ""))
 	if not art_prefix.is_empty():
 		_scene = ArtLibrary.texture("world", art_prefix + "_scene")
-		_scene_barren = ArtLibrary.texture("world", art_prefix + "_scene_barren")
+		if _scene != null:
+			_scene_barren = ArtLibrary.texture("world", art_prefix + "_scene_barren")
 	_to_palette = palette_for(level)
 	_from_palette = _to_palette
 	_from_level = float(level)
@@ -105,7 +108,7 @@ func setup(p_region_id: String, p_layout: Dictionary, p_weather: WeatherService,
 
 ## True when a painting replaces the drawn backdrop.
 func has_scene_art() -> bool:
-	return _scene != null or _scene_barren != null
+	return _scene != null
 
 ## How strongly the restored painting shows over the barren one (0..1, follows the level).
 func scene_restored_share() -> float:
@@ -322,7 +325,6 @@ func _draw_scene_art() -> void:
 	var design := Vector2(float(viewport[0]), float(viewport[1]))
 	var share := scene_restored_share()
 	if _scene_barren != null:
-		_ground.draw_texture_rect(_scene_barren, ArtLibrary.cover_rect(_scene_barren, design), false)
-	if _scene != null:
-		var tint := Color(1, 1, 1, share) if _scene_barren != null else Color.WHITE.lerp(UNRESTORED_TINT, 1.0 - share)
-		_ground.draw_texture_rect(_scene, ArtLibrary.cover_rect(_scene, design), false, tint)
+		_ground.draw_texture_rect(_scene_barren, ArtLibrary.scene_rect(_scene_barren, design), false)
+	var tint := Color(1, 1, 1, share) if _scene_barren != null else Color.WHITE.lerp(UNRESTORED_TINT, 1.0 - share)
+	_ground.draw_texture_rect(_scene, ArtLibrary.scene_rect(_scene, design), false, tint)

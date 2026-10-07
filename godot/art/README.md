@@ -5,7 +5,7 @@ arrive one at a time. What to draw and how is in `assets/design/ASSET_REQUESTS.m
 
 | Folder | File | Used for |
 |---|---|---|
-| `world/` | `<art>_scene.png`, `<art>_scene_barren.png`, `<art>_foreground.png` | The painted pond (restored / level 0) and the front frame. `<art>` is the layout's `art` (Region 01: `r01`) |
+| `world/` | `<art>_scene.png`, `<art>_scene_barren.png`, `<art>_foreground.png` | The painted pond (restored / level 0) and the front frame. `<art>` is the layout's `art` (Region 01: `r01`). Placed centred and sized to fill a 20:9 screen (`ArtLibrary.scene_rect`); the barren one is only used with the restored one |
 | `character/` | `angler_idle.png`, `angler_cast.png`, `angler_bite.png`, `angler_reel.png`, `angler_hold.png` | The angler by fishing state; a missing pose shows idle. No rod: the game draws it |
 | `fish/` | `<fish id>_top.png` (head right), `<fish id>_side.png` (head left) | Swimming fish; catch result and journal |
 | `props/` | `<prop kind>.png`, `<prop kind>_02.png`, ... | Restoration props and camp decorations (kinds: `world/prop_kinds.gd`) |

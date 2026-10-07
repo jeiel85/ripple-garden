@@ -20,4 +20,4 @@ func has_art() -> bool:
 
 func _draw() -> void:
 	if _texture != null:
-		draw_texture_rect(_texture, ArtLibrary.cover_rect(_texture, _design), false)
+		draw_texture_rect(_texture, ArtLibrary.scene_rect(_texture, _design), false)
