@@ -20,3 +20,6 @@ Adding a picture:
    camp_slots) has to be moved onto the painting.
 
 Record the source and licence of every picture in `assets/placeholders/README.md`.
+
+A generated drop zip is imported with `python tools/import_art_drop.py <zip>`: it renames the approved pictures to
+these names and cleans the light-sheet halo and pinholes left by the cut-out (the list is in the script).
