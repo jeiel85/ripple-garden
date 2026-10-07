@@ -51,4 +51,9 @@
 - **아이콘**: `assets/branding/`과 `godot/icon.svg`는 `tools/generate_icon.py`로 만든 자체 제작 아이콘이다.
 - **디자인 목업**: `assets/design/`은 ChatGPT 이미지 생성으로 만든 UI 목업과 그 조각이다(D-017). 런타임에는 쓰지 않으며 화면의 기준이다(D-018).
 - **UI 아이콘**: `godot/ui/icons/*.svg`는 `tools/generate_ui_icons.py`로 그린 자체 제작 단색 아이콘이다. 정식 아이콘으로 교체할 대상.
-- **폰트**: Godot 기본 폰트 + OS 폰트 폴백. 배포 전에 라이선스가 확인된 CJK 폰트를 번들해야 한다.
+- **폰트** (`godot/fonts/`, D-031): Gowun Dodum(본문)·Jua(제목)·M PLUS Rounded 1c Regular/Bold(일본어), 모두 SIL Open Font License 1.1.
+  github.com/google/fonts에서 2026-10-07 받아 `tools/subset_fonts.py`로 게임에 쓰는 글자만 남겨 woff2로 넣었다(수정됨, 예약 글꼴 이름 없음).
+  저작권 표시와 라이선스 전문은 `godot/fonts/OFL.txt`이며 설정 > 오픈소스 라이선스 화면에 함께 나온다(export `include_filter`에 포함).
+- **그림 — Asset Drop 07** (`godot/art/moments/moment_rainbow.png`): OpenAI 이미지 생성으로 2026-10-07 만든 그림(`ripple_garden_asset_drop_07.zip`, 저장소 밖 보관),
+  512px로 줄여 넣었다(수정됨). 넣지 않은 것: 나머지 순간 그림 10장(목업 01을 잘라 스티커를 얹은 같은 장면), 아이콘 39개(지금 아이콘보다 단순하고 뜻이 틀린 것이 있으며
+  일부만 섞으면 일관성이 깨짐), 사진 액자 4장(게임이 그리는 액자와 같은 수준). 다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.

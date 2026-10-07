@@ -13,7 +13,7 @@ dest_files=["res://data/localization.ko.translation", "res://data/localization.e
 
 [params]
 
-compress=1
+compress=0
 delimiter=0
 unescape_keys=false
 unescape_translations=true

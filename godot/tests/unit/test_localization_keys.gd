@@ -91,7 +91,8 @@ func test_choosing_japanese_in_settings_switches_the_game() -> void:
 	assert_eq(TranslationServer.get_locale(), "ja")
 	assert_eq(String(TranslationServer.translate("ui.cta.cast")), "釣り")
 	GameState.set_setting("language", "ko")
-	assert_eq(String(TranslationServer.translate("ui.cta.cast")), "낚시")
+	assert_eq(String(TranslationServer.translate("ui.cta.cast")).replace(KeepWordsTranslation.JOINER, ""), "낚시",
+		"Korean (set word by word: its letters are joined)")
 	# A real game whose save cannot be written keeps its scene (a reload would read the old save back).
 	root.load_save = true
 	GameState.set_setting("language", "en")
@@ -119,3 +120,40 @@ func test_the_shipped_csv_parses_with_quoted_commas_and_all_locale_columns() -> 
 	assert_true(rows.has("ui.hint.reel"), "a row whose text contains a comma must parse")
 	for locale in ["ko", "en", "ja"]:
 		assert_true(rows["ui.hint.reel"].has(locale))
+
+# --- Korean line breaks ---
+
+func test_korean_words_are_joined_and_placeholders_kept() -> void:
+	var joiner := KeepWordsTranslation.JOINER
+	assert_eq(KeepWordsTranslation.keep_words("손을 떼"), "손" + joiner + "을 떼")
+	assert_eq(KeepWordsTranslation.keep_words("%d마리, %s을"), "%d" + joiner + "마" + joiner + "리" + joiner + ", %s" + joiner + "을",
+		"a placeholder stays whole; punctuation sticks to its word")
+	assert_eq(KeepWordsTranslation.keep_words("Cast the line"), "Cast the line", "only words with Hangul are joined")
+	var once := KeepWordsTranslation.keep_words("보세요.")
+	assert_eq(KeepWordsTranslation.keep_words(once), once, "joining twice changes nothing")
+	assert_eq(KeepWordsTranslation.keep_words("%d%%를") % [50], "50%를", "an escaped percent sign still formats")
+
+func test_a_korean_line_breaks_only_between_words() -> void:
+	var text := KeepWordsTranslation.keep_words("물 위를 끌어서 던질 곳을 정하고 손을 떼 보세요.")
+	var paragraph := TextParagraph.new()
+	paragraph.add_string(text, SystemFont.new(), 30, "ko")
+	paragraph.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+	for width in [300.0, 330.0, 360.0]:
+		paragraph.width = width
+		for line in paragraph.get_line_count():
+			var end := paragraph.get_line_range(line).y
+			assert_true(end >= text.length() or text[end - 1] == " ", "line %d at width %d ends inside a word" % [line, width])
+
+func test_the_korean_translation_keeps_words_together_once_installed() -> void:
+	KeepWordsTranslation.install()
+	KeepWordsTranslation.install()  # twice is harmless
+	var installed := TranslationServer.get_translation_object("ko")
+	assert_true(installed.has_meta(KeepWordsTranslation.MARK))
+	assert_true(installed.get_script() == null, "a script-backed Translation left registered crashes the engine on exit")
+	assert_true(installed.get_message_list().size() > 100, "every Korean message was copied")
+	var previous := TranslationServer.get_locale()
+	TranslationServer.set_locale("ko")
+	var shown := String(TranslationServer.translate("ui.cta.cast"))
+	assert_true(KeepWordsTranslation.JOINER in shown)
+	assert_eq(shown.replace(KeepWordsTranslation.JOINER, ""), "낚시")
+	TranslationServer.set_locale(previous)

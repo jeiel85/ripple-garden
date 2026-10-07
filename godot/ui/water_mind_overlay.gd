@@ -66,11 +66,11 @@ func _init() -> void:
 	_chrome.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_chrome)
 
-	_badge = UiKit.icon_button("lotus", tr("ui.water_mind.badge"), exit, "PillButton", 34.0, false)
+	_badge = UiKit.icon_button("lotus", tr("ui.water_mind.badge"), exit, "PillButton", UiTheme.ICON_M, false)
 	_badge.tooltip_text = tr("ui.water_mind.exit")
 	_badge.position = Vector2(20, 20)
 	_chrome.add_child(_badge)
-	_hide_button = UiKit.icon_button("eye_off", tr("ui.water_mind.hide_ui"), hide_chrome, "PillButton", 34.0, false)
+	_hide_button = UiKit.icon_button("eye_off", tr("ui.water_mind.hide_ui"), hide_chrome, "PillButton", UiTheme.ICON_M, false)
 	_hide_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_hide_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_hide_button.offset_right = -20

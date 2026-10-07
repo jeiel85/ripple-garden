@@ -30,6 +30,7 @@ func show_text(title: String, body: String) -> void:
 	_title.text = title
 	_body.text = body
 
-## The licences shown in Settings: the game's own notice plus the engine's licence text.
+## The licences shown in Settings: the game's own notice, the bundled fonts' (D-031) and the engine's.
 static func licenses_text() -> String:
-	return "%s\n\n%s" % [TranslationServer.translate("ui.licenses.intro"), Engine.get_license_text()]
+	var fonts := FileAccess.get_file_as_string(UiTheme.FONT_DIR + "OFL.txt")  # exported by the presets' include_filter
+	return "%s\n\n%s\n\n%s" % [TranslationServer.translate("ui.licenses.intro"), fonts, Engine.get_license_text()]

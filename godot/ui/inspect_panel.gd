@@ -50,17 +50,17 @@ func _init() -> void:
 	page.add_child(column)
 
 	# Header: a small fish, then the title between two laurel branches.
-	var fish_mark := UiKit.icon("fish", 36.0, UiTheme.PILL_TEXT)
+	var fish_mark := UiKit.icon("fish", UiTheme.ICON_M, UiTheme.PILL_TEXT)
 	fish_mark.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(fish_mark)
 	var header := UiKit.hbox(12)
 	header.alignment = BoxContainer.ALIGNMENT_CENTER
-	_header_icon_left = UiKit.icon("laurel", 72.0, Color("#e8d9a0"))
-	_header_icon_right = UiKit.icon("laurel", 72.0, Color("#e8d9a0"))
+	_header_icon_left = UiKit.icon("laurel", UiTheme.ICON_XL, Color("#e8d9a0"))
+	_header_icon_right = UiKit.icon("laurel", UiTheme.ICON_XL, Color("#e8d9a0"))
 	_header_icon_right.flip_h = true
 	_badge = UiKit.label("", "BigLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	_badge.theme_type_variation = "LightLabel"
-	_badge.add_theme_font_size_override("font_size", 40)
+	UiKit.text_size(_badge, "title")
 	_badge.custom_minimum_size.x = 420
 	header.add_child(_header_icon_left)
 	header.add_child(_badge)
@@ -86,7 +86,7 @@ func _init() -> void:
 	var note_box := UiKit.vbox(4)
 	var note_title := UiKit.hbox(6)
 	note_title.alignment = BoxContainer.ALIGNMENT_CENTER
-	note_title.add_child(UiKit.icon("memory", 30.0, UiTheme.GREEN))
+	note_title.add_child(UiKit.icon("memory", UiTheme.ICON_M, UiTheme.GREEN))
 	_rarity_title = UiKit.label("", "", HORIZONTAL_ALIGNMENT_CENTER, false)
 	note_title.add_child(_rarity_title)
 	note_box.add_child(note_title)
@@ -147,7 +147,7 @@ func _init() -> void:
 func _fact(icon_name: String, caption_key: String) -> Control:
 	var box := UiKit.hbox(10)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(UiKit.icon(icon_name, 40.0, UiTheme.INK_DIM))
+	box.add_child(UiKit.icon(icon_name, UiTheme.ICON_L, UiTheme.INK_DIM))
 	var text := UiKit.vbox(0)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.add_child(UiKit.label(tr(caption_key), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, false))

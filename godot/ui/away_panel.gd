@@ -19,14 +19,14 @@ func _init() -> void:
 	var box := UiKit.vbox(12)
 	var head := UiKit.hbox(10)
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	head.add_child(UiKit.icon("clock", 40.0, UiTheme.GREEN))
+	head.add_child(UiKit.icon("clock", UiTheme.ICON_L, UiTheme.GREEN))
 	_title = UiKit.label("", "TitleLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL  # a wrapping label without width breaks every letter
 	head.add_child(_title)
 	box.add_child(head)
 	_rows = UiKit.vbox(8)
 	box.add_child(_rows)
-	var look := UiKit.centered_button("lotus", tr("ui.away.look"), func() -> void: close_pressed.emit(), "PrimaryButton", 36.0)
+	var look := UiKit.centered_button("lotus", tr("ui.away.look"), func() -> void: close_pressed.emit(), "PrimaryButton")
 	look.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(look)
 	add_child(UiKit.margin(box, 26))
@@ -52,7 +52,7 @@ func line_count() -> int:
 
 func _row(icon_name: String, text: String) -> Control:
 	var row := UiKit.hbox(10)
-	row.add_child(UiKit.icon(icon_name, 32.0, UiTheme.INK_DIM))
+	row.add_child(UiKit.icon(icon_name, UiTheme.ICON_M, UiTheme.INK_DIM))
 	var label := UiKit.label(text, "", HORIZONTAL_ALIGNMENT_LEFT, true)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)

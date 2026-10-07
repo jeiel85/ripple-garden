@@ -153,14 +153,14 @@ func _build_top() -> Control:
 	status_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var status := UiKit.hbox(10)
 	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	status.add_child(UiKit.icon("mountain", 30.0, UiTheme.PILL_TEXT))
+	status.add_child(UiKit.icon("mountain", UiTheme.ICON_M, UiTheme.PILL_TEXT))
 	region_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	status.add_child(region_label)
 	status.add_child(UiKit.divider())
 	clock_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	status.add_child(clock_label)
 	status.add_child(UiKit.divider())
-	weather_icon = UiKit.icon("clear", 30.0, UiTheme.PILL_TEXT)
+	weather_icon = UiKit.icon("clear", UiTheme.ICON_M, UiTheme.PILL_TEXT)
 	status.add_child(weather_icon)
 	weather_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	status.add_child(weather_label)
@@ -185,13 +185,13 @@ func _build_top() -> Control:
 	currency_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var money := UiKit.hbox(8)
 	money.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	money.add_child(UiKit.icon("ripple", 30.0, UiTheme.WATER))
+	money.add_child(UiKit.icon("ripple", UiTheme.ICON_M, UiTheme.WATER))
 	var ripple_word := UiKit.label(tr("ui.currency.ripple"), "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	money.add_child(ripple_word)
 	ripple_label = UiKit.label("0", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	money.add_child(ripple_label)
 	money.add_child(UiKit.spacer(0))
-	money.add_child(UiKit.icon("memory", 30.0, Color("#bcd99a")))
+	money.add_child(UiKit.icon("memory", UiTheme.ICON_M, Color("#bcd99a")))
 	var memory_word := UiKit.label(tr("ui.currency.memory"), "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	money.add_child(memory_word)
 	memory_label = UiKit.label("0", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
@@ -220,7 +220,7 @@ func _build_bottom() -> Control:
 	cta_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cta_content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	cta_content.offset_bottom = -20
-	cta_content.add_child(UiKit.icon("fish", 58.0, UiTheme.WOOD_TEXT))
+	cta_content.add_child(UiKit.icon("fish", UiTheme.ICON_XL, UiTheme.WOOD_TEXT))
 	cta_label = UiKit.label(tr("ui.cta.cast"), "CtaLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	cta_content.add_child(cta_label)
 	cta_button.add_child(cta_content)

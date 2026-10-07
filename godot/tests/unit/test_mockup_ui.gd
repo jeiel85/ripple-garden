@@ -399,3 +399,42 @@ func _assert_inside(node: Node, width: float, label: String) -> void:
 				return
 		if not (child is ScrollContainer and (child as ScrollContainer).horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED):
 			_assert_inside(child, width, label)
+
+## Content of a scroll area that scrolls only up and down must fit its width, or the right edge is cut.
+func _assert_fits_scrolls(node: Node, label: String) -> void:
+	for child in node.get_children():
+		if child is ScrollContainer and (child as ScrollContainer).horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED:
+			var scroll := child as ScrollContainer
+			for content in scroll.get_children():
+				if content is Control and not content is ScrollBar:
+					var wanted := (content as Control).get_combined_minimum_size().x
+					var room := scroll.size.x - (scroll.get_v_scroll_bar().size.x if scroll.get_v_scroll_bar().visible else 0.0)
+					assert_true(wanted <= room + 1.0, "%s: %s needs %.0f px in a %.0f px scroll area" % [label, content.name, wanted, room])
+		_assert_fits_scrolls(child, label)
+
+func test_scrolling_pages_are_not_cut_at_the_right_edge() -> void:
+	var previous := TranslationServer.get_locale()
+	GameState.new_game()
+	GameState.record_encounter("fish_crucian_carp", 12.0, "steady", "clear")
+	for locale in ["ko", "en", "ja"]:
+		TranslationServer.set_locale(locale)
+		var host := Control.new()
+		host.size = Vector2(720, 1280)
+		host.theme = UiTheme.build(1.0, false, false)
+		tree.root.add_child(host)
+		var journal := JournalPanel.new()
+		journal.setup(JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"]), "region_01_quiet_pond")
+		var gear := GearPanel.new()
+		gear.setup(LoadoutService.new(GameState))
+		for panel in [journal, gear]:
+			host.add_child(panel)
+		journal.refresh()
+		journal.select_fish("fish_crucian_carp")
+		gear.select_tab("rod")
+		await tree.process_frame
+		await tree.process_frame
+		for panel in [journal, gear]:
+			_assert_fits_scrolls(panel, "%s (%s)" % [panel.get_script().get_path().get_file(), locale])
+		host.free()
+	TranslationServer.set_locale(previous)
+	GameState.new_game()

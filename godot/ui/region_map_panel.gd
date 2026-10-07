@@ -47,11 +47,11 @@ func _init() -> void:
 	board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title.add_child(board)
 	var subtitle := UiKit.label(tr("ui.map.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	subtitle.add_theme_font_size_override("font_size", 22)
+	UiKit.text_size(subtitle, "caption")
 	title.add_child(subtitle)
 	add_child(title)
 
-	var back := UiKit.icon_button("back", tr("ui.back"), func() -> void: close_pressed.emit(), "", 40.0)
+	var back := UiKit.icon_button("back", tr("ui.back"), func() -> void: close_pressed.emit(), "", UiTheme.ICON_L)
 	back.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	back.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	back.offset_left = 24
@@ -124,8 +124,8 @@ func _sign(region_id: String, state: String) -> Control:
 	var box := UiKit.vbox(2)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var button := UiKit.icon_button(def["map"]["icon"] if state != RegionUnlocks.LOCKED else "lock", _name(region_id),
-		func() -> void: tap(region_id), "", 32.0, false)
-	button.add_theme_font_size_override("font_size", 26)
+		func() -> void: tap(region_id), "", UiTheme.ICON_M, false)
+	UiKit.text_size(button, "small")
 	button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
 	if state == RegionUnlocks.CURRENT:
 		button.theme_type_variation = "CardSelected"
@@ -136,9 +136,9 @@ func _sign(region_id: String, state: String) -> Control:
 	pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := UiKit.hbox(6)
-	row.add_child(UiKit.icon("fish", 24.0, UiTheme.PILL_TEXT))
+	row.add_child(UiKit.icon("fish", UiTheme.ICON_S, UiTheme.PILL_TEXT))
 	var count := UiKit.label("%d/%d" % [_unlocks.species_met(region_id), RegionUnlocks.species_total(region_id)], "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	count.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(count, "caption")
 	row.add_child(count)
 	pill.add_child(row)
 	box.add_child(pill)
