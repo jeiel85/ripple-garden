@@ -10,6 +10,7 @@ extends RefCounted
 ##   character/angler_<pose>.png                                    (idle, cast, bite, reel, hold)
 ##   fish/<fish id>_top.png, <fish id>_side.png                     (head right / head left)
 ##   props/<prop kind>.png, <prop kind>_02.png, ...                 (variants are picked per position)
+##   items/<item id>.png                                            (equipment screen: rods, baits, bags, accessories)
 ##
 ## How large a picture is drawn and which point of it sits on the anchor comes from `art.json`
 ## ({category: {"*": defaults, name: overrides}}), so tuning the placement is a data change.

@@ -1,8 +1,8 @@
 class_name ItemArt
 extends Control
 
-## Placeholder picture of an equipment item for the equipment screen (mockup 05), until the item art of
-## assets/design/ASSET_REQUESTS.md §6 arrives: a soft round backdrop tinted by grade, and the item drawn
+## Picture of an equipment item for the equipment screen (mockup 05): a soft round backdrop tinted by
+## grade and the item's drawn art, `art/items/<item id>.png` (D-029). An item without a picture is drawn
 ## from simple shapes — a rod with cork grip and reel, a bait by its kind, a backpack in the bag's
 ## colour, a hat in the accessory's colours. Locked items are drawn faded.
 
@@ -29,6 +29,10 @@ func show_item(p_category: String, p_item_id: String, p_faded: bool = false) -> 
 	faded = p_faded
 	queue_redraw()
 
+## True when the shown item is drawn from its picture rather than shapes.
+func has_art() -> bool:
+	return ArtLibrary.has("items", item_id)
+
 func _draw() -> void:
 	var def := ContentDB.get_item(category, item_id)
 	if def.is_empty():
@@ -39,11 +43,15 @@ func _draw() -> void:
 	draw_circle(center, radius, GRADE_TINTS.get(grade, GRADE_TINTS["common"]))
 	draw_circle(center + Vector2(-radius * 0.3, -radius * 0.25), radius * 0.35, Color(1, 1, 1, 0.25))
 	var s := radius / 50.0
-	match category:
-		"rod": _rod(center, s, GRADE_ACCENTS.get(grade, GRADE_ACCENTS["common"]), grade == "event")
-		"bait": _bait(center, s, def.get("tags", []))
-		"bag": _bag(center, s, Color(def.get("color", "#6f8a5a")))
-		"accessory": _hat(center, s, Color(def.get("hat", "#ece0c2")), Color(def.get("band", "#5f7a4a")))
+	var art := ArtLibrary.texture("items", item_id)
+	if art != null:
+		draw_texture_rect(art, ArtLibrary.fit_rect(art, Rect2(center - Vector2.ONE * radius * 0.82, Vector2.ONE * radius * 1.64)), false)
+	else:
+		match category:
+			"rod": _rod(center, s, GRADE_ACCENTS.get(grade, GRADE_ACCENTS["common"]), grade == "event")
+			"bait": _bait(center, s, def.get("tags", []))
+			"bag": _bag(center, s, Color(def.get("color", "#6f8a5a")))
+			"accessory": _hat(center, s, Color(def.get("hat", "#ece0c2")), Color(def.get("band", "#5f7a4a")))
 	if faded:
 		draw_circle(center, radius, Color(0.95, 0.92, 0.86, 0.55))
 		draw_texture_rect(UiIcons.texture("lock"), Rect2(center - Vector2(18, 18) * s * 1.2, Vector2(36, 36) * s * 1.2), false, Color(UiTheme.INK, 0.8))
