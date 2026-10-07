@@ -37,6 +37,9 @@
   그림이 오지 않은 게임 아이템은 도형 그대로다(BACKLOG).
 - **Asset Drop 04** (`ripple_garden_asset_drop_04.zip`, 지도·아이콘): 넣지 않았다. 아이콘은 지금 아이콘과 같은 수준의 코드 생성 도형인데 뜻이 틀린 것이 많고
   (설정=해, 카메라=가방, 꾸미기=꺾은선, 추억=하트) 색이 박혀 있어 게임의 틴트를 받지 못한다. 지도는 목업 07과 다른 평면 도형이라 지금 지도보다 낫지 않다.
+- **Asset Drop 05** (`ripple_garden_asset_drop_05.zip`, 순간 그림·사진 액자·효과): 넣지 않았다. 순간 그림은 목업 01·03을 잘라 스티커를 얹은 같은 장면이라
+  순간의 내용이 없고(`rare_encounter`는 한글 UI가 박혀 있음), 나무 액자는 가로줄이 사진 위로 지나가며, 효과는 게임이 이미 그리는 점·원과 같은 수준이다.
+  다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.
 - **아이콘**: `assets/branding/`과 `godot/icon.svg`는 `tools/generate_icon.py`로 만든 자체 제작 아이콘이다.
 - **디자인 목업**: `assets/design/`은 ChatGPT 이미지 생성으로 만든 UI 목업과 그 조각이다(D-017). 런타임에는 쓰지 않으며 화면의 기준이다(D-018).
 - **UI 아이콘**: `godot/ui/icons/*.svg`는 `tools/generate_ui_icons.py`로 그린 자체 제작 단색 아이콘이다. 정식 아이콘으로 교체할 대상.
