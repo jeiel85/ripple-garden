@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_09) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_10) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -171,15 +171,25 @@ FEET_09 = {
     "hold": ((330, 1022), (649, 1153), (883, 1069)),
 }
 ANGLER_MARGIN = 120  # px of room around the 1254 canvas for the moved and enlarged poses
+# drop_10's UI frames are one picture per file, each on a large canvas with a faint (alpha < 8) shadow spread to
+# its edges; a 9-slice stretches any margin left around the frame, so each is cut to its visible part.
+# The journal binding is drawn with three rings; the game repeats one ring down the page, so one ring
+# interval (between the midpoints of rings 1-2 and 2-3) is cut from it.
+UI_10 = ["ui_wood_cta", "ui_wood_sign", "ui_wood_panel", "ui_paper_card", "ui_cream_button", "ui_cream_tab",
+         "ui_green_tab", "ui_dark_pill", "ui_round_dark", "ui_reel_button", "ui_tension_bar",
+         "ui_leaf_corner_01", "ui_leaf_corner_02", "ui_leaf_corner_03", "ui_leaf_corner_04", "ui_notebook_binding"]
+BINDING_10 = (313, 595, 636, 1027)  # x0, y0, x1, y1: the middle ring and its strip
+UI_VISIBLE = 8  # alpha above this is the frame, below it the shadow haze
 CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
 CHECKER_GREY = 238  # its average
 RIM_SPREAD = 80  # an outline pixel this far from the grey (largest channel) is fully the picture's
 KEEP_SHARE = 0.02  # a part of a cut at least this share of its largest part belongs to the picture
 
-LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128, "moments": 512, "character": 400}  # px, the longest side written per folder
+LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128, "moments": 512, "character": 400, "ui": 640}  # px, the longest side written per folder
 # How the frames of an animated picture line up on their shared canvas (x, y as 0 left/top .. 1 right/bottom).
 ALIGN = {"fish": (1.0, 0.5), "props": (0.5, 1.0), "animals": (0.5, 0.5)}
-LONGEST_FOR = {"props/frog.png": 192, "props/tent.png": 384}  # the tent is drawn 190 design px wide
+LONGEST_FOR = {"props/frog.png": 192, "props/tent.png": 384,  # the tent is drawn 210 design px wide
+               "ui/ui_notebook_binding.png": 192, **{f"ui/ui_leaf_corner_0{i}.png": 256 for i in range(1, 5)}}
 OPAQUE_FROM = 235  # the sheets' body alpha is ~253; this and above becomes 255
 ITEM_SHARE = 0.25  # a part at least this share of the sheet's largest picture is a picture of its own
 SPECK_SHARE = 0.01  # a smaller part inside a picture's box below this share of it is key debris
@@ -467,6 +477,8 @@ def main() -> None:
                     image = image.transpose(Image.FLIP_LEFT_RIGHT)
                 write_group([(image, path)], f"{REFERENCE_06} {box}")
             copy(drop, "drop_06")
+        elif names == {"drop_10"}:
+            ui_frames(drop)
         elif names == {"drop_09"}:
             angler_poses(drop)
             copy(drop, "drop_09")
@@ -499,6 +511,18 @@ def angler_poses(drop: zipfile.ZipFile) -> None:
     box = (min(b[0] for b in boxes) - PAD, min(b[1] for b in boxes) - PAD,
            max(b[2] for b in boxes) + PAD, max(b[3] for b in boxes) + PAD)
     write_group([(image.crop(box), path) for image, path in placed], "drop_09 " + ANGLER_09 % "*")
+
+
+def ui_frames(drop: zipfile.ZipFile) -> None:
+    for name in UI_10:
+        source = f"ui/{name}.png"
+        image = Image.open(BytesIO(drop.read(PREFIX % "drop_10" + source))).convert("RGBA")
+        if name == "ui_notebook_binding":
+            image = image.crop(BINDING_10)
+        image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
+        target = f"ui/{name}.png"
+        longest = LONGEST_FOR.get(target, LONGEST["ui"])
+        _write(shrink(image, longest / max(image.size)), source, target)
 
 
 def copy(drop: zipfile.ZipFile, name: str) -> None:

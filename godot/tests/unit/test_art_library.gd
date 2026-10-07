@@ -34,11 +34,13 @@ func test_a_missing_picture_is_null_and_an_existing_one_loads() -> void:
 	assert_false(ArtLibrary.has("world", "r99_scene"))
 	_restore()
 
-func test_the_game_folder_ships_the_region_01_scene_and_the_angler() -> void:
+func test_the_game_folder_ships_the_region_01_scene_the_angler_and_the_ui_frames() -> void:
 	_restore()
 	for pose in ["idle", "cast", "bite", "reel", "hold"]:
 		assert_not_null(ArtLibrary.texture("character", "angler_" + pose), "Asset Drop 09: %s" % pose)
 	assert_not_null(ArtLibrary.texture("world", "r01_scene"), "Asset Drop 08")
+	for frame in UiTheme.FRAMES.values() + ["ui_reel_button", "ui_tension_bar", "ui_notebook_binding", "ui_leaf_corner_01"]:
+		assert_not_null(ArtLibrary.texture("ui", frame), "Asset Drop 10: %s" % frame)
 	assert_not_null(ArtLibrary.texture("world", "r01_scene_barren"), "the restored painting fades in over its barren twin")
 
 func test_variants_cycle_and_are_stable_for_the_same_pick() -> void:
@@ -357,15 +359,16 @@ func test_a_seen_moment_shows_its_picture_and_an_unseen_one_does_not() -> void:
 # --- UI frames ---
 
 func test_without_frame_pictures_the_theme_keeps_its_coded_boxes() -> void:
-	_restore()
+	_without_art()
 	var theme := UiTheme.build(1.0, false, false)
 	assert_true(theme.get_stylebox("normal", "Button") is StyleBoxFlat)
 	assert_true(theme.get_stylebox("panel", "WoodPanel") is WoodStyle)
 	assert_true(theme.get_stylebox("panel", "SignPanel") is WoodStyle)
 	assert_true(theme.get_stylebox("panel", "NotebookPanel") is StyleBoxFlat)
+	_restore()
 
 func test_a_frame_picture_replaces_its_box_and_keeps_the_layout() -> void:
-	_restore()
+	_without_art()
 	var coded: StyleBox = UiTheme.build(1.0, false, false).get_stylebox("normal", "Button")
 	_with_fixtures()
 	var theme := UiTheme.build(1.0, false, false)
@@ -389,6 +392,7 @@ func test_leaf_corners_and_the_binding_decorate_the_coded_boxes() -> void:
 	assert_eq(wood.corners[0], ArtLibrary.texture("ui", "ui_leaf_corner_01"))
 	assert_true(wood.corners[1] == null, "a corner without a picture stays bare")
 	assert_eq(wood.corner_size, 24.0)
+	assert_true(theme.get_stylebox("panel", "SignPanel") is WoodStyle, "title boards take no leaf corners")
 	var notebook := theme.get_stylebox("panel", "NotebookPanel") as ArtFrameStyle
 	assert_eq(notebook.strip, ArtLibrary.texture("ui", "ui_notebook_binding"))
 	assert_true(theme.get_stylebox("panel", "PanelContainer") is StyleBoxFlat, "only the journal's list has the binding")
@@ -406,7 +410,7 @@ func test_a_frame_is_scaled_so_its_slices_fit_the_control() -> void:
 	_restore()
 
 func test_the_reel_button_and_the_tension_meter_use_their_pictures() -> void:
-	_restore()
+	_without_art()
 	assert_true(Hud.ReelStyle.art() == null)
 	var meter := FightMeter.new()
 	assert_true(meter.frame_art() == null)
