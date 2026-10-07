@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -23,7 +23,14 @@ head, a frog's feet, an insect's middle) and scaled alike, so the picture does n
 A fish's tail frames are drawn with the whole body turned; `level_head` turns each back so its head lies
 over the straight picture's head (only the tail moves) before they are lined up.
 
-Only pictures listed in DROP_01 / SHEETS are imported; the rest of the drop is waiting for a decision
+drop_06's own PNGs are the pictures of its reference sheet cut out with fixed boxes and enlarged ~6x: they
+carry the sheet's drawn checkerboard, parts of the neighbouring pictures and their file-name labels. So
+the pictures are cut again from the sheet (CUTS_06): `key_checker` takes away the grey checkerboard (and
+the soft shadow on it) reached from the box's edge and un-mixes the grey from the outline, `keep_picture`
+drops what the box caught of a panel line or a label. They stay at the sheet's size (100..200 px), which
+covers the size the game draws them. Its foreground was painted separately at full size and is copied.
+
+Only pictures listed in DROP_01 / SHEETS / CUTS_06 are imported; the rest of the drop is waiting for a decision
 (assets/placeholders/README.md lists what was taken and why the others were not).
 
     python tools/import_art_drop.py path/to/ripple_garden_asset_drop_0N.zip
@@ -110,6 +117,42 @@ SHEETS = {
         "camp/props/camp_prop_collection_sheet_b_6.png": (2, 6, ["props/campfire.png", "props/signboard.png", None, None, None, None]),
     },
 }
+# drop_06: box (left, top, right, bottom) on its reference sheet -> (godot/art path, degrees to turn clockwise).
+# The top-view fish lie head down; the side view is mirrored to head left. Not cut: the tent (drop_03's is
+# larger and matches the other camp props), the angler (faces the viewer, the mockup's sits with its back to
+# us looking at the water), the scenes (enlarged from a 330 px picture), the UI frames (see the README).
+REFERENCE_06 = "source_masters/corrected_core_reference_sheet.png"
+CUTS_06 = {
+    (22, 382, 140, 549): ("fish/fish_crucian_carp_top.png", -90),
+    (175, 382, 256, 549): ("fish/fish_minnow_top.png", -90),
+    (288, 382, 425, 549): ("fish/fish_catfish_top.png", -90),
+    (451, 382, 534, 549): ("fish/fish_loach_top.png", -90),
+    (584, 382, 692, 549): ("fish/fish_gudgeon_top.png", -90),
+    (733, 392, 848, 538): ("fish/fish_bitterling_top.png", -90),
+    (884, 382, 997, 549): ("fish/fish_bluegill_top.png", -90),
+    (1048, 372, 1161, 549): ("fish/fish_largemouth_bass_top.png", -90),
+    (1208, 372, 1299, 549): ("fish/fish_snakehead_top.png", -90),
+    (1323, 395, 1529, 508): ("fish/fish_gudgeon_side.png", "mirror"),
+    (11, 621, 144, 742): ("props/crate.png", 0),
+    (137, 630, 279, 741): ("props/bench.png", 0),
+    (480, 636, 589, 741): ("props/junk.png", 0),
+    (582, 627, 697, 741): ("props/stump.png", 0),
+    (692, 627, 792, 740): ("props/flower_03.png", 0),
+    (795, 663, 912, 772): ("items/acc_bucket_hat.png", 0),
+    (905, 663, 1020, 772): ("items/acc_river_cap.png", 0),
+    (1018, 663, 1145, 772): ("items/acc_starry_hat.png", 0),
+    (20, 764, 147, 852): ("items/bait_cricket.png", 0),
+    (158, 773, 303, 841): ("items/bait_minnow.png", 0),
+    (316, 749, 459, 850): ("items/bait_crab.png", 0),
+    (473, 761, 611, 851): ("items/bait_squid.png", 0),
+    (620, 756, 777, 855): ("items/bait_seaweed.png", 0),
+}
+COPIES_06 = {"source_masters/r01_foreground_hires_source.png": "world/r01_foreground.png"}
+CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
+CHECKER_GREY = 238  # its average
+RIM_SPREAD = 80  # an outline pixel this far from the grey (largest channel) is fully the picture's
+KEEP_SHARE = 0.02  # a part of a cut at least this share of its largest part belongs to the picture
+
 LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128}  # px, the longest side written per folder
 # How the frames of an animated picture line up on their shared canvas (x, y as 0 left/top .. 1 right/bottom).
 ALIGN = {"fish": (1.0, 0.5), "props": (0.5, 1.0), "animals": (0.5, 0.5)}
@@ -232,6 +275,61 @@ def pieces(sheet: Image.Image, rows: int) -> list[Image.Image]:
     return result
 
 
+def _checker(pixel: tuple[int, ...]) -> bool:
+    r, g, b = pixel[:3]
+    return max(r, g, b) - min(r, g, b) <= CHECKER_SAT and r + g + b >= 3 * CHECKER_LOW
+
+
+def key_checker(image: Image.Image) -> Image.Image:
+    """`image` without the checkerboard reached from its edge; the outline next to it un-mixed from the grey."""
+    image = image.convert("RGBA")
+    px = image.load()
+    w, h = image.size
+    gone = [[False] * w for _ in range(h)]
+    queue = deque((x, y) for x in range(w) for y in range(h) if (x in (0, w - 1) or y in (0, h - 1)) and _checker(px[x, y]))
+    for x, y in queue:
+        gone[y][x] = True
+    while queue:
+        x, y = queue.popleft()
+        for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= nx < w and 0 <= ny < h and not gone[ny][nx] and _checker(px[nx, ny]):
+                gone[ny][nx] = True
+                queue.append((nx, ny))
+    for y in range(h):
+        for x in range(w):
+            if gone[y][x]:
+                px[x, y] = (0, 0, 0, 0)
+                continue
+            if not any(gone[ny][nx] for nx in (x - 1, x, x + 1) for ny in (y - 1, y, y + 1) if 0 <= nx < w and 0 <= ny < h):
+                continue
+            r, g, b, _ = px[x, y]
+            alpha = min(1.0, max(abs(v - CHECKER_GREY) for v in (r, g, b)) / RIM_SPREAD)
+            if alpha < 0.1:
+                px[x, y] = (0, 0, 0, 0)
+            elif alpha < 1:
+                colour = [min(255, max(0, round((v - (1 - alpha) * CHECKER_GREY) / alpha))) for v in (r, g, b)]
+                px[x, y] = (*colour, round(255 * alpha))
+    return image
+
+
+def keep_picture(image: Image.Image) -> Image.Image:
+    """Only the parts of a cut that belong to its picture: large enough and not touching the box's edge."""
+    px = image.load()
+    w, h = image.size
+    parts = _parts(px, w, h)
+    biggest = max(len(part) for part in parts)
+    result = Image.new("RGBA", image.size)
+    out = result.load()
+    for part in parts:
+        if len(part) < biggest * KEEP_SHARE or any(x in (0, w - 1) or y in (0, h - 1) for x, y in part):
+            continue
+        for x, y in part:
+            out[x, y] = px[x, y]
+    if result.getbbox() is None:
+        raise ValueError("every part touches the box's edge: widen the box")
+    return result
+
+
 def prepare(image: Image.Image, turn: int) -> Image.Image:
     """Opaque body, no key debris alpha, cropped to the picture plus PAD, turned."""
     px = image.load()
@@ -338,6 +436,15 @@ def main() -> None:
                 for base, images in groups.items():
                     images.sort(key=lambda pair: pair[1] != base)  # the picture first, then its frames
                     write_group(images, source)
+        elif names == {"drop_06"}:
+            sheet = Image.open(BytesIO(drop.read(PREFIX % "drop_06" + REFERENCE_06)))
+            for box, (path, turn) in CUTS_06.items():
+                image = prepare(keep_picture(key_checker(sheet.crop(box))), 0 if turn == "mirror" else turn)
+                if turn == "mirror":
+                    image = image.transpose(Image.FLIP_LEFT_RIGHT)
+                write_group([(image, path)], f"{REFERENCE_06} {box}")
+            for source, target in COPIES_06.items():
+                _write(Image.open(BytesIO(drop.read(PREFIX % "drop_06" + source))).convert("RGBA"), source, target)
         else:
             sys.exit(f"not a known drop (found {sorted(names) or 'no drop folder'})")
 
