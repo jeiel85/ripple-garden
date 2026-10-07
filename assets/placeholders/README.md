@@ -67,3 +67,5 @@
 - **그림 — Asset Drop 10** (`godot/art/ui/` 16장): OpenAI 이미지 생성으로 2026-10-07 만든 UI 프레임(`ripple_garden_asset_drop_10.zip`, 저장소 밖 보관).
   상업적 이용은 OpenAI 이용 약관을 따른다. `tools/import_art_drop.py`가 거의 투명한 그림자(alpha 8 이하)를 빼고 보이는 부분으로 자른 뒤 640px
   (잎 장식 256px)로 줄이고, 바인더는 고리 한 마디만 잘라 192px로 줄인다(수정됨). 9-slice 비율·배율은 `art.json` `ui`에 있다.
+- **그림 — Asset Drop 11** (`godot/art/moments/` 10장): OpenAI 이미지 생성으로 2026-10-07 만든 도감 순간 그림(`ripple_garden_asset_drop_11.zip`, 저장소 밖 보관).
+  상업적 이용은 OpenAI 이용 약관을 따른다. 1254 정사각 원본을 512px로 줄여 넣었다(수정됨). 이로써 순간 11개 모두 그림이 있다.
