@@ -54,7 +54,7 @@ func _init() -> void:
 
 	var header := UiKit.hbox(10)
 	header.position = Vector2(16, 112)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", 40.0)
+	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
 	back.tooltip_text = tr("ui.back")
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
 	header.add_child(back)
@@ -69,11 +69,11 @@ func _init() -> void:
 	add_child(header)
 
 	# Cream circles for turning and putting away, a green one for done (mockup 06).
-	_turn_button = UiKit.icon_button("rotate", "", func() -> void: _turn(), "CircleButton", 36.0)
+	_turn_button = UiKit.icon_button("rotate", "", func() -> void: _turn(), "CircleButton", UiTheme.ICON_L)
 	_turn_button.tooltip_text = tr("ui.camp.turn")
-	_confirm_button = UiKit.icon_button("check", "", func() -> void: _confirm(), "GreenCircle", 44.0)
+	_confirm_button = UiKit.icon_button("check", "", func() -> void: _confirm(), "GreenCircle", UiTheme.ICON_L)
 	_confirm_button.tooltip_text = tr("ui.camp.done_slot")
-	_remove_button = UiKit.icon_button("trash", "", func() -> void: _remove(), "CircleButton", 34.0)
+	_remove_button = UiKit.icon_button("trash", "", func() -> void: _remove(), "CircleButton", UiTheme.ICON_L)
 	_remove_button.tooltip_text = tr("ui.camp.remove")
 	_remove_button.add_theme_color_override("icon_normal_color", UiTheme.NOTICE)
 	for button in [_turn_button, _remove_button]:
@@ -93,9 +93,8 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", 28.0, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_S, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.add_theme_font_size_override("font_size", 24)
 		_tabs[tab_id] = button
 		tab_row.add_child(button)
 	box.add_child(tab_row)
@@ -105,7 +104,7 @@ func _init() -> void:
 	_cards = UiKit.hbox(8)
 	scroll.add_child(_cards)
 	box.add_child(scroll)
-	var done := UiKit.centered_button("check", tr("ui.camp.finish"), func() -> void: close_pressed.emit(), "WaterButton", 44.0)
+	var done := UiKit.centered_button("check", tr("ui.camp.finish"), func() -> void: close_pressed.emit(), "WaterButton")
 	done.custom_minimum_size = Vector2(320, UiTheme.TOUCH_MIN_PX * 1.2)
 	done.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(done)
@@ -303,14 +302,14 @@ func _card(decoration_id: String) -> Button:
 	box.add_child(art)
 	var caption := UiKit.label(tr(def["name_key"]), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	caption.add_theme_color_override("font_color", UiTheme.INK)
-	caption.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(caption, "caption")
 	caption.clip_text = true
 	caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	box.add_child(caption)
 	if not owned:
 		var price := UiKit.label("%s %d" % [tr("ui.currency." + String(deal["currency"])), deal["amount"]] if not String(deal["currency"]).is_empty() else "",
 			"SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-		price.add_theme_font_size_override("font_size", 18)
+		UiKit.text_size(price, "caption")
 		box.add_child(price)
 	card.add_child(box)
 	if not _camp.slot_of(region_id, decoration_id).is_empty():

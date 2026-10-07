@@ -60,6 +60,20 @@ static func modal(content: Control, width: float = 620.0) -> PanelContainer:
 	return panel
 
 ## A tinted icon from UiIcons. `color` defaults to inheriting the modulate of the parent.
+## Sets `control`'s text to the named step of UiTheme.TEXT_SIZES and keeps it there when the theme is
+## rebuilt (Text Scale, Large UI), instead of a fixed pixel size.
+static func text_size(control: Control, size_name: String) -> void:
+	var apply := func() -> void:
+		if not control.has_theme_font_size(size_name, UiTheme.SIZES_TYPE):
+			return  # not under the game's theme (yet)
+		var wanted := control.get_theme_font_size(size_name, UiTheme.SIZES_TYPE)
+		# Setting an override emits theme_changed again: only set a size that differs.
+		if not control.has_theme_font_size_override("font_size") or control.get_theme_font_size("font_size") != wanted:
+			control.add_theme_font_size_override("font_size", wanted)
+	control.theme_changed.connect(apply)
+	control.tree_entered.connect(apply)
+	apply.call()
+
 static func icon(icon_name: String, size_px: float, color: Variant = null) -> TextureRect:
 	var node := TextureRect.new()
 	node.texture = UiIcons.texture(icon_name)
@@ -76,7 +90,7 @@ static func icon(icon_name: String, size_px: float, color: Variant = null) -> Te
 ## action buttons); otherwise the icon sits left of the label. The icon is also the accessibility
 ## cue, so the label is never dropped: icon-only buttons set it as tooltip_text instead.
 static func icon_button(icon_name: String, text: String, callback: Callable, variation: String = "",
-		icon_px: float = 44.0, vertical: bool = true) -> Button:
+		icon_px: float = UiTheme.ICON_L, vertical: bool = true) -> Button:
 	var node := Button.new()
 	node.text = text
 	node.icon = UiIcons.texture(icon_name)
@@ -149,7 +163,7 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 	column.offset_right = -10
 	column.offset_top = 12
 	column.offset_bottom = -30 if variation == "WaterButton" else -12  # stay above the band of water
-	var picture := icon(icon_name, 56.0, text_color)
+	var picture := icon(icon_name, UiTheme.ICON_M, text_color)  # with a title under it: the body-text size
 	picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(picture)
 	var title_label := label(title, "TitleLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
@@ -159,13 +173,15 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 	var sub_label := label(subtitle, "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	sub_label.name = "Subtitle"
 	sub_label.custom_minimum_size.x = 150  # wraps inside the card instead of widening the row
-	sub_label.add_theme_font_size_override("font_size", 20)
+	text_size(sub_label, "caption")
 	sub_label.add_theme_color_override("font_color", Color(text_color, 0.8))
 	column.add_child(sub_label)
 	node.add_child(column)
 	var fit := func() -> void:
 		var needed := column.get_combined_minimum_size()
-		node.custom_minimum_size = Vector2(maxf(needed.x + 20.0, UiTheme.TOUCH_MIN_PX), maxf(needed.y + 24.0, UiTheme.TOUCH_MIN_PX))
+		# The column's own insets, including the room kept above the water band.
+		var insets := column.offset_top - column.offset_bottom
+		node.custom_minimum_size = Vector2(maxf(needed.x + 20.0, UiTheme.TOUCH_MIN_PX), maxf(needed.y + insets, UiTheme.TOUCH_MIN_PX))
 	column.minimum_size_changed.connect(fit)
 	fit.call()
 	node.pressed.connect(callback)
@@ -173,7 +189,7 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 
 ## A wide button whose icon and word sit centred together (the mockups' wooden "낚시" / "완료"): a Button
 ## alone pins its icon to an edge. The label is returned through the button's "label" meta.
-static func centered_button(icon_name: String, text: String, callback: Callable, variation: String, icon_px: float = 44.0) -> Button:
+static func centered_button(icon_name: String, text: String, callback: Callable, variation: String, icon_px: float = UiTheme.ICON_L) -> Button:
 	var node := Button.new()
 	node.theme_type_variation = variation
 	node.focus_mode = Control.FOCUS_ALL
@@ -213,7 +229,7 @@ static func sign_board(icon_name: String, title: String) -> PanelContainer:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_child(icon(icon_name, 52.0, UiTheme.WOOD_TEXT))
+	row.add_child(icon(icon_name, UiTheme.ICON_L, UiTheme.WOOD_TEXT))
 	var title_label := label(title, "SignLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	title_label.name = "Title"
 	row.add_child(title_label)

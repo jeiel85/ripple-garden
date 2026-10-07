@@ -64,7 +64,7 @@ func _init() -> void:
 
 	# Header: back, then the wooden sign with its subtitle.
 	var header := UiKit.hbox(10)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", 40.0)
+	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
 	back.tooltip_text = tr("ui.back")
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
 	back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -73,7 +73,7 @@ func _init() -> void:
 	sign_board.theme_type_variation = "SignPanel"
 	sign_board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sign_row := UiKit.hbox(14)
-	sign_row.add_child(UiKit.icon("gear", 50.0, UiTheme.WOOD_TEXT))
+	sign_row.add_child(UiKit.icon("gear", UiTheme.ICON_L, UiTheme.WOOD_TEXT))
 	var sign_text := UiKit.vbox(0)
 	sign_text.add_child(UiKit.label(tr("ui.gear.title"), "SignLabel", HORIZONTAL_ALIGNMENT_LEFT, false))
 	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
@@ -88,9 +88,8 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var category: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", 30.0, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_S, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.add_theme_font_size_override("font_size", 24)
 		_tabs[category] = button
 		tab_row.add_child(button)
 	column.add_child(tab_row)
@@ -113,7 +112,7 @@ func _build_featured() -> Control:
 	_art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	art_box.add_child(_art)
 	for side in [-1, 1]:
-		var arrow := UiKit.icon_button("back" if side < 0 else "forward", "", func() -> void: _step(side), "CircleButton", 26.0)
+		var arrow := UiKit.icon_button("back" if side < 0 else "forward", "", func() -> void: _step(side), "CircleButton", UiTheme.ICON_S)
 		arrow.tooltip_text = tr("ui.gear.prev") if side < 0 else tr("ui.gear.next")
 		arrow.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX * 0.75, UiTheme.TOUCH_MIN_PX * 0.75)
 		if side > 0:
@@ -140,7 +139,7 @@ func _build_featured() -> Control:
 	info.add_child(_grade_pill)
 	_desc = UiKit.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
 	_desc.custom_minimum_size.x = 200
-	_desc.add_theme_font_size_override("font_size", 21)
+	UiKit.text_size(_desc, "small")
 	info.add_child(_desc)
 	_details = UiKit.vbox(6)
 	info.add_child(_details)
@@ -155,7 +154,7 @@ func _build_list() -> Control:
 	card.theme_type_variation = "PaperPanel"
 	var box := UiKit.vbox(8)
 	var head := UiKit.hbox(8)
-	_list_icon = UiKit.icon("rod", 30.0, UiTheme.INK)
+	_list_icon = UiKit.icon("rod", UiTheme.ICON_M, UiTheme.INK)
 	head.add_child(_list_icon)
 	_list_title = UiKit.label("", "", HORIZONTAL_ALIGNMENT_LEFT, false)
 	_list_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -179,17 +178,18 @@ func _build_summary(category: String) -> Control:
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var box := UiKit.vbox(8)
 	var head := UiKit.hbox(6)
-	head.add_child(UiKit.icon(category if category == "bait" else "bag", 26.0, UiTheme.INK))
+	head.add_child(UiKit.icon(category if category == "bait" else "bag", UiTheme.ICON_S, UiTheme.INK))
 	var title := UiKit.label(tr("ui.gear.tab." + category), "", HORIZONTAL_ALIGNMENT_LEFT, false)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	UiKit.text_size(title, "small")  # two summaries share a row: a compact head
 	head.add_child(title)
 	var count := UiKit.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT, false)
-	count.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(count, "caption")
 	head.add_child(count)
 	box.add_child(head)
 	var items := UiKit.hbox(6)
 	box.add_child(items)
-	var change := UiKit.icon_button(category if category == "bait" else "bag", tr("ui.gear.change"), func() -> void: select_tab(category), "GreenButton", 26.0, false)
+	var change := UiKit.icon_button(category if category == "bait" else "bag", tr("ui.gear.change"), func() -> void: select_tab(category), "GreenButton", UiTheme.ICON_M, false)
 	box.add_child(change)
 	card.add_child(UiKit.margin(box, 12))
 	if category == "bait":
@@ -278,7 +278,7 @@ func _fill_actions(deal: Dictionary) -> void:
 		var is_equipped := _loadout.equipped(tab) == selected_id
 		var usable := tab != "bait" or _loadout.bait_stock(selected_id) != 0
 		var equip := UiKit.icon_button("check", tr("ui.gear.equipped") if is_equipped else tr("ui.gear.equip"),
-			func() -> void: _equip(), "GreenButton", 28.0, false)
+			func() -> void: _equip(), "GreenButton", UiTheme.ICON_M, false)
 		# "Equipped" stays solid green like the mockup; pressing it does nothing.
 		equip.disabled = not usable
 		equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -297,7 +297,7 @@ func _offer_button(deal: Dictionary) -> Button:
 	match deal["state"]:
 		LoadoutService.BUY:
 			var text := tr("ui.gear.buy_pack") % [deal["pack"], currency, deal["amount"]] if tab == "bait" else tr("ui.gear.buy") % [currency, deal["amount"]]
-			return UiKit.icon_button(deal["currency"] if deal["currency"] == "ripple" else "memory", text, func() -> void: _buy(), "WaterButton", 28.0, false)
+			return UiKit.icon_button(deal["currency"] if deal["currency"] == "ripple" else "memory", text, func() -> void: _buy(), "WaterButton", UiTheme.ICON_M, false)
 		LoadoutService.TOO_DEAR:
 			return _disabled("ripple" if deal["currency"] == "ripple" else "memory", "%s · %s %d" % [tr("ui.gear.not_enough") % currency, currency, deal["amount"]])
 		LoadoutService.LOCKED:
@@ -309,18 +309,18 @@ func _offer_button(deal: Dictionary) -> Button:
 	return null
 
 func _disabled(icon_name: String, text: String) -> Button:
-	var button := UiKit.icon_button(icon_name, text, func() -> void: pass, "", 26.0, false)
+	var button := UiKit.icon_button(icon_name, text, func() -> void: pass, "", UiTheme.ICON_S, false)
 	button.disabled = true
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	button.add_theme_font_size_override("font_size", 22)
+	UiKit.text_size(button, "caption")
 	return button
 
 func _stat_bar(caption_key: String, icon_name: String, value: int, color: Color) -> Control:
 	var row := UiKit.hbox(8)
-	row.add_child(UiKit.icon(icon_name, 24.0, UiTheme.INK_DIM))
+	row.add_child(UiKit.icon(icon_name, UiTheme.ICON_S, UiTheme.INK_DIM))
 	var caption := UiKit.label(tr(caption_key), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
 	caption.custom_minimum_size.x = 76
-	caption.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(caption, "caption")
 	row.add_child(caption)
 	var bar := ProgressBar.new()
 	bar.show_percentage = false
@@ -376,7 +376,7 @@ func _card(item_id: String) -> Button:
 	box.add_child(art)
 	var caption := UiKit.label(tr(def.get("name_key", "")), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	caption.add_theme_color_override("font_color", UiTheme.INK)
-	caption.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(caption, "caption")
 	caption.clip_text = true
 	caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	box.add_child(caption)
@@ -386,7 +386,7 @@ func _card(item_id: String) -> Button:
 		pill.add_theme_stylebox_override("panel", grade_box(grade))
 		pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var grade_label := UiKit.label(tr("ui.gear.grade." + grade), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-		grade_label.add_theme_font_size_override("font_size", 18)
+		UiKit.text_size(grade_label, "caption")
 		grade_label.add_theme_color_override("font_color", Color.WHITE)
 		pill.add_child(grade_label)
 		box.add_child(pill)
@@ -409,7 +409,7 @@ static func _badge(icon_name: String, color: Color) -> Control:
 	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		style.set_content_margin(side, 4)
 	badge.add_theme_stylebox_override("panel", style)
-	badge.add_child(UiKit.icon(icon_name, 24.0, Color.WHITE))
+	badge.add_child(UiKit.icon(icon_name, UiTheme.ICON_S, Color.WHITE))
 	badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	badge.offset_right = -4
@@ -453,7 +453,7 @@ func _mini(category: String, item_id: String) -> Control:
 		var stock := _loadout.bait_stock(item_id)
 		text = "∞" if stock < 0 else "x%d" % stock
 	var caption := UiKit.label(text, "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	caption.add_theme_font_size_override("font_size", 18)
+	UiKit.text_size(caption, "caption")
 	box.add_child(caption)
 	if _loadout.equipped(category) == item_id:
 		art.add_child(_badge("check", UiTheme.GREEN))

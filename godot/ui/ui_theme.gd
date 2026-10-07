@@ -30,6 +30,23 @@ const LARGE_UI_FONT_FACTOR := 1.15
 ## Side padding inside buttons: small enough that a four-button row still fits a word like "Journal".
 const BUTTON_H_MARGIN := 12
 
+## The type scale, as factors of the body size (30 px at Text Scale 1): every text in the game is one of
+## these. Captions (counts, grades, card names), small (secondary text, tabs), body, titles, the wooden
+## signs and the big headline. A control takes one with UiKit.text_size, the theme's variations below
+## use them directly; all follow Text Scale and Large UI.
+const TEXT_SIZES := {"caption": 0.7, "small": 0.8, "body": 1.0, "title": 1.35, "sign": 1.5, "big": 1.7}
+## The theme type holding the named sizes (theme.get_font_size(name, SIZES_TYPE)).
+const SIZES_TYPE := "TextSizes"
+## The icon scale (design px): next to a caption, next to body text / in tabs and pills, alone on a
+## button or a sign, and the large picture of a screen.
+const ICON_S := 24.0
+const ICON_M := 32.0
+const ICON_L := 44.0
+const ICON_XL := 64.0
+## The bundled fonts (D-031): a rounded gothic for text and a lettered face for titles and wooden boards.
+## Korean faces have no kana, so Japanese starts from M PLUS Rounded; each falls back to the other.
+const FONT_DIR := "res://fonts/"
+
 ## Type variation -> the frame picture that replaces its box. The round reel button and the tension
 ## meter draw `ui_reel_button` / `ui_tension_bar` themselves (Hud.ReelStyle, FightMeter).
 const FRAMES := {
@@ -83,6 +100,12 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	var theme := Theme.new()
 	var font := font_px(text_scale, large_ui)
 	theme.default_font_size = font
+	for size_name in TEXT_SIZES:
+		theme.set_font_size(size_name, SIZES_TYPE, text_px(font, size_name))
+	var fonts := fonts_for(TranslationServer.get_locale())
+	theme.default_font = fonts["body"]
+	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton"]:
+		theme.set_font("font", type, fonts["title"])
 	var border_width := 4 if high_contrast else 2
 	var ink := Color.BLACK if high_contrast else INK
 
@@ -134,7 +157,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	_wood_states(theme, "WaterButton", high_contrast, true)
 	_font_colors(theme, "WaterButton", WOOD_TEXT)
 	_icon_colors(theme, "WaterButton", WOOD_TEXT)
-	theme.set_font_size("font_size", "WaterButton", roundi(font * 1.35))
+	theme.set_font_size("font_size", "WaterButton", text_px(font, "title"))
 
 	# Green: "this is chosen" (equipped, selected tab, confirm).
 	theme.set_type_variation("GreenButton", "Button")
@@ -157,6 +180,8 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_type_variation("TabSelected", "Button")
 	_button_states(theme, "TabSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
 	_font_colors(theme, "TabSelected", GREEN_TEXT)
+	theme.set_font_size("font_size", "TabButton", text_px(font, "small"))
+	theme.set_font_size("font_size", "TabSelected", text_px(font, "small"))
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
 
 	# Round and pill buttons drawn over the scenery: full-size touch target, smaller picture.
@@ -177,7 +202,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("focus", "RoundButton", InsetStyle.new(_focus_box(999), Vector2(2, 2), true))
 	_font_colors(theme, "RoundButton", PILL_TEXT)
 	_icon_colors(theme, "RoundButton", PILL_TEXT)
-	theme.set_font_size("font_size", "RoundButton", roundi(font * 0.75))
+	theme.set_font_size("font_size", "RoundButton", text_px(font, "caption"))
 
 	# Green circle: "done / confirm" floating over the world (camp slot, mockup 06).
 	theme.set_type_variation("GreenCircle", "Button")
@@ -196,7 +221,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("focus", "GreenCircle", InsetStyle.new(_focus_box(999), Vector2(2, 2), true))
 	_font_colors(theme, "GreenCircle", GREEN_TEXT)
 	_icon_colors(theme, "GreenCircle", GREEN_TEXT)
-	theme.set_font_size("font_size", "GreenCircle", roundi(font * 0.6))
+	theme.set_font_size("font_size", "GreenCircle", text_px(font, "caption"))
 
 	# Cream circle with a dark rim: "back" on full-screen pages.
 	theme.set_type_variation("CircleButton", "Button")
@@ -231,7 +256,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("focus", "PillButton", InsetStyle.new(_focus_box(40), Vector2(0, 10)))
 	_font_colors(theme, "PillButton", PILL_TEXT)
 	_icon_colors(theme, "PillButton", PILL_TEXT)
-	theme.set_font_size("font_size", "PillButton", roundi(font * 0.8))
+	theme.set_font_size("font_size", "PillButton", text_px(font, "small"))
 
 	theme.set_type_variation("FlatButton", "Button")
 	var empty := StyleBoxEmpty.new()
@@ -246,25 +271,25 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_color("font_color", "DimLabel", Color.BLACK if high_contrast else INK_DIM)
 	theme.set_type_variation("SmallLabel", "Label")
 	theme.set_color("font_color", "SmallLabel", Color.BLACK if high_contrast else INK_DIM)
-	theme.set_font_size("font_size", "SmallLabel", roundi(font * 0.8))
+	theme.set_font_size("font_size", "SmallLabel", text_px(font, "small"))
 	theme.set_type_variation("TitleLabel", "Label")
-	theme.set_font_size("font_size", "TitleLabel", roundi(font * 1.35))
+	theme.set_font_size("font_size", "TitleLabel", text_px(font, "title"))
 	theme.set_type_variation("BigLabel", "Label")
-	theme.set_font_size("font_size", "BigLabel", roundi(font * 1.7))
+	theme.set_font_size("font_size", "BigLabel", text_px(font, "big"))
 	theme.set_type_variation("SignLabel", "Label")
 	theme.set_color("font_color", "SignLabel", WOOD_TEXT)
 	theme.set_color("font_shadow_color", "SignLabel", Color(0.2, 0.1, 0.03, 0.6))
 	theme.set_constant("shadow_offset_x", "SignLabel", 0)
 	theme.set_constant("shadow_offset_y", "SignLabel", 2)
-	theme.set_font_size("font_size", "SignLabel", roundi(font * 1.5))
+	theme.set_font_size("font_size", "SignLabel", text_px(font, "sign"))
 	theme.set_type_variation("CtaLabel", "Label")
 	theme.set_color("font_color", "CtaLabel", WOOD_TEXT)
 	theme.set_color("font_shadow_color", "CtaLabel", Color(0.2, 0.1, 0.03, 0.55))
 	theme.set_constant("shadow_offset_y", "CtaLabel", 2)
-	theme.set_font_size("font_size", "CtaLabel", roundi(font * 1.45))
+	theme.set_font_size("font_size", "CtaLabel", text_px(font, "sign"))
 	theme.set_type_variation("PillLabel", "Label")
 	theme.set_color("font_color", "PillLabel", PILL_TEXT)
-	theme.set_font_size("font_size", "PillLabel", roundi(font * 0.8))
+	theme.set_font_size("font_size", "PillLabel", text_px(font, "small"))
 	theme.set_type_variation("LightLabel", "Label")
 	theme.set_color("font_color", "LightLabel", PILL_TEXT)
 	theme.set_color("font_shadow_color", "LightLabel", Color(0, 0, 0, 0.6))
@@ -304,6 +329,26 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("normal", "LineEdit", _box(CARD, CREAM_BORDER, border_width, 14))
 	theme.set_color("font_color", "LineEdit", ink)
 	return theme
+
+## The px size of the named step of TEXT_SIZES for a body size of `body_px`.
+static func text_px(body_px: int, size_name: String) -> int:
+	return roundi(body_px * float(TEXT_SIZES[size_name]))
+
+## {"body", "title"} fonts for `locale` (D-031), each with the other script's face as a fallback.
+static func fonts_for(locale: String) -> Dictionary:
+	var japanese := locale.begins_with("ja")
+	var gothic: Font = load(FONT_DIR + "GowunDodum-Regular.woff2")
+	var lettered: Font = load(FONT_DIR + "Jua-Regular.woff2")
+	var rounded: Font = load(FONT_DIR + "MPLUSRounded1c-Regular.woff2")
+	var rounded_bold: Font = load(FONT_DIR + "MPLUSRounded1c-Bold.woff2")
+	return {"body": _font(rounded if japanese else gothic, gothic if japanese else rounded),
+		"title": _font(rounded_bold if japanese else lettered, lettered if japanese else rounded_bold)}
+
+static func _font(primary: Font, fallback: Font) -> FontVariation:
+	var font := FontVariation.new()
+	font.base_font = primary
+	font.fallbacks = [fallback]
+	return font
 
 static func _button_states(theme: Theme, type: String, normal: Color, hover: Color, pressed: Color, border: Color,
 		border_width: int, radius: int, shadow: bool, high_contrast: bool) -> void:

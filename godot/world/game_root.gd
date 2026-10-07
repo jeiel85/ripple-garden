@@ -97,7 +97,9 @@ func _ready() -> void:
 	moments.check()  # whatever is already true when the game opens
 
 ## The saved language, or the device's when it is "auto" (KO / EN / JA; anything else reads English).
+## Korean lines break between words only (KeepWordsTranslation).
 func _pick_language() -> void:
+	KeepWordsTranslation.install()
 	TranslationServer.set_locale(LocalizationCheck.locale_for(String(GameState.get_setting("language")), OS.get_locale_language()))
 
 ## Most labels are written once when a screen is built, so a new language rebuilds the scene from the

@@ -71,7 +71,7 @@ func _init() -> void:
 
 	# Header: back, hanging sign with subtitle, species counter.
 	var header := UiKit.hbox(10)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", 40.0)
+	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
 	back.tooltip_text = tr("ui.back")
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
 	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -82,17 +82,17 @@ func _init() -> void:
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
 	var subtitle := UiKit.label(tr("ui.journal.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
-	subtitle.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(subtitle, "caption")
 	title_column.add_child(subtitle)
 	header.add_child(title_column)
 	var counter_pill := PanelContainer.new()
 	counter_pill.theme_type_variation = "PillPanel"
 	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var counter_box := UiKit.hbox(8)
-	counter_box.add_child(UiKit.icon("fish", 30.0, UiTheme.PILL_TEXT))
+	counter_box.add_child(UiKit.icon("fish", UiTheme.ICON_M, UiTheme.PILL_TEXT))
 	var counter_text := UiKit.vbox(0)
 	var counter_caption := UiKit.label(tr("ui.journal.found"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	counter_caption.add_theme_font_size_override("font_size", 18)
+	UiKit.text_size(counter_caption, "caption")
 	counter_text.add_child(counter_caption)
 	_counter = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	counter_text.add_child(_counter)
@@ -105,9 +105,8 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", 24.0, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_S, false)
 		button.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
-		button.add_theme_font_size_override("font_size", 20)
 		button.add_theme_constant_override("h_separation", 2)
 		button.custom_minimum_size.x = 104
 		_tabs[tab_id] = button
@@ -143,15 +142,15 @@ func _init() -> void:
 	progress_pill.theme_type_variation = "PillPanel"
 	var progress_row := UiKit.hbox(6)
 	_progress = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	_progress.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(_progress, "caption")
 	progress_row.add_child(_progress)
 	progress_pill.add_child(progress_row)
 	progress_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	left_footer.add_child(progress_pill)
-	_sort_button = UiKit.icon_button("sort", "", _next_sort, "", 22.0, false)
+	_sort_button = UiKit.icon_button("sort", "", _next_sort, "", UiTheme.ICON_S, false)
 	_sort_button.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_sort_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_sort_button.add_theme_font_size_override("font_size", 20)
+	UiKit.text_size(_sort_button, "caption")
 	_sort_button.add_theme_constant_override("h_separation", 4)
 	left_footer.add_child(_sort_button)
 	left_box.add_child(left_footer)
@@ -189,7 +188,7 @@ func _init() -> void:
 	home.theme_type_variation = "CardPanel"
 	var home_box := UiKit.vbox(6)
 	var home_head := UiKit.hbox(6)
-	home_head.add_child(UiKit.icon("star", 26.0, UiTheme.GOLD))
+	home_head.add_child(UiKit.icon("star", UiTheme.ICON_S, UiTheme.GOLD))
 	_home_title = UiKit.label(tr("ui.journal.home"), "", HORIZONTAL_ALIGNMENT_LEFT, false)
 	home_head.add_child(_home_title)
 	home_box.add_child(home_head)
@@ -203,7 +202,7 @@ func _init() -> void:
 	place_pill.offset_left = 8
 	place_pill.offset_bottom = -8
 	var place_row := UiKit.hbox(4)
-	place_row.add_child(UiKit.icon("pin", 22.0, UiTheme.PILL_TEXT))
+	place_row.add_child(UiKit.icon("pin", UiTheme.ICON_S, UiTheme.PILL_TEXT))
 	place_row.add_child(_home_place)
 	place_pill.add_child(place_row)
 	_home_view.add_child(place_pill)
@@ -212,7 +211,11 @@ func _init() -> void:
 	home_box.add_child(_home_text)
 	home.add_child(UiKit.margin(home_box, 12))
 	_page.add_child(home)
-	right_scroll.add_child(_page)
+	var page_margin := MarginContainer.new()
+	page_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page_margin.add_theme_constant_override("margin_right", 12)  # keep the text clear of the scroll bar
+	page_margin.add_child(_page)
+	right_scroll.add_child(page_margin)
 	right.add_child(UiKit.margin(right_scroll, 14))
 	book.add_child(right)
 	column.add_child(book)
@@ -394,7 +397,7 @@ func _card(entry: JournalModel.Entry) -> Button:
 	box.add_child(caption)
 	card.add_child(box)
 	if entry.tier >= 4:
-		var crown := UiKit.icon("crown", 30.0, UiTheme.GOLD)
+		var crown := UiKit.icon("crown", UiTheme.ICON_M, UiTheme.GOLD)
 		crown.position = Vector2(10, 8)
 		crown.size = Vector2(30, 30)
 		card.add_child(crown)
@@ -413,7 +416,7 @@ static func _new_badge() -> Control:
 	style.content_margin_bottom = 2
 	badge.add_theme_stylebox_override("panel", style)
 	var text := UiKit.label("NEW", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	text.add_theme_font_size_override("font_size", 18)
+	UiKit.text_size(text, "caption")
 	badge.add_child(text)
 	badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -478,16 +481,18 @@ func _show_page(fish_id: String) -> void:
 
 ## One fact row; a locked fact says how many meetings open it.
 func _row(icon_name: String, caption_key: String, value: String, open: bool, needed: int) -> void:
-	var row := UiKit.hbox(8)
+	# Two lines: the caption with its icon, then the value under it on the right. The page is too narrow
+	# for both on one line: captions and values were squeezed into columns and broke every few letters.
+	var row := UiKit.vbox(0)
 	row.custom_minimum_size.y = 54
-	row.add_child(UiKit.icon(icon_name, 26.0, UiTheme.INK_DIM))
-	var caption := UiKit.label(tr(caption_key), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
-	caption.add_theme_font_size_override("font_size", 18)
-	row.add_child(caption)
-	# The value takes the rest of the line and wraps there, so the page never widens.
+	var head := UiKit.hbox(8)
+	head.add_child(UiKit.icon(icon_name, UiTheme.ICON_S, UiTheme.INK_DIM))
+	var caption := UiKit.label(tr(caption_key), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
+	UiKit.text_size(caption, "caption")
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(caption)
+	row.add_child(head)
 	var shown := UiKit.label(value if open else tr("ui.journal.locked") % needed, "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT, true)
-	shown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shown.custom_minimum_size.x = 60
 	if open:
 		shown.add_theme_color_override("font_color", UiTheme.INK)
 	row.add_child(shown)
@@ -543,7 +548,7 @@ func _moment_card(moment_id: String) -> Button:
 		picture = _moment_picture(art, 96.0)
 		picture.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	else:
-		picture = UiKit.icon(def["icon"] if seen else "lock", 64.0, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
+		picture = UiKit.icon(def["icon"] if seen else "lock", UiTheme.ICON_XL, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
 		picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(picture)
 	var caption := UiKit.label(tr(def["name_key"]) if seen else tr("ui.journal.unknown_name"), "SmallLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
