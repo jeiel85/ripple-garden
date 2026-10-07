@@ -111,7 +111,7 @@ func test_a_barren_painting_alone_does_not_replace_the_backdrop() -> void:
 	env.queue_free()
 	_restore()
 
-func test_over_a_painted_scene_only_the_changing_props_are_drawn() -> void:
+func test_over_a_painted_scene_the_painted_props_are_not_drawn_again() -> void:
 	_with_fixtures()
 	var env := _environment(5)
 	var props := PropsLayer.new()
@@ -119,9 +119,19 @@ func test_over_a_painted_scene_only_the_changing_props_are_drawn() -> void:
 	props.setup(ContentDB.get_layout(REGION), env)
 	var drawn := props.drawn_props(5)
 	assert_false(drawn.is_empty())
+	var drawn_kinds := {}
 	for prop in drawn:
-		assert_false(PropsLayer.is_permanent(prop), "%s is in the painting" % prop["kind"])
+		assert_false(PropsLayer.is_in_painting(prop), "%s is in the painting" % prop["kind"])
+		drawn_kinds[prop["kind"]] = true
+	for kind in ["tree", "dock", "stepping_stone", "camp_ground"]:
+		assert_false(drawn_kinds.has(kind), "%s is painted" % kind)
+	# Permanent props the scene request tells the artist to leave out stay on top of the painting.
+	assert_true(drawn_kinds.has("crate"), "the crate on the dock is not in the painting")
+	assert_true(drawn.any(func(prop: Dictionary) -> bool: return prop["kind"] == "bush" and PropsLayer.is_permanent(prop)),
+		"the front bushes are not in the painting")
 	assert_true(props.visible_props(5).size() > drawn.size(), "trees, rocks and the dock are painted")
+	for kind in PropKinds.SCENE_PAINTED:
+		assert_true(kind in PropKinds.PROPS, "%s is not a prop kind" % kind)
 	props.queue_free()
 	env.queue_free()
 	_restore()

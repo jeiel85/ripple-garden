@@ -8,8 +8,10 @@ extends Node2D
 ## player turned it. Everything is drawn back to front by y. Props are static, so the layer only
 ## redraws when the level, the palette or the camp changes.
 ##
-## With a painted scene (ArtLibrary, D-029) the props that exist at every level (trees, rocks, the dock)
-## are part of the painting, so only the ones that come and go with restoration and the camp are drawn.
+## With a painted scene (ArtLibrary, D-029) the props that exist at every level and are of a kind the
+## painting shows (trees, rocks, the dock: PropKinds.SCENE_PAINTED) are part of it and not drawn again.
+## Everything else — restoration props, the camp, and permanent props the painting leaves out (a crate,
+## bushes) — is drawn on top.
 
 var layout: Dictionary = {}
 var environment: RegionEnvironment = null
@@ -57,12 +59,16 @@ func camp_props() -> Array:
 static func is_permanent(prop: Dictionary) -> bool:
 	return not prop.has("min_level") and not prop.has("max_level")
 
+## True when a scene painting already shows this prop: there at every level and of a painted kind.
+static func is_in_painting(prop: Dictionary) -> bool:
+	return is_permanent(prop) and String(prop["kind"]) in PropKinds.SCENE_PAINTED
+
 ## Layout props drawn on top of the backdrop at `level`: all of them over the drawn-shape backdrop,
-## only the level-dependent ones over a painted scene.
+## all but the painted ones over a scene painting.
 func drawn_props(level: int) -> Array:
 	var shown := visible_props(level)
 	if environment != null and environment.has_scene_art():
-		shown = shown.filter(func(prop: Dictionary) -> bool: return not is_permanent(prop))
+		shown = shown.filter(func(prop: Dictionary) -> bool: return not is_in_painting(prop))
 	return shown
 
 func refresh() -> void:
