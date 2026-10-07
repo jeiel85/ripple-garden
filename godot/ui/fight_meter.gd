@@ -7,6 +7,8 @@ extends Control
 ## brackets, the marker's *position* and the caption under the bar ("Just right" / "Too tight" /
 ## "Too loose") say the same thing, and High Contrast adds hatching to the unsafe zones and thick
 ## outlines. Landing progress is the ring around the round reel button (Hud.ReelButton).
+## The frame is the picture `ui/ui_tension_bar.png` once drawn (ASSET_REQUESTS §5, its middle left out so
+## the colour band shows), except in High Contrast.
 
 const BAR_HEIGHT := 40.0
 const MARKER_WIDTH := 12.0
@@ -90,18 +92,27 @@ func _color_at(value: float) -> Color:
 	var half := maxf((band_max - band_min) / 2.0, 0.001)
 	return green.lerp(teal, clampf(absf(value - mid) / half, 0.0, 1.0))
 
+## The drawn frame around the band, or null for the coded rim.
+func frame_art() -> ArtFrameStyle:
+	var style: ArtFrameStyle = null if high_contrast else ArtFrameStyle.from_art("ui_tension_bar")
+	if style != null:
+		style.draw_center = false
+	return style
+
 func _draw() -> void:
 	if _bar_rect.size.x <= 0.0:
 		return
 	var radius := BAR_HEIGHT / 2.0
-	# Frame: a dark rounded rim, then the gradient in segments.
-	var frame := StyleBoxFlat.new()
-	frame.bg_color = Color(0.16, 0.1, 0.06, 0.92)
-	frame.set_corner_radius_all(int(radius + 6))
-	frame.border_color = Color.WHITE if high_contrast else Color(1, 0.94, 0.8, 0.55)
-	frame.set_border_width_all(4 if high_contrast else 3)
-	frame.anti_aliasing = true
-	draw_style_box(frame, _bar_rect.grow(6))
+	# Frame: a dark rounded rim (or the drawn frame, over the band), then the gradient in segments.
+	var picture := frame_art()
+	if picture == null:
+		var frame := StyleBoxFlat.new()
+		frame.bg_color = Color(0.16, 0.1, 0.06, 0.92)
+		frame.set_corner_radius_all(int(radius + 6))
+		frame.border_color = Color.WHITE if high_contrast else Color(1, 0.94, 0.8, 0.55)
+		frame.set_border_width_all(4 if high_contrast else 3)
+		frame.anti_aliasing = true
+		draw_style_box(frame, _bar_rect.grow(6))
 	var segments := 48
 	for i in segments:
 		var from := float(i) / segments
@@ -117,6 +128,8 @@ func _draw() -> void:
 			while x < zone.end.x:
 				draw_line(Vector2(x, zone.end.y), Vector2(minf(x + BAR_HEIGHT, zone.end.x), zone.position.y + maxf(0.0, BAR_HEIGHT - (zone.end.x - x))), Color(1, 1, 1, 0.7), 2.0)
 				x += 14.0
+	if picture != null:
+		draw_style_box(picture, _bar_rect.grow(float(ArtLibrary.meta("ui", "ui_tension_bar").get("outset", 10.0))))
 	# Safe band brackets.
 	for edge_x in [_x_at(band_min), _x_at(band_max)]:
 		draw_line(Vector2(edge_x, _bar_rect.position.y - 6), Vector2(edge_x, _bar_rect.end.y + 6), Color.WHITE, 3.0)

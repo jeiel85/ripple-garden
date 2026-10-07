@@ -4,7 +4,7 @@
     "lily_pad": {"width": 40, "anchor": [0.5, 0.5]}
   },
   "character": {
-    "*": {"height": 100, "anchor": [0.5, 1.0], "hands": [0.5, 0.5]},
+    "*": {"height": 100, "anchor": [0.5, 1.0], "hands": [0.5, 0.5], "head": [0.5, 0.25], "hat_width": 0.5},
     "angler_reel": {"hands": [0.25, 0.25]}
   },
   "fish": {
@@ -12,5 +12,12 @@
   },
   "animals": {
     "*": {"width": 30, "faces": "left", "fps": 10}
+  },
+  "ui": {
+    "ui_cream_button": {"slice": [0.25, 0.25, 0.25, 0.25], "scale": 0.5},
+    "ui_leaf_corner": {"width": 24}
+  },
+  "map": {
+    "island": {"width": 2.0}
   }
 }

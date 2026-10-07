@@ -13,6 +13,9 @@ extends RefCounted
 ##   items/<item id>.png                                            (equipment screen: rods, baits, bags, accessories)
 ##   animals/<kind>.png                                             (ambient wildlife: dragonfly, butterfly, firefly, bird)
 ##   moments/<moment id>.png                                        (the journal's moments)
+##   hats/<accessory id>.png                                        (a hat worn over the angler picture)
+##   ui/ui_<frame>.png                                              (UI frames, 9-slice: UiTheme.FRAMES)
+##   map/map_background.png, map/map_island_<region id>.png         (the region map)
 ##
 ## A picture can have animation frames next to it: `<name>_f2.png`, `<name>_f3.png`, ... (`frames`).
 ## The painter decides how they play (a fish's tail follows its swimming, wings beat, a frog blinks now

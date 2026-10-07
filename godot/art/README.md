@@ -12,6 +12,9 @@ arrive one at a time. What to draw and how is in `assets/design/ASSET_REQUESTS.m
 | `items/` | `<item id>.png` (`rod_bamboo`, `bait_worm`, `bag_basic`, `acc_straw_hat`, ...) | The equipment screen's item pictures |
 | `animals/` | `dragonfly.png`, `butterfly.png`, `firefly.png`, `bird.png` | Ambient wildlife over the pond; `art.json` sets `width`, `faces` (`left`/`right`, which way the picture looks) and wing-beat `fps` |
 | `moments/` | `<moment id>.png` (`moment_rain_rings`, ...; ids in `data/moments.json`) | The journal's moment cards and page, once the moment is seen |
+| `hats/` | `<accessory id>.png` (`acc_bucket_hat`, ...) | A hat worn over the angler picture (which wears the straw hat): its `anchor` on the pose's `head`, `hat_width` of the angler wide (`art.json` `character`) |
+| `ui/` | `ui_wood_cta.png`, `ui_paper_card.png`, ... (`UiTheme.FRAMES`), `ui_leaf_corner_01..04.png`, `ui_notebook_binding.png`, `ui_reel_button.png`, `ui_tension_bar.png` | UI frames stretched as 9-slices; `art.json` `ui` sets `slice` (border as fractions of the picture) and `scale` (design px per picture px, 0 = fit the control). Leaf corners go top-left, top-right, bottom-left, bottom-right of the wood panel and sign boards; the binding repeats down the journal list's left edge; the tension bar's middle stays open for the colour band. High Contrast keeps the coded boxes |
+| `map/` | `map_background.png`, `map_island_<region id>.png` | The region map: the background covers the screen, an island is drawn `width` island radii wide on its spot (`art.json` `map`). Route, glow, locks and signs stay the game's |
 
 **Animation frames.** A picture can have frames beside it: `<name>_f2.png`, `<name>_f3.png`, ... on **the same canvas size**
 (a test checks it). A fish's `_top` frames are its tail bent one way, then the other (the straight picture is the base) and follow

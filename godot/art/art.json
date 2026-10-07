@@ -27,7 +27,10 @@
     "bench": {"width": 100}
   },
   "character": {
-    "*": {"height": 150, "anchor": [0.5, 0.9], "hands": [0.62, 0.42]}
+    "*": {"height": 150, "anchor": [0.5, 0.9], "hands": [0.62, 0.42], "head": [0.5, 0.2], "hat_width": 0.5}
+  },
+  "hats": {
+    "*": {"anchor": [0.5, 0.6]}
   },
   "fish": {
     "*": {"top_length": 1.3, "underwater_alpha": 0.88}
@@ -38,5 +41,14 @@
     "butterfly": {"width": 28, "faces": "right", "fps": 7},
     "bird": {"width": 32, "fps": 6},
     "firefly": {"width": 20, "faces": "right", "fps": 8}
+  },
+  "ui": {
+    "*": {"slice": [0.3, 0.3, 0.3, 0.3]},
+    "ui_leaf_corner": {"width": 56},
+    "ui_notebook_binding": {"width": 40},
+    "ui_tension_bar": {"outset": 10}
+  },
+  "map": {
+    "island": {"width": 2.6}
   }
 }

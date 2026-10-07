@@ -536,12 +536,16 @@ class ReelButton extends Button:
 				style.progress = clamped
 			queue_redraw()
 
-## The wooden disc with its glow and the landing-progress ring.
+## The wooden disc with its glow and the landing-progress ring. The disc is the picture
+## `ui/ui_reel_button.png` once drawn (ASSET_REQUESTS §5), except in High Contrast; the rings stay.
 class ReelStyle extends StyleBox:
 	var progress := 0.0
 	var pressed := false
 	var dimmed := false
 	var focus_ring := false
+
+	static func art() -> Texture2D:
+		return null if GameState.get_setting("high_contrast_meter") == true else ArtLibrary.texture("ui", "ui_reel_button")
 
 	func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 		var center := rect.get_center()
@@ -550,14 +554,20 @@ class ReelStyle extends StyleBox:
 			RenderingServer.canvas_item_add_polyline(to_canvas_item, _arc(center, radius + 4.0, 0.0, TAU), PackedColorArray([UiTheme.GOLD]), 4.0, true)
 			return
 		RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius + 4.0, Color(UiTheme.GOLD, 0.12 if dimmed else 0.35))
-		var wood := UiTheme.WOOD_PRESSED if pressed else UiTheme.WOOD
-		if dimmed:
-			wood = UiTheme.WOOD.lerp(UiTheme.DISABLED, 0.5)
-		RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius - 8.0, UiTheme.WOOD_BORDER)
-		RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius - 12.0, wood)
-		for i in 4:
-			var grain := _arc(center, radius * (0.25 + i * 0.16), deg_to_rad(200 + i * 25), deg_to_rad(320 + i * 20))
-			RenderingServer.canvas_item_add_polyline(to_canvas_item, grain, PackedColorArray([Color(0.25, 0.14, 0.07, 0.25)]), 2.0, true)
+		var picture := art()
+		if picture != null:
+			var tint: Color = UiTheme.FRAME_TINTS["disabled" if dimmed else "pressed" if pressed else "normal"]
+			var disc := Rect2(center - Vector2.ONE * (radius - 4.0), Vector2.ONE * (radius - 4.0) * 2.0)
+			RenderingServer.canvas_item_add_texture_rect(to_canvas_item, ArtLibrary.fit_rect(picture, disc), picture.get_rid(), false, tint)
+		else:
+			var wood := UiTheme.WOOD_PRESSED if pressed else UiTheme.WOOD
+			if dimmed:
+				wood = UiTheme.WOOD.lerp(UiTheme.DISABLED, 0.5)
+			RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius - 8.0, UiTheme.WOOD_BORDER)
+			RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius - 12.0, wood)
+			for i in 4:
+				var grain := _arc(center, radius * (0.25 + i * 0.16), deg_to_rad(200 + i * 25), deg_to_rad(320 + i * 20))
+				RenderingServer.canvas_item_add_polyline(to_canvas_item, grain, PackedColorArray([Color(0.25, 0.14, 0.07, 0.25)]), 2.0, true)
 		# Track and landing progress: a ring that fills clockwise from the top.
 		RenderingServer.canvas_item_add_polyline(to_canvas_item, _arc(center, radius - 1.0, 0.0, TAU), PackedColorArray([Color(1, 1, 1, 0.3)]), 6.0, true)
 		if progress > 0.0:

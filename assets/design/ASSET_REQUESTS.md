@@ -75,7 +75,10 @@ ChatGPT에는 "transparent background, no text, same art style and camera angle 
 | `angler_cast.png` | 던지는 자세 (선택) |
 | `angler_hold.png` | 물고기를 들어 올리는 자세, 물고기 없이 (선택) |
 
-모자 색을 바꾸는 악세서리(D-019)는 캐릭터 그림이 오면 그림에 그려진 모자로 고정됩니다. 모자별 그림은 나중에 요청드립니다.
+낚시꾼은 **밀짚모자를 쓴 채로** 그려 주세요. 다른 모자(악세서리, D-019)는 게임이 그 위에 겹쳐 그립니다. 낚시꾼 그림이 온 뒤에
+낚시꾼 그림을 첨부해 **모자만, 같은 각도(뒷모습)로, 밀짚모자를 다 덮는 크기**로 3장 요청드립니다. 게임이 읽는 이름 그대로
+**`hats/` 폴더 안에** 주세요: `hats/acc_bucket_hat.png`(숲 버킷햇), `hats/acc_river_cap.png`(강바람 캡), `hats/acc_starry_hat.png`(별밤 모자).
+장비 화면의 정면 모자 그림(§4, 같은 이름이지만 다른 폴더)과는 다른 그림입니다.
 
 ### 3. 연못 속 물고기 — 위에서 본 모습 ✔ 받음(Drop 06)
 
@@ -112,7 +115,10 @@ ChatGPT에는 "transparent background, no text, same art style and camera angle 
 | 미끼 | `bait_cricket.png`, `bait_minnow.png`, `bait_crab.png`, `bait_squid.png`, `bait_seaweed.png` | 귀뚜라미, 미끼용 작은 피라미, 작은 게(가재 아님), 오징어 조각, 해초 |
 | 악세서리 | `acc_bucket_hat.png`, `acc_river_cap.png`, `acc_starry_hat.png` | 숲 버킷햇(초록), 강바람 모자(하늘색 캡), 별밤 모자(남색에 별 무늬). **모자만**, 정면 3/4 |
 
-### 5. UI 부품 (9-patch 프레임) — 아직 쓸 수 있는 것 없음
+### 5. UI 부품 (9-patch 프레임) — 게임에 자리 있음, 아직 쓸 수 있는 그림 없음
+
+받는 대로 게임의 버튼·패널이 그 그림으로 바뀝니다(고대비 모드는 지금 모양 유지).
+**프레임 바깥에 투명 여백을 두지 말고 프레임 테두리에 딱 맞게** 잘라 주세요(여백도 프레임으로 늘어납니다).
 
 글자 없는 **빈 프레임**이 필요합니다. Drop 06 프레임은 1024 캔버스지만 작은 그림을 키운 듯 흐리고, 일부(초록 탭·둥근 버튼·잎 장식 02)는 가장자리가 잘렸으며 흰 테두리가 남았습니다.
 **한 장에 하나씩, 1024 크기로 처음부터** 그려 주세요. 게임이 크기에 맞춰 늘리기 때문에 모서리 장식은 네 귀퉁이에만 두고 가운데는 단색·무늬 반복이 되게 그려 주세요.
@@ -120,17 +126,17 @@ ChatGPT에는 "transparent background, no text, same art style and camera angle 
 | 파일명 | 목업 속 위치 |
 |---|---|
 | `ui_wood_cta.png` | 하단 `낚시` 나무 버튼(물결 무늬 포함), `완료`·`다시 낚시` 버튼 |
-| `ui_wood_sign.png` | `도감`·`캠프`·`지역 선택`·`장비` 제목 나무 간판 (밧줄로 매단 버전 1장 추가) |
+| `ui_wood_sign.png` | `도감`·`캠프`·`지역 선택`·`장비` 제목 나무 간판 |
 | `ui_wood_panel.png` | 포획 결과 카드의 나무 테두리 |
 | `ui_paper_card.png` | 크림색 종이 카드(포획 결과 안쪽, 도감 상세) |
 | `ui_cream_button.png` | `도감`·`장비`·`캠프`·`취소` 크림색 둥근 사각 버튼 |
 | `ui_cream_tab.png` / `ui_green_tab.png` | 탭(선택 안 됨/선택됨) |
 | `ui_dark_pill.png` | 상단 지역·시간·날씨, 재화 표시 반투명 알약 |
 | `ui_round_dark.png` | 설정·물멍 모드 원형 버튼 |
-| `ui_reel_button.png` | 릴링 원형 나무 버튼(빛나는 테두리) |
-| `ui_tension_bar.png` | 장력 미터 틀(색 띠는 게임이 그림) |
-| `ui_notebook_binding.png` | 도감 왼쪽 링 바인더 |
-| `ui_leaf_corner_01~04.png` | 패널 귀퉁이 잎사귀·꽃 장식 |
+| `ui_reel_button.png` | 릴링 원형 나무 버튼(정사각 캔버스에 원판만, 진행 고리·빛은 게임이 그림) |
+| `ui_tension_bar.png` | 장력 미터 틀, **가운데는 투명**(색 띠는 게임이 그림) |
+| `ui_notebook_binding.png` | 도감 왼쪽 링 바인더 **한 마디**(세로로 반복해 이어 붙임), 세로로 긴 그림 |
+| `ui_leaf_corner_01~04.png` | 패널 귀퉁이 잎사귀·꽃 장식: 01 왼쪽 위, 02 오른쪽 위, 03 왼쪽 아래, 04 오른쪽 아래 (나무 패널·간판 모서리에 붙음) |
 
 ### 6. 순간 그림 (도감 '순간' 11장, 선택)
 
@@ -156,7 +162,10 @@ ChatGPT에는 "transparent background, no text, same art style and camera angle 
   도감(책+물고기), 장비(배낭), 낚시(물고기), 캠프(텐트), 설정(톱니바퀴), 지역(산), 맑음/흐림/비/안개/폭풍, 물결(재화, 소용돌이), 추억(새싹), 릴, 취소(X), 뒤로(<),
   방생(물고기+물결), 기록(펼친 책), 다시 낚시(바늘), 민물/호수/계곡/특수, 낚싯대/미끼/가방/악세서리(모자), 꾸미기(잎)/배치/가구/장식(화분),
   저장(카메라), 시간(시계), BGM(음표), UI 숨기기(눈+사선), 물멍(연꽃), 자물쇠, 왕관, 위치 핀, 달력, 자.
-- **지역 지도**(목업 07 화풍 그대로, 평면 도형 안 됨): `map_background.png`(바다·구름·지도 책상, 섬 없이), `map_island_<region>.png` × 5(디오라마 섬, 투명).
+- **지역 지도**(목업 07 화풍 그대로, 평면 도형 안 됨, 게임에 자리 있음): `map_background.png`(세로 그림, 바다·구름·지도 책상, 섬 없이),
+  섬 5장(디오라마 섬, 투명, 섬에 꼭 맞게): `map_island_region_01_quiet_pond.png`(작은 연못), `map_island_region_02_forest_stream.png`(숲속 계곡),
+  `map_island_region_03_reed_river.png`(큰 강), `map_island_region_04_blue_coast.png`(바닷가), `map_island_region_05_moonlight_isle.png`(달빛섬).
+  점선 길·이름표·자물쇠는 게임이 그립니다.
 - **사진 액자**: 지금은 게임이 그리고 있어 급하지 않습니다. 주실 때는 테두리만(사진 위로 지나가는 선 없이), 9-patch로 늘릴 수 있게.
 
 ## 그림 말고 정해 주실 것

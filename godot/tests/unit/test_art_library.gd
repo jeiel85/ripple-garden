@@ -344,3 +344,108 @@ func test_a_seen_moment_shows_its_picture_and_an_unseen_one_does_not() -> void:
 	panel.free()
 	GameState.new_game()
 	_restore()
+
+# --- UI frames ---
+
+func test_without_frame_pictures_the_theme_keeps_its_coded_boxes() -> void:
+	_restore()
+	var theme := UiTheme.build(1.0, false, false)
+	assert_true(theme.get_stylebox("normal", "Button") is StyleBoxFlat)
+	assert_true(theme.get_stylebox("panel", "WoodPanel") is WoodStyle)
+	assert_true(theme.get_stylebox("panel", "SignPanel") is WoodStyle)
+	assert_true(theme.get_stylebox("panel", "NotebookPanel") is StyleBoxFlat)
+
+func test_a_frame_picture_replaces_its_box_and_keeps_the_layout() -> void:
+	_restore()
+	var coded: StyleBox = UiTheme.build(1.0, false, false).get_stylebox("normal", "Button")
+	_with_fixtures()
+	var theme := UiTheme.build(1.0, false, false)
+	var framed := theme.get_stylebox("normal", "Button") as ArtFrameStyle
+	assert_not_null(framed, "the cream button picture replaces the coded box")
+	assert_eq(framed.texture, ArtLibrary.texture("ui", "ui_cream_button"))
+	assert_eq(framed.slice, Vector4(0.25, 0.25, 0.25, 0.25), "the slice from art.json")
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		assert_eq(framed.get_content_margin(side), coded.get_content_margin(side), "the text sits where it did")
+	assert_true((theme.get_stylebox("pressed", "Button") as ArtFrameStyle).tint.v < 1.0, "pressed is the same picture, darker")
+	assert_true(theme.get_stylebox("normal", "TabButton") is StyleBoxFlat, "a frame not drawn yet keeps its box")
+	assert_true(UiTheme.build(1.0, false, true).get_stylebox("normal", "Button") is StyleBoxFlat, "High Contrast keeps the coded boxes")
+	_restore()
+
+func test_leaf_corners_and_the_binding_decorate_the_coded_boxes() -> void:
+	_with_fixtures()
+	var theme := UiTheme.build(1.0, false, false)
+	var wood := theme.get_stylebox("panel", "WoodPanel") as ArtFrameStyle
+	assert_not_null(wood, "the leaf corner is drawn, the wood frame is not")
+	assert_true(wood.texture == null and wood.fallback is WoodStyle, "so the coded wood board stays under the leaves")
+	assert_eq(wood.corners[0], ArtLibrary.texture("ui", "ui_leaf_corner_01"))
+	assert_true(wood.corners[1] == null, "a corner without a picture stays bare")
+	assert_eq(wood.corner_size, 24.0)
+	var notebook := theme.get_stylebox("panel", "NotebookPanel") as ArtFrameStyle
+	assert_eq(notebook.strip, ArtLibrary.texture("ui", "ui_notebook_binding"))
+	assert_true(theme.get_stylebox("panel", "PanelContainer") is StyleBoxFlat, "only the journal's list has the binding")
+	_restore()
+
+func test_a_frame_is_scaled_so_its_slices_fit_the_control() -> void:
+	_with_fixtures()
+	var frame := ArtFrameStyle.from_art("ui_cream_button")  # 40 x 20, slices of 10 / 5 px
+	assert_eq(frame.slice_px(), Vector4(10, 5, 10, 5))
+	assert_eq(frame.scale_for(Vector2(200, 100)), 0.5, "the scale from art.json")
+	assert_eq(frame.scale_for(Vector2(8, 100)), 0.4, "shrunk where the left and right slices would overlap")
+	frame.scale = 0.0
+	assert_eq(frame.scale_for(Vector2(80, 80)), 2.0, "without a scale, as large as the narrower side allows")
+	assert_true(ArtFrameStyle.from_art("ui_wood_cta") == null)
+	_restore()
+
+func test_the_reel_button_and_the_tension_meter_use_their_pictures() -> void:
+	_restore()
+	assert_true(Hud.ReelStyle.art() == null)
+	var meter := FightMeter.new()
+	assert_true(meter.frame_art() == null)
+	_with_fixtures()
+	assert_eq(Hud.ReelStyle.art(), ArtLibrary.texture("ui", "ui_reel_button"))
+	var frame := meter.frame_art()
+	assert_not_null(frame)
+	assert_false(frame.draw_center, "the colour band shows through the frame")
+	meter.high_contrast = true
+	assert_true(meter.frame_art() == null, "High Contrast keeps the coded rim")
+	meter.free()
+	_restore()
+
+# --- region map ---
+
+func test_the_map_paints_its_pictures_and_keeps_shapes_for_the_rest() -> void:
+	_with_fixtures()
+	var map := RegionMapPanel.MapView.new()
+	map.size = Vector2(720, 1280)
+	var island := map.island_rect("region_01_quiet_pond")
+	assert_true(is_equal_approx(island.size.x, map.island_radius() * 2.0), "two island radii wide (art.json)")
+	assert_true(island.get_center().is_equal_approx(map.island_center("region_01_quiet_pond")))
+	assert_false(map.island_rect("region_02_forest_stream").has_area(), "an island without a picture is drawn from shapes")
+	var cover := RegionMapPanel.MapView.cover_rect(ArtLibrary.texture("map", "map_background"), Rect2(0, 0, 100, 100))
+	assert_eq(cover, Rect2(-50, 0, 200, 100), "covers the area, cropped at the sides")
+	map.free()
+	_restore()
+
+# --- the angler's hat ---
+
+func test_an_equipped_hat_with_a_picture_is_drawn_over_the_angler() -> void:
+	_with_fixtures()
+	GameState.new_game()
+	var controller := FishingController.new()
+	tree.root.add_child(controller)
+	var view := FishingView.new()
+	tree.root.add_child(view)
+	var seat := Vector2(300, 640)
+	view.setup(controller, Vector2(430, 450), seat)
+	assert_true(view.hat_art(view.angler_art()).is_empty(), "the straw hat is part of the angler picture")
+	GameState.grant_accessory("acc_bucket_hat")
+	assert_true(GameState.equip_accessory("acc_bucket_hat"))
+	var hat := view.hat_art(view.angler_art())
+	assert_eq(hat["texture"], ArtLibrary.texture("hats", "acc_bucket_hat"))
+	# The 80 x 100 angler: head at (0.5, 0.25), the hat half its width, its default anchor (0.5, 0.6) on the head.
+	assert_eq(hat["rect"], Rect2(seat + Vector2(-20, -75 - 12), Vector2(40, 20)))
+	assert_true(view.hat_art({}).is_empty(), "no hat without an angler picture")
+	view.queue_free()
+	controller.queue_free()
+	GameState.new_game()
+	_restore()

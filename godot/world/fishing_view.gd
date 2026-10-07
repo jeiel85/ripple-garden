@@ -11,6 +11,9 @@ extends Node2D
 ## The angler is drawn art when ArtLibrary has `character/angler_<pose>.png` (D-029): one picture per
 ## fishing state, the idle one standing in for poses not drawn yet, and the rod held from the picture's
 ## hands (`art.json`). Without any picture the angler is drawn from shapes.
+## The picture wears the straw hat; another equipped hat (D-019) is drawn over it from
+## `hats/<accessory id>.png`, its `anchor` on the pose's `head` point, `hat_width` of the picture wide.
+## A hat without a picture leaves the drawn straw hat showing.
 
 const BOBBER_RADIUS := 9.0
 const RING_LIFETIME := 1.6
@@ -172,7 +175,24 @@ func angler_art() -> Dictionary:
 	var height := float(data.get("height", 150.0))
 	var rect := ArtLibrary.placed_rect(tex, angler, height * tex.get_width() / maxf(1.0, tex.get_height()),
 		ArtLibrary.point(data, "anchor", Vector2(0.5, 0.9)))
-	return {"texture": tex, "rect": rect, "hands": rect.position + ArtLibrary.point(data, "hands", Vector2(0.62, 0.42)) * rect.size}
+	return {"texture": tex, "rect": rect, "pose": pose,
+		"hands": rect.position + ArtLibrary.point(data, "hands", Vector2(0.62, 0.42)) * rect.size}
+
+## The equipped hat over the angler picture `art` (from `angler_art`): {"texture", "rect"}, or {} when
+## there is no angler picture or the hat has no picture of its own.
+func hat_art(art: Dictionary) -> Dictionary:
+	if art.is_empty():
+		return {}
+	var accessory := GameState.get_equipped_accessory()
+	var tex := ArtLibrary.texture("hats", accessory)
+	if tex == null:
+		return {}
+	var pose_data := ArtLibrary.meta("character", art["pose"], "angler")
+	var rect: Rect2 = art["rect"]
+	var head := rect.position + ArtLibrary.point(pose_data, "head", Vector2(0.5, 0.2)) * rect.size
+	var width := rect.size.x * float(pose_data.get("hat_width", 0.5))
+	var anchor := ArtLibrary.point(ArtLibrary.meta("hats", accessory), "anchor", Vector2(0.5, 0.6))
+	return {"texture": tex, "rect": ArtLibrary.placed_rect(tex, head, width, anchor)}
 
 ## Where the rod leaves the angler's hands.
 func current_rod_base() -> Vector2:
@@ -183,6 +203,9 @@ func _draw() -> void:
 	var art := angler_art()
 	if not art.is_empty():
 		draw_texture_rect(art["texture"], art["rect"], false)
+		var hat := hat_art(art)
+		if not hat.is_empty():
+			draw_texture_rect(hat["texture"], hat["rect"], false)
 	elif has_angler():
 		_draw_angler()
 	var base: Vector2 = art["hands"] if not art.is_empty() else rod_base
