@@ -34,13 +34,15 @@ func test_a_missing_picture_is_null_and_an_existing_one_loads() -> void:
 	assert_false(ArtLibrary.has("world", "r99_scene"))
 	_restore()
 
-func test_the_game_folder_ships_the_region_01_scene_the_angler_and_the_ui_frames() -> void:
+func test_the_game_folder_ships_the_region_01_scene_the_angler_the_ui_frames_and_the_moments() -> void:
 	_restore()
 	for pose in ["idle", "cast", "bite", "reel", "hold"]:
 		assert_not_null(ArtLibrary.texture("character", "angler_" + pose), "Asset Drop 09: %s" % pose)
 	assert_not_null(ArtLibrary.texture("world", "r01_scene"), "Asset Drop 08")
 	for frame in UiTheme.FRAMES.values() + ["ui_reel_button", "ui_tension_bar", "ui_notebook_binding", "ui_leaf_corner_01"]:
 		assert_not_null(ArtLibrary.texture("ui", frame), "Asset Drop 10: %s" % frame)
+	for moment_id in ContentDB.moments:
+		assert_not_null(ArtLibrary.texture("moments", moment_id), "Asset Drop 07/11: %s" % moment_id)
 	assert_not_null(ArtLibrary.texture("world", "r01_scene_barren"), "the restored painting fades in over its barren twin")
 
 func test_variants_cycle_and_are_stable_for_the_same_pick() -> void:

@@ -29,6 +29,8 @@ const TABS: Array = [
 	["moments", "star", "ui.journal.tab.moments", [], 0],
 ]
 const SORTS: PackedStringArray = ["found", "name", "size"]
+## Height of a moment's picture on its card (168 px tall): leaves room for a two-line name under it.
+const MOMENT_CARD_PICTURE_PX := 80.0
 
 var journal: JournalModel
 var region_id := ""
@@ -545,7 +547,7 @@ func _moment_card(moment_id: String) -> Button:
 	var art := ArtLibrary.texture("moments", moment_id) if seen else null
 	var picture: Control
 	if art != null:
-		picture = _moment_picture(art, 96.0)
+		picture = _moment_picture(art, MOMENT_CARD_PICTURE_PX)
 		picture.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	else:
 		picture = UiKit.icon(def["icon"] if seen else "lock", UiTheme.ICON_XL, UiTheme.GREEN if seen else Color(UiTheme.INK_DIM, 0.5))
