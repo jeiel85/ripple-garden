@@ -144,7 +144,7 @@ func test_over_a_painted_scene_the_painted_props_are_not_drawn_again() -> void:
 	plain.queue_free()
 
 func test_the_foreground_only_exists_as_art() -> void:
-	_restore()
+	ArtLibrary.use_root("res://tests/fixtures/art_barren_only")  # a folder without a foreground picture
 	var none := ForegroundLayer.new()
 	none.setup(ContentDB.get_layout(REGION))
 	assert_false(none.has_art())

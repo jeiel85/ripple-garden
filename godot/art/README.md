@@ -31,4 +31,5 @@ Record the source and licence of every picture in `assets/placeholders/README.md
 
 A generated drop zip is imported with `python tools/import_art_drop.py <zip>`: it renames the approved pictures to
 these names and cleans the light-sheet halo and pinholes left by the cut-out (drop_01), or cuts single pictures out of
-the sheets of drop_02 and drop_03. The list is in the script.
+the sheets of drop_02 and drop_03, or cuts drop_06's pictures again out of its reference sheet (taking away the drawn
+checkerboard). The list is in the script.

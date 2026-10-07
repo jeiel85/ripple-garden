@@ -39,6 +39,15 @@
 - **Asset Drop 05** (`ripple_garden_asset_drop_05.zip`, 순간 그림·사진 액자·효과): 넣지 않았다. 순간 그림은 목업 01·03을 잘라 스티커를 얹은 같은 장면이라
   순간의 내용이 없고(`rare_encounter`는 한글 UI가 박혀 있음), 나무 액자는 가로줄이 사진 위로 지나가며, 효과는 게임이 이미 그리는 점·원과 같은 수준이다.
   다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.
+- **그림 — Asset Drop 06** (`godot/art/world/r01_foreground.png`, `godot/art/fish/` 위에서 본 9종 + `fish_gudgeon_side`, `godot/art/props/`
+  `crate`·`bench`·`junk`·`stump`·`flower_03`, `godot/art/items/` 미끼 5종·모자 3종): OpenAI 이미지 생성으로 2026-10-07 만든 그림
+  (`ripple_garden_asset_drop_06.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다. 드롭의 낱장 PNG는 참조 시트
+  (`source_masters/corrected_core_reference_sheet.png`)를 고정 칸으로 잘라 약 6배 키운 것이라 시트의 체크무늬 배경·옆 그림 조각·파일명 글자가 박혀 있어 쓰지 않았다.
+  `tools/import_art_drop.py`가 같은 그림을 참조 시트에서 다시 잘라 체크무늬와 그림자를 지우고(수정됨), 위에서 본 물고기는 머리가 오른쪽이 되게 돌리고
+  모래무지 옆모습은 좌우를 뒤집는다. 크기는 시트 그대로(100~200px)다. 앞쪽 수풀은 따로 큰 원본(`r01_foreground_hires_source.png`, 941×1672)을 그대로 넣었다.
+  넣지 않은 것: `r01_scene`·`r01_scene_barren`(시트의 330px 그림을 키우고 위아래를 흐린 복사본으로 채움, 체크무늬가 박힘, 목업 01 구도 아님),
+  낚시꾼 5장(정면을 보고 앉음 — 목업은 연못을 향한 뒷모습, `cast`에 줄이 그려지고 `bite`·`hold`에 느낌표가 박힘), 텐트(Drop 03 것이 더 크고 다른 캠프 소품과 같은 그림),
+  UI 프레임 16장(잘림·흰 테두리, 게임에 9-patch 자리가 아직 없음). 다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.
 - **아이콘**: `assets/branding/`과 `godot/icon.svg`는 `tools/generate_icon.py`로 만든 자체 제작 아이콘이다.
 - **디자인 목업**: `assets/design/`은 ChatGPT 이미지 생성으로 만든 UI 목업과 그 조각이다(D-017). 런타임에는 쓰지 않으며 화면의 기준이다(D-018).
 - **UI 아이콘**: `godot/ui/icons/*.svg`는 `tools/generate_ui_icons.py`로 그린 자체 제작 단색 아이콘이다. 정식 아이콘으로 교체할 대상.
