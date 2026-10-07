@@ -48,9 +48,18 @@
   },
   "ui": {
     "*": {"slice": [0.3, 0.3, 0.3, 0.3]},
+    "ui_wood_cta": {"slice": [0.16, 0.42, 0.16, 0.42]},
+    "ui_wood_sign": {"slice": [0.12, 0.4, 0.12, 0.4]},
+    "ui_wood_panel": {"slice": [0.12, 0.15, 0.12, 0.15], "scale": 0.35},
+    "ui_paper_card": {"slice": [0.06, 0.16, 0.16, 0.06], "scale": 0.25},
+    "ui_cream_button": {"slice": [0.17, 0.4, 0.17, 0.56]},
+    "ui_cream_tab": {"slice": [0.09, 0.52, 0.09, 0.36]},
+    "ui_green_tab": {"slice": [0.11, 0.52, 0.11, 0.36]},
+    "ui_dark_pill": {"slice": [0.14, 0.45, 0.14, 0.45]},
+    "ui_round_dark": {"slice": [0.45, 0.45, 0.45, 0.45]},
     "ui_leaf_corner": {"width": 56},
     "ui_notebook_binding": {"width": 40},
-    "ui_tension_bar": {"outset": 10}
+    "ui_tension_bar": {"slice": [0.11, 0.3, 0.11, 0.3], "outset": 10}
   },
   "map": {
     "island": {"width": 2.6}

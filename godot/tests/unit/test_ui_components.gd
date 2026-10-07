@@ -130,8 +130,11 @@ func test_theme_scales_with_text_size_and_large_ui() -> void:
 	assert_true(UiTheme.touch_min(false) >= 96.0, "48 dp at 2 px per dp")
 
 func test_high_contrast_theme_uses_stronger_borders() -> void:
+	# The coded boxes compared (the shipped frame pictures replace them outside High Contrast).
+	ArtLibrary.use_root("res://tests/fixtures/no_art")
 	var normal := UiTheme.build(1.0, false, false)
 	var contrast := UiTheme.build(1.0, false, true)
+	ArtLibrary.use_root(ArtLibrary.DEFAULT_ROOT)
 	var normal_box := normal.get_stylebox("normal", "Button") as StyleBoxFlat
 	var contrast_box := contrast.get_stylebox("normal", "Button") as StyleBoxFlat
 	assert_true(contrast_box.border_width_left > normal_box.border_width_left)

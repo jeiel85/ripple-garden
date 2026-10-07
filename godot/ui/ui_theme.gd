@@ -136,7 +136,9 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	wood_panel.set_margins(26, 14)
 	theme.set_stylebox("panel", "WoodPanel", _framed(wood_panel, "WoodPanel", high_contrast, Color.WHITE, true))
 	theme.set_type_variation("SignPanel", "PanelContainer")
-	theme.set_stylebox("panel", "SignPanel", _framed(wood_panel, "SignPanel", high_contrast, Color.WHITE, true))
+	# No leaf corners on the title boards: the sign picture has its own leaves, and on a small board the
+	# corner sprays reach past it onto the subtitle below.
+	theme.set_stylebox("panel", "SignPanel", _framed(wood_panel, "SignPanel", high_contrast))
 
 	# --- buttons: cream card by default ---
 	_button_states(theme, "Button", CREAM, CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 24, true, high_contrast)

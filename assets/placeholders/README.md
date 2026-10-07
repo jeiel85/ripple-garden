@@ -64,3 +64,6 @@
   낚시꾼 5자세(1254 캔버스)와 텐트(1536×1024)(`ripple_garden_asset_drop_09.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다.
   `tools/import_art_drop.py`가 포즈마다 의자 다리 끝 세 점(`FEET_09`)이 idle과 겹치게 크기·위치를 맞추고, 다섯 장을 한 캔버스로 잘라 400px로 줄인다(수정됨).
   텐트는 384px로 줄였다. Drop 03 텐트(오른쪽 줄이 잘림)를 대신한다. 손·머리 위치는 `art.json` `character`에 있다.
+- **그림 — Asset Drop 10** (`godot/art/ui/` 16장): OpenAI 이미지 생성으로 2026-10-07 만든 UI 프레임(`ripple_garden_asset_drop_10.zip`, 저장소 밖 보관).
+  상업적 이용은 OpenAI 이용 약관을 따른다. `tools/import_art_drop.py`가 거의 투명한 그림자(alpha 8 이하)를 빼고 보이는 부분으로 자른 뒤 640px
+  (잎 장식 256px)로 줄이고, 바인더는 고리 한 마디만 잘라 192px로 줄인다(수정됨). 9-slice 비율·배율은 `art.json` `ui`에 있다.
