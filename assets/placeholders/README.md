@@ -21,6 +21,13 @@
   `flower_02`←`prop_flower_pink_01`, `grass_tuft`, `bush`.
   넣지 않은 것: `_top` 물고기(위에서 본 그림이 아니라 비스듬한 옆모습에 머리 왼쪽), `fish_gudgeon_side`(꼬리 잘림),
   월드·낚시꾼·UI·동물과 나머지 소품(해상도·잘림·구조 결정 필요, BACKLOG).
+- **그림 — Asset Drop 02** (`godot/art/fish/fish_common_carp_top.png`, `godot/art/props/cat.png`, `godot/art/props/frog.png`): OpenAI 이미지 생성으로
+  2026-10-07 만든 애니메이션 시트(`ripple_garden_asset_drop_02.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다.
+  `tools/import_art_drop.py`가 시트에서 한 포즈를 잘라 부스러기 점을 지우고, 몸통을 불투명하게 하고, 축소해 넣는다(수정됨; 게임에 스프라이트 애니메이션이 아직 없어 한 포즈만).
+  원본 대응: `fish_common_carp_top`←`fish_common_carp_top_anim_sheet_alt` 가운데 포즈(머리 위 → 오른쪽으로 돌림), `cat`←`animal_cat_sleeping_01_anim_sheet` 왼쪽 위,
+  `frog`←`animal_frog_01_anim_sheet` 왼쪽 위.
+  넣지 않은 것: `fish_common_carp_top_anim_sheet`·`fish_minnow_top_anim_sheet`(위에서 본 그림이 아니라 비스듬한 옆모습, 머리 왼쪽),
+  새·잠자리·나비·반딧불이(받을 코드 없음), 폭포 시트(폭포만이 아니라 웅덩이까지 든 바위섬 한 덩어리, 받을 자리 없음) — BACKLOG.
 - **아이콘**: `assets/branding/`과 `godot/icon.svg`는 `tools/generate_icon.py`로 만든 자체 제작 아이콘이다.
 - **디자인 목업**: `assets/design/`은 ChatGPT 이미지 생성으로 만든 UI 목업과 그 조각이다(D-017). 런타임에는 쓰지 않으며 화면의 기준이다(D-018).
 - **UI 아이콘**: `godot/ui/icons/*.svg`는 `tools/generate_ui_icons.py`로 그린 자체 제작 단색 아이콘이다. 정식 아이콘으로 교체할 대상.

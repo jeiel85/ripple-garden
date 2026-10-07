@@ -22,4 +22,5 @@ Adding a picture:
 Record the source and licence of every picture in `assets/placeholders/README.md`.
 
 A generated drop zip is imported with `python tools/import_art_drop.py <zip>`: it renames the approved pictures to
-these names and cleans the light-sheet halo and pinholes left by the cut-out (the list is in the script).
+these names and cleans the light-sheet halo and pinholes left by the cut-out (drop_01), or takes one pose out of an
+animation sheet (drop_02). The list is in the script.
