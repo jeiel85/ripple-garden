@@ -60,3 +60,7 @@
 - **그림 — Asset Drop 08** (`godot/art/world/r01_scene.png`, `r01_scene_barren.png`): OpenAI 이미지 생성으로 2026-10-07 만든 Region 01 풍경 두 장
   (`ripple_garden_asset_drop_08.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다. 1024×1536 원본 그대로 넣었다(수정 없음).
   두 장은 같은 구도라 복원 단계 사이에 섞어 보여 준다. `data/region_layouts.json`의 연못 경계·구역·낚시꾼·캠프 자리·소품 위치를 이 그림에 맞췄다.
+- **그림 — Asset Drop 09** (`godot/art/character/angler_idle·bite·reel·cast·hold.png`, `godot/art/props/tent.png`): OpenAI 이미지 생성으로 2026-10-07 만든
+  낚시꾼 5자세(1254 캔버스)와 텐트(1536×1024)(`ripple_garden_asset_drop_09.zip`, 저장소 밖 보관). 상업적 이용은 OpenAI 이용 약관을 따른다.
+  `tools/import_art_drop.py`가 포즈마다 의자 다리 끝 세 점(`FEET_09`)이 idle과 겹치게 크기·위치를 맞추고, 다섯 장을 한 캔버스로 잘라 400px로 줄인다(수정됨).
+  텐트는 384px로 줄였다. Drop 03 텐트(오른쪽 줄이 잘림)를 대신한다. 손·머리 위치는 `art.json` `character`에 있다.

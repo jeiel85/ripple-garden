@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_08) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_09) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -156,13 +156,27 @@ COPIES = {
     # Region 01's scene painted from scratch at 1024x1536, restored and barren in the same framing.
     "drop_08": {"world/region_01/r01_scene.png": "world/r01_scene.png",
                 "world/region_01/r01_scene_barren.png": "world/r01_scene_barren.png"},
+    # The tent of drop_03 again, with its guy ropes and stakes inside the picture.
+    "drop_09": {"props/camp/tent.png": "props/tent.png"},
 }
+# drop_09's angler poses were painted one by one: the chair is not at the same place nor quite the same size
+# in each. The chair is the part that must not move when the pose changes, so every pose is scaled and moved
+# to put its chair's three leg caps (left, front, right; found as the dark blobs at the bottom) on idle's.
+ANGLER_09 = "characters/angler/angler_%s.png"
+FEET_09 = {
+    "idle": ((336, 1023), (628, 1133), (870, 1056)),
+    "bite": ((290, 977), (577, 1128), (825, 1024)),
+    "reel": ((331, 1032), (625, 1131), (842, 1016)),
+    "cast": ((325, 1063), (601, 1177), (826, 1081)),
+    "hold": ((330, 1022), (649, 1153), (883, 1069)),
+}
+ANGLER_MARGIN = 120  # px of room around the 1254 canvas for the moved and enlarged poses
 CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
 CHECKER_GREY = 238  # its average
 RIM_SPREAD = 80  # an outline pixel this far from the grey (largest channel) is fully the picture's
 KEEP_SHARE = 0.02  # a part of a cut at least this share of its largest part belongs to the picture
 
-LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128, "moments": 512}  # px, the longest side written per folder
+LONGEST = {"fish": 256, "props": 256, "items": 256, "animals": 128, "moments": 512, "character": 400}  # px, the longest side written per folder
 # How the frames of an animated picture line up on their shared canvas (x, y as 0 left/top .. 1 right/bottom).
 ALIGN = {"fish": (1.0, 0.5), "props": (0.5, 1.0), "animals": (0.5, 0.5)}
 LONGEST_FOR = {"props/frog.png": 192, "props/tent.png": 384}  # the tent is drawn 190 design px wide
@@ -453,16 +467,44 @@ def main() -> None:
                     image = image.transpose(Image.FLIP_LEFT_RIGHT)
                 write_group([(image, path)], f"{REFERENCE_06} {box}")
             copy(drop, "drop_06")
+        elif names == {"drop_09"}:
+            angler_poses(drop)
+            copy(drop, "drop_09")
         elif len(names) == 1 and next(iter(names)) in COPIES:
             copy(drop, next(iter(names)))
         else:
             sys.exit(f"not a known drop (found {sorted(names) or 'no drop folder'})")
 
 
+def fit_feet(feet, reference) -> tuple[float, float, float]:
+    """Scale and offset (no turn) that put `feet` on `reference` with the least squared error."""
+    mx, my = (sum(p[i] for p in feet) / len(feet) for i in (0, 1))
+    rx, ry = (sum(p[i] for p in reference) / len(reference) for i in (0, 1))
+    scale = sum((p[0] - mx) * (q[0] - rx) + (p[1] - my) * (q[1] - ry) for p, q in zip(feet, reference))         / sum((p[0] - mx) ** 2 + (p[1] - my) ** 2 for p in feet)
+    return scale, rx - scale * mx, ry - scale * my
+
+
+def angler_poses(drop: zipfile.ZipFile) -> None:
+    placed = []
+    for pose, feet in FEET_09.items():
+        source = ANGLER_09 % pose
+        image = Image.open(BytesIO(drop.read(PREFIX % "drop_09" + source))).convert("RGBa")
+        scale, dx, dy = fit_feet(feet, FEET_09["idle"])
+        size = (image.width + 2 * ANGLER_MARGIN, image.height + 2 * ANGLER_MARGIN)
+        # The affine data maps each output pixel back to the source one.
+        out = image.transform(size, Image.AFFINE, (1 / scale, 0, -(dx + ANGLER_MARGIN) / scale,
+                                                  0, 1 / scale, -(dy + ANGLER_MARGIN) / scale), Image.BICUBIC)
+        placed.append((out.convert("RGBA"), f"character/angler_{pose}.png"))
+    boxes = [image.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox() for image, _ in placed]
+    box = (min(b[0] for b in boxes) - PAD, min(b[1] for b in boxes) - PAD,
+           max(b[2] for b in boxes) + PAD, max(b[3] for b in boxes) + PAD)
+    write_group([(image.crop(box), path) for image, path in placed], "drop_09 " + ANGLER_09 % "*")
+
+
 def copy(drop: zipfile.ZipFile, name: str) -> None:
     for source, target in COPIES[name].items():
         image = Image.open(BytesIO(drop.read(PREFIX % name + source))).convert("RGBA")
-        longest = LONGEST.get(target.split("/")[0])
+        longest = LONGEST_FOR.get(target, LONGEST.get(target.split("/")[0]))
         _write(shrink(image, longest / max(image.size)) if longest else image, source, target)
 
 
