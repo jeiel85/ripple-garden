@@ -209,7 +209,7 @@ static func divider(height: float = 26.0, color: Color = Color(1, 0.96, 0.88, 0.
 ## A wooden sign with an icon and a title (the mockups' "도감", "캠프", "지역 선택" boards).
 static func sign_board(icon_name: String, title: String) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.theme_type_variation = "WoodPanel"
+	panel.theme_type_variation = "SignPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER

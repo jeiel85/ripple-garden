@@ -70,7 +70,7 @@ func _init() -> void:
 	back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(back)
 	var sign_board := PanelContainer.new()
-	sign_board.theme_type_variation = "WoodPanel"
+	sign_board.theme_type_variation = "SignPanel"
 	sign_board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sign_row := UiKit.hbox(14)
 	sign_row.add_child(UiKit.icon("gear", 50.0, UiTheme.WOOD_TEXT))

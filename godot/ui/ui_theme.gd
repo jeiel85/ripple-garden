@@ -14,9 +14,14 @@ extends RefCounted
 ##   Button:  PrimaryButton (wood), WaterButton (wood with water, the fishing CTA), GreenButton,
 ##            TabButton / TabSelected, RoundButton (dark circle over the scenery), PillButton,
 ##            FlatButton (no box)
-##   Panel:   PaperPanel (default), PillPanel, WoodPanel, CardPanel, SelectedCard, NoteCard
+##   Panel:   PaperPanel (default), PillPanel, WoodPanel, SignPanel (title boards), NotebookPanel (the journal's
+##            list), CardPanel, SelectedCard, NoteCard
 ##   Label:   DimLabel, TitleLabel, SignLabel (on wood), PillLabel (on dark pills), LightLabel (on scenery),
 ##            SmallLabel, BigLabel
+##
+## The frame pictures of ASSET_REQUESTS §5 (`art/ui/ui_<frame>.png`, D-029) replace the coded boxes as
+## soon as they are drawn (`_framed`): FRAMES lists which box takes which picture. High Contrast keeps the
+## coded boxes, whose borders are part of the contrast.
 
 const BASE_FONT_PX := 30
 const TOUCH_MIN_PX := 96.0
@@ -24,6 +29,19 @@ const TOUCH_MIN_LARGE_PX := 120.0
 const LARGE_UI_FONT_FACTOR := 1.15
 ## Side padding inside buttons: small enough that a four-button row still fits a word like "Journal".
 const BUTTON_H_MARGIN := 12
+
+## Type variation -> the frame picture that replaces its box. The round reel button and the tension
+## meter draw `ui_reel_button` / `ui_tension_bar` themselves (Hud.ReelStyle, FightMeter).
+const FRAMES := {
+	"PanelContainer": "ui_paper_card", "PaperPanel": "ui_paper_card", "CardPanel": "ui_paper_card",
+	"NotebookPanel": "ui_paper_card", "WoodPanel": "ui_wood_panel", "SignPanel": "ui_wood_sign",
+	"PillPanel": "ui_dark_pill", "PillButton": "ui_dark_pill", "RoundButton": "ui_round_dark",
+	"Button": "ui_cream_button", "PrimaryButton": "ui_wood_cta", "WaterButton": "ui_wood_cta",
+	"TabButton": "ui_cream_tab", "TabSelected": "ui_green_tab",
+}
+## How a pictured button shows its state: the picture is tinted, never recoloured.
+const FRAME_TINTS := {"normal": Color.WHITE, "hover": Color.WHITE, "pressed": Color(0.86, 0.86, 0.86),
+	"disabled": Color(0.78, 0.78, 0.78, 0.6)}
 
 const CREAM := Color("#f4ecdd")
 const CREAM_HOVER := Color("#f9f3e8")
@@ -72,13 +90,15 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	var paper := _box(PAPER if not high_contrast else Color.WHITE, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 30)
 	paper.bg_color.a = 1.0 if high_contrast else 0.97
 	_shadow(paper, 10)
-	theme.set_stylebox("panel", "PanelContainer", paper)
-	theme.set_stylebox("panel", "Panel", paper)
+	theme.set_stylebox("panel", "PanelContainer", _framed(paper, "PanelContainer", high_contrast))
+	theme.set_stylebox("panel", "Panel", _framed(paper, "PanelContainer", high_contrast))
 	theme.set_type_variation("PaperPanel", "PanelContainer")
+	theme.set_type_variation("NotebookPanel", "PanelContainer")
+	theme.set_stylebox("panel", "NotebookPanel", _framed(paper, "NotebookPanel", high_contrast, Color.WHITE, false, true))
 	theme.set_type_variation("CardPanel", "PanelContainer")
 	var card := _box(CARD, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 22)
 	_shadow(card, 4)
-	theme.set_stylebox("panel", "CardPanel", card)
+	theme.set_stylebox("panel", "CardPanel", _framed(card, "CardPanel", high_contrast))
 	theme.set_type_variation("SelectedCard", "PanelContainer")
 	var selected := _box(Color("#f2f6e6"), GOLD if not high_contrast else Color.BLACK, 4 if not high_contrast else 6, 22)
 	_shadow(selected, 4)
@@ -87,14 +107,16 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_stylebox("panel", "NoteCard", _box(Color("#efe7c9"), Color("#cdbd8f"), border_width, 6))
 	theme.set_type_variation("PillPanel", "PanelContainer")
 	var pill := _box(Color.BLACK if high_contrast else PILL, Color.WHITE if high_contrast else PILL_BORDER, border_width, 40, 12, 20)
-	theme.set_stylebox("panel", "PillPanel", pill)
+	theme.set_stylebox("panel", "PillPanel", _framed(pill, "PillPanel", high_contrast))
 	theme.set_type_variation("WoodPanel", "PanelContainer")
 	var wood_panel := WoodStyle.new(WOOD, WOOD_BORDER, 4 if high_contrast else 3, 26)
 	wood_panel.set_margins(26, 14)
-	theme.set_stylebox("panel", "WoodPanel", wood_panel)
+	theme.set_stylebox("panel", "WoodPanel", _framed(wood_panel, "WoodPanel", high_contrast, Color.WHITE, true))
+	theme.set_type_variation("SignPanel", "PanelContainer")
+	theme.set_stylebox("panel", "SignPanel", _framed(wood_panel, "SignPanel", high_contrast, Color.WHITE, true))
 
 	# --- buttons: cream card by default ---
-	_button_states(theme, "Button", CREAM, CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 24, true)
+	_button_states(theme, "Button", CREAM, CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 24, true, high_contrast)
 	_font_colors(theme, "Button", ink)
 	theme.set_color("icon_normal_color", "Button", ink)
 	theme.set_color("icon_hover_color", "Button", ink)
@@ -116,24 +138,24 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 
 	# Green: "this is chosen" (equipped, selected tab, confirm).
 	theme.set_type_variation("GreenButton", "Button")
-	_button_states(theme, "GreenButton", GREEN, GREEN.lightened(0.08), GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width, 24, true)
+	_button_states(theme, "GreenButton", GREEN, GREEN.lightened(0.08), GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width, 24, true, high_contrast)
 	_font_colors(theme, "GreenButton", GREEN_TEXT)
 	_icon_colors(theme, "GreenButton", GREEN_TEXT)
 
 	# A chosen card in a list (journal fish, equipped item): pale green with a gold-green rim.
 	theme.set_type_variation("CardSelected", "Button")
 	_button_states(theme, "CardSelected", Color("#f0f5e1"), Color("#f4f8e8"), Color("#e2ebcd"), Color.BLACK if high_contrast else Color("#9cc46a"),
-		6 if high_contrast else 4, 24, true)
+		6 if high_contrast else 4, 24, true, high_contrast)
 	_font_colors(theme, "CardSelected", ink)
 	_icon_colors(theme, "CardSelected", ink)
 
 	# Tabs: cream when idle, green when selected.
 	theme.set_type_variation("TabButton", "Button")
-	_button_states(theme, "TabButton", Color("#efe4cf"), CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 18, false)
+	_button_states(theme, "TabButton", Color("#efe4cf"), CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 18, false, high_contrast)
 	_font_colors(theme, "TabButton", ink)
 	_icon_colors(theme, "TabButton", ink)
 	theme.set_type_variation("TabSelected", "Button")
-	_button_states(theme, "TabSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false)
+	_button_states(theme, "TabSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
 	_font_colors(theme, "TabSelected", GREEN_TEXT)
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
 
@@ -146,7 +168,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 			"pressed": color = Color(0.05, 0.06, 0.05, 0.8)
 			"disabled": color = Color(color, 0.3)
 		var circle := _box(color, Color.WHITE if high_contrast else PILL_BORDER, border_width + 1, 999)
-		var round_style := InsetStyle.new(circle, Vector2(6, 6), true)
+		var round_style := InsetStyle.new(_framed(circle, "RoundButton", high_contrast, FRAME_TINTS[state]), Vector2(6, 6), true)
 		round_style.content_margin_left = 4
 		round_style.content_margin_right = 4
 		round_style.content_margin_top = 4
@@ -200,7 +222,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 		if state == "pressed":
 			color = Color(0.05, 0.06, 0.05, 0.8)
 		var inner := _box(color, Color.WHITE if high_contrast else PILL_BORDER, border_width, 40, 18, 6)
-		var pill_style := InsetStyle.new(inner, Vector2(0, 14))
+		var pill_style := InsetStyle.new(_framed(inner, "PillButton", high_contrast, FRAME_TINTS[state]), Vector2(0, 14))
 		pill_style.content_margin_left = 22
 		pill_style.content_margin_right = 22
 		pill_style.content_margin_top = 18
@@ -262,7 +284,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 		theme.set_stylebox(state, "CheckButton", _box(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 0, 18, 0, 6))
 	theme.set_stylebox("focus", "CheckButton", _focus_box(18))
 
-	_button_states(theme, "OptionButton", CREAM, CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 18, false)
+	_button_states(theme, "OptionButton", CREAM, CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 18, false, high_contrast)
 	_font_colors(theme, "OptionButton", ink)
 	theme.set_icon("arrow", "OptionButton", UiIcons.theme_texture("theme_arrow"))
 	theme.set_stylebox("panel", "PopupMenu", _box(CARD, CREAM_BORDER, 2, 18))
@@ -284,7 +306,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	return theme
 
 static func _button_states(theme: Theme, type: String, normal: Color, hover: Color, pressed: Color, border: Color,
-		border_width: int, radius: int, shadow: bool) -> void:
+		border_width: int, radius: int, shadow: bool, high_contrast: bool) -> void:
 	for state in ["normal", "hover", "pressed", "disabled"]:
 		var color := normal
 		match state:
@@ -294,7 +316,7 @@ static func _button_states(theme: Theme, type: String, normal: Color, hover: Col
 		var style := _box(color, border, border_width, radius, 0, BUTTON_H_MARGIN)
 		if shadow and state != "pressed":
 			_shadow(style, 4)
-		theme.set_stylebox(state, type, style)
+		theme.set_stylebox(state, type, _framed(style, type, high_contrast, FRAME_TINTS[state]))
 	theme.set_stylebox("focus", type, _focus_box(radius))
 
 static func _wood_states(theme: Theme, type: String, high_contrast: bool, water: bool) -> void:
@@ -310,8 +332,39 @@ static func _wood_states(theme: Theme, type: String, high_contrast: bool, water:
 		style.set_margins(BUTTON_H_MARGIN + 6, 14)
 		if water:
 			style.content_margin_bottom = 22  # keep the label above the water band
-		theme.set_stylebox(state, type, style)
+		theme.set_stylebox(state, type, _framed(style, type, high_contrast, FRAME_TINTS[state]))
 	theme.set_stylebox("focus", type, _focus_box(28))
+
+## `fallback`, or the frame picture FRAMES names for `type` in its place, with the leaf corners or the
+## journal's binding when asked for and drawn. Without any of those pictures, or in High Contrast, it is
+## `fallback` itself, so the theme is unchanged until art arrives. A picture keeps the fallback's content
+## margins: the layout does not move when a frame is drawn.
+static func _framed(fallback: StyleBox, type: String, high_contrast: bool, tint: Color = Color.WHITE,
+		leaves: bool = false, binding: bool = false) -> StyleBox:
+	if high_contrast:
+		return fallback
+	var frame: String = FRAMES.get(type, "")
+	var style: ArtFrameStyle = ArtFrameStyle.from_art(frame) if not frame.is_empty() else null
+	var corners: Array[Texture2D] = [null, null, null, null]
+	var decorated := false
+	if leaves:
+		for i in 4:
+			corners[i] = ArtLibrary.texture("ui", "ui_leaf_corner_%02d" % (i + 1))
+			decorated = decorated or corners[i] != null
+	var strip: Texture2D = ArtLibrary.texture("ui", "ui_notebook_binding") if binding else null
+	if style == null and not decorated and strip == null:
+		return fallback
+	if style == null:
+		style = ArtFrameStyle.new()
+	style.fallback = fallback
+	style.tint = tint
+	style.corners = corners
+	style.strip = strip
+	style.corner_size = float(ArtLibrary.meta("ui", "ui_leaf_corner").get("width", style.corner_size))
+	style.strip_width = float(ArtLibrary.meta("ui", "ui_notebook_binding").get("width", style.strip_width))
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		style.set_content_margin(side, fallback.get_content_margin(side))
+	return style
 
 static func _font_colors(theme: Theme, type: String, color: Color) -> void:
 	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:

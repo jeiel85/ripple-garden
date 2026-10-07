@@ -124,7 +124,7 @@ func _init() -> void:
 	var book := UiKit.hbox(8)
 	book.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var left := PanelContainer.new()
-	left.theme_type_variation = "PaperPanel"
+	left.theme_type_variation = "NotebookPanel"
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.size_flags_stretch_ratio = 0.92
 	var left_box := UiKit.vbox(8)

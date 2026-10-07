@@ -8,7 +8,9 @@ extends Control
 ## comes in a later update — in a pill at the bottom of the map (the global toast sits under open screens,
 ## and the map covers it). Opened from the region pill of the status bar.
 ##
-## The islands are painted from shapes (MapView) until the map art of ASSET_REQUESTS §7 arrives.
+## The map is painted from shapes (MapView) until the map art of ASSET_REQUESTS §7 arrives (D-029):
+## `map/map_background.png` replaces the sea and clouds, `map/map_island_<region id>.png` an island. The
+## route, the glow of the current island, the locks and the signs stay the game's.
 
 signal close_pressed
 
@@ -175,26 +177,53 @@ class MapView extends Control:
 	func island_radius() -> float:
 		return minf(area().size.x, area().size.y) * 0.18
 
+	## The whole area the map covers: the panel and the sea running on under a notch and the gesture bar.
+	func backdrop_rect() -> Rect2:
+		return Rect2(Vector2(0, -SEA_BLEED), size + Vector2(0, SEA_BLEED * 2.0))
+
 	func _draw() -> void:
-		# The sea runs on past the panel, under a notch and the gesture bar the panel keeps clear of.
-		draw_rect(Rect2(Vector2(0, -SEA_BLEED), size + Vector2(0, SEA_BLEED * 2.0)), Color("#2a86ad"))
-		var deep := Color("#1d6f96")
-		for i in 6:
-			draw_rect(Rect2(0, size.y * (0.5 + i * 0.08), size.x, size.y * 0.08), Color(deep, 0.1 * i))
-		# Sparkles on the water.
-		for i in 40:
-			var at := Vector2(PropPainter.noise(Vector2(i, 7), 1) * size.x, PropPainter.noise(Vector2(i, 9), 2) * size.y)
-			draw_line(at, at + Vector2(10, 0), Color(1, 1, 1, 0.25), 2.0)
+		var background := ArtLibrary.texture("map", "map_background")
+		if background != null:
+			draw_texture_rect(background, cover_rect(background, backdrop_rect()), false)
+		else:
+			draw_rect(backdrop_rect(), Color("#2a86ad"))
+			var deep := Color("#1d6f96")
+			for i in 6:
+				draw_rect(Rect2(0, size.y * (0.5 + i * 0.08), size.x, size.y * 0.08), Color(deep, 0.1 * i))
+			# Sparkles on the water.
+			for i in 40:
+				var at := Vector2(PropPainter.noise(Vector2(i, 7), 1) * size.x, PropPainter.noise(Vector2(i, 9), 2) * size.y)
+				draw_line(at, at + Vector2(10, 0), Color(1, 1, 1, 0.25), 2.0)
 		var ids: Array = ContentDB.regions.keys()
 		for i in ids.size() - 1:
 			_dotted(island_center(ids[i]), island_center(ids[i + 1]))
 		for region_id in ids:
 			_island(region_id)
-		# Clouds drifting at the edges.
-		for corner in [Vector2(0.05, 0.12), Vector2(0.95, 0.2), Vector2(0.02, 0.62), Vector2(0.98, 0.7), Vector2(0.5, 0.97)]:
-			var c := Vector2(corner.x * size.x, corner.y * size.y)
-			for k in 4:
-				draw_circle(c + Vector2((k - 1.5) * 34.0, sin(k) * 10.0), 40.0 - k * 4.0, Color(1, 1, 1, 0.85))
+		if background == null:
+			# Clouds drifting at the edges.
+			for corner in [Vector2(0.05, 0.12), Vector2(0.95, 0.2), Vector2(0.02, 0.62), Vector2(0.98, 0.7), Vector2(0.5, 0.97)]:
+				var c := Vector2(corner.x * size.x, corner.y * size.y)
+				for k in 4:
+					draw_circle(c + Vector2((k - 1.5) * 34.0, sin(k) * 10.0), 40.0 - k * 4.0, Color(1, 1, 1, 0.85))
+
+	## The smallest rect with the picture's proportions that covers `area`, centred: the background is
+	## cropped at the sides or the ends rather than stretched or letterboxed.
+	static func cover_rect(tex: Texture2D, area: Rect2) -> Rect2:
+		var ratio := float(tex.get_width()) / maxf(1.0, tex.get_height())
+		var size_px := Vector2(area.size.x, area.size.x / ratio)
+		if size_px.y < area.size.y:
+			size_px = Vector2(area.size.y * ratio, area.size.y)
+		return Rect2(area.get_center() - size_px / 2.0, size_px)
+
+	## Where the island picture of `region_id` is drawn: centred on the island, `width` island radii wide
+	## (art.json "map"), or an empty rect when it has no picture.
+	func island_rect(region_id: String) -> Rect2:
+		var picture_name := "map_island_" + region_id
+		var tex := ArtLibrary.texture("map", picture_name)
+		if tex == null:
+			return Rect2()
+		var width := island_radius() * float(ArtLibrary.meta("map", picture_name, "island").get("width", 2.6))
+		return ArtLibrary.placed_rect(tex, island_center(region_id), width, Vector2(0.5, 0.5))
 
 	func _dotted(a: Vector2, b: Vector2) -> void:
 		var mid := a.lerp(b, 0.5) + (b - a).orthogonal().normalized() * 30.0
@@ -217,6 +246,13 @@ class MapView extends Control:
 			"coast": Color("#e8d39a"), "isle": Color("#3c4668")}.get(style, Color("#7cbf5e"))
 		if state == RegionUnlocks.CURRENT:
 			draw_colored_polygon(_blob(c, r * 1.14, region_id), Color("#ffe79a"))
+		var picture := island_rect(region_id)
+		if picture.has_area():
+			var dim := Color(0.45, 0.5, 0.62) if state == RegionUnlocks.LOCKED else Color.WHITE
+			draw_texture_rect(ArtLibrary.texture("map", "map_island_" + region_id), picture, false, dim)
+			if state == RegionUnlocks.LOCKED:
+				draw_texture_rect(UiIcons.texture("lock"), Rect2(c - Vector2(28, 40), Vector2(56, 56)), false, Color(1, 1, 1, 0.9))
+			return
 		draw_colored_polygon(_blob(c + Vector2(0, r * 0.12), r, region_id), Color(0.35, 0.3, 0.25, 0.5))  # cliff
 		draw_colored_polygon(_blob(c, r, region_id), land)
 		match style:
