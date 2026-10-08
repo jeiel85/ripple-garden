@@ -73,3 +73,5 @@
   상업적 이용은 OpenAI 이용 약관을 따른다. 큰 투명 여백을 잘라 가장 긴 변 512px로 줄여 넣었다(수정됨). 넣지 않은 것: `map_background`(섬 5개가 이미 그려져 있어 게임의 섬과 겹침).
 - **그림 — Asset Drop 13** (`godot/art/hats/` 3장): OpenAI 이미지 생성으로 2026-10-08 만든 낚시꾼용 모자(`ripple_garden_asset_drop_13.zip`, 저장소 밖 보관).
   상업적 이용은 OpenAI 이용 약관을 따른다. 1254 캔버스의 투명 여백을 잘라 가장 긴 변 256px로 줄여 넣었다(수정됨). 크기·위치는 `art.json` `character`의 `hat_width`·`head`.
+- **그림 — Asset Drop 14** (`godot/art/map/map_background.png`): OpenAI 이미지 생성으로 2026-10-08 만든 섬 없는 지도 배경(`ripple_garden_asset_drop_14.zip`, 저장소 밖 보관).
+  상업적 이용은 OpenAI 이용 약관을 따른다. 1024×1536 원본 그대로(수정 없음). 현재 지역은 섬 뒤에 도형 대신 부드러운 후광을 그린다.

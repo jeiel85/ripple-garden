@@ -244,9 +244,15 @@ class MapView extends Control:
 		var style: String = ContentDB.get_region(region_id).get("map", {}).get("style", "pond")
 		var land: Color = {"pond": Color("#7cbf5e"), "valley": Color("#6fa35a"), "river": Color("#86c066"),
 			"coast": Color("#e8d39a"), "isle": Color("#3c4668")}.get(style, Color("#7cbf5e"))
-		if state == RegionUnlocks.CURRENT:
-			draw_colored_polygon(_blob(c, r * 1.14, region_id), Color("#ffe79a"))
 		var picture := island_rect(region_id)
+		if state == RegionUnlocks.CURRENT:
+			if picture.has_area():
+				# A soft warm halo around the drawn island: stacked ellipses, fainter the wider they go.
+				for step in 6:
+					var grow := 1.0 + step * 0.06
+					draw_colored_polygon(PropPainter._ellipse(picture.get_center(), picture.size * 0.5 * grow), Color(1.0, 0.91, 0.6, 0.11))
+			else:
+				draw_colored_polygon(_blob(c, r * 1.14, region_id), Color("#ffe79a"))
 		if picture.has_area():
 			var dim := Color(0.45, 0.5, 0.62) if state == RegionUnlocks.LOCKED else Color.WHITE
 			draw_texture_rect(ArtLibrary.texture("map", "map_island_" + region_id), picture, false, dim)
