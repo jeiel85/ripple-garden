@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Copies approved pictures from a generated art drop into godot/art under the D-029 names, cleaning
-the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_12) is recognised from the paths inside the zip.
+the cut-outs on the way. The drop (drop_01 .. drop_03, drop_06 .. drop_13) is recognised from the paths inside the zip.
 
 The drop_01 PNGs were cut out of one generated sheet on a light background (SHEET_BG). That left two
 defects that show on the game's darker grass and water:
@@ -187,6 +187,8 @@ UI_VISIBLE = 8  # alpha above this is the frame, below it the shadow haze
 # drop_12's five region islands, each on a large canvas with empty margins; cut to the island and scaled to 512.
 # Its map_background is not taken: the islands are painted into it, and the game draws its own on top.
 ISLANDS_12 = ["quiet_pond", "forest_stream", "reed_river", "blue_coast", "moonlight_isle"]
+# drop_13's hats are drawn full size on a 1254 canvas (not on the angler's); cut to the hat and scale to 256.
+HATS_13 = ["acc_bucket_hat", "acc_river_cap", "acc_starry_hat"]
 CHECKER_SAT, CHECKER_LOW = 18, 150  # the checkerboard and the shadow on it: channels within 18, brightness 150+
 CHECKER_GREY = 238  # its average
 RIM_SPREAD = 80  # an outline pixel this far from the grey (largest channel) is fully the picture's
@@ -484,6 +486,8 @@ def main() -> None:
                     image = image.transpose(Image.FLIP_LEFT_RIGHT)
                 write_group([(image, path)], f"{REFERENCE_06} {box}")
             copy(drop, "drop_06")
+        elif names == {"drop_13"}:
+            hats(drop)
         elif names == {"drop_12"}:
             region_islands(drop)
         elif names == {"drop_10"}:
@@ -532,6 +536,14 @@ def ui_frames(drop: zipfile.ZipFile) -> None:
         target = f"ui/{name}.png"
         longest = LONGEST_FOR.get(target, LONGEST["ui"])
         _write(shrink(image, longest / max(image.size)), source, target)
+
+
+def hats(drop: zipfile.ZipFile) -> None:
+    for name in HATS_13:
+        source = f"hats/{name}.png"
+        image = Image.open(BytesIO(drop.read(PREFIX % "drop_13" + source))).convert("RGBA")
+        image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
+        _write(shrink(image, 256 / max(image.size)), source, source)
 
 
 def region_islands(drop: zipfile.ZipFile) -> None:

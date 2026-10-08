@@ -41,6 +41,8 @@ func test_the_game_folder_ships_the_region_01_scene_the_angler_the_ui_frames_and
 	assert_not_null(ArtLibrary.texture("world", "r01_scene"), "Asset Drop 08")
 	for frame in UiTheme.FRAMES.values() + ["ui_reel_button", "ui_tension_bar", "ui_notebook_binding", "ui_leaf_corner_01"]:
 		assert_not_null(ArtLibrary.texture("ui", frame), "Asset Drop 10: %s" % frame)
+	for hat in ["acc_bucket_hat", "acc_river_cap", "acc_starry_hat"]:
+		assert_not_null(ArtLibrary.texture("hats", hat), "Asset Drop 13: %s" % hat)
 	for region_id in ContentDB.regions:
 		assert_not_null(ArtLibrary.texture("map", "map_island_" + region_id), "Asset Drop 12: %s" % region_id)
 	for moment_id in ContentDB.moments:

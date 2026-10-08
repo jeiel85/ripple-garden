@@ -71,3 +71,5 @@
   상업적 이용은 OpenAI 이용 약관을 따른다. 1254 정사각 원본을 512px로 줄여 넣었다(수정됨). 이로써 순간 11개 모두 그림이 있다.
 - **그림 — Asset Drop 12** (`godot/art/map/map_island_region_01~05_*.png` 5장): OpenAI 이미지 생성으로 2026-10-08 만든 지역 섬(`ripple_garden_asset_drop_12.zip`, 저장소 밖 보관).
   상업적 이용은 OpenAI 이용 약관을 따른다. 큰 투명 여백을 잘라 가장 긴 변 512px로 줄여 넣었다(수정됨). 넣지 않은 것: `map_background`(섬 5개가 이미 그려져 있어 게임의 섬과 겹침).
+- **그림 — Asset Drop 13** (`godot/art/hats/` 3장): OpenAI 이미지 생성으로 2026-10-08 만든 낚시꾼용 모자(`ripple_garden_asset_drop_13.zip`, 저장소 밖 보관).
+  상업적 이용은 OpenAI 이용 약관을 따른다. 1254 캔버스의 투명 여백을 잘라 가장 긴 변 256px로 줄여 넣었다(수정됨). 크기·위치는 `art.json` `character`의 `hat_width`·`head`.
