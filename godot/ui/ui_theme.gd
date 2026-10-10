@@ -72,6 +72,8 @@ const WOOD := Color("#8a5a36")
 const WOOD_PRESSED := Color("#734a2b")
 const WOOD_BORDER := Color("#5e3b22")
 const WOOD_TEXT := Color("#fff4e0")
+const WOOD_RIM := Color("#4a2a14")
+const SCENERY_RIM := Color(0.04, 0.1, 0.12, 0.85)
 const GREEN := Color("#627d4c")
 const GREEN_PRESSED := Color("#4f6a3c")
 const GREEN_BORDER := Color("#455c35")
@@ -283,11 +285,13 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_color("font_shadow_color", "SignLabel", Color(0.2, 0.1, 0.03, 0.6))
 	theme.set_constant("shadow_offset_x", "SignLabel", 0)
 	theme.set_constant("shadow_offset_y", "SignLabel", 2)
+	_rim(theme, "SignLabel", WOOD_RIM, 5)
 	theme.set_font_size("font_size", "SignLabel", text_px(font, "sign"))
 	theme.set_type_variation("CtaLabel", "Label")
 	theme.set_color("font_color", "CtaLabel", WOOD_TEXT)
 	theme.set_color("font_shadow_color", "CtaLabel", Color(0.2, 0.1, 0.03, 0.55))
 	theme.set_constant("shadow_offset_y", "CtaLabel", 2)
+	_rim(theme, "CtaLabel", WOOD_RIM, 5)
 	theme.set_font_size("font_size", "CtaLabel", text_px(font, "sign"))
 	theme.set_type_variation("PillLabel", "Label")
 	theme.set_color("font_color", "PillLabel", PILL_TEXT)
@@ -298,6 +302,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_constant("shadow_offset_x", "LightLabel", 1)
 	theme.set_constant("shadow_offset_y", "LightLabel", 2)
 	theme.set_constant("shadow_outline_size", "LightLabel", 4)
+	_rim(theme, "LightLabel", SCENERY_RIM, 5)
 
 	# --- inputs ---
 	theme.set_color("font_color", "CheckButton", ink)
@@ -412,6 +417,12 @@ static func _framed(fallback: StyleBox, type: String, high_contrast: bool, tint:
 	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
 		style.set_content_margin(side, fallback.get_content_margin(side))
 	return style
+
+## A dark rim around a label's letters, so text sits in its board or on the scenery instead of floating
+## above it: carved-looking on wood, readable on busy water.
+static func _rim(theme: Theme, type: String, color: Color, size: int) -> void:
+	theme.set_color("font_outline_color", type, color)
+	theme.set_constant("outline_size", type, size)
 
 static func _font_colors(theme: Theme, type: String, color: Color) -> void:
 	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
