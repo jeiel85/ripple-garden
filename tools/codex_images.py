@@ -22,6 +22,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Optional
 
 MODEL = "gpt-5.6-luna"
 EFFORT = "low"
@@ -32,7 +33,7 @@ SCENE = ("Use the image generation tool to draw ONE image. Warm miniature-dioram
          "opaque square scene with a painted background, no text, no watermark, no UI. ")
 
 
-def generated_path(stdout: str) -> Path | None:
+def generated_path(stdout: str) -> Optional[Path]:
     for line in reversed(stdout.splitlines()):
         text = line.strip().strip("`").strip('"').strip("'")
         if text.endswith(".png") and "generated_images" in text and Path(text).exists():
