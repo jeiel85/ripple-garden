@@ -50,7 +50,7 @@
   UI 프레임 16장(잘림·흰 테두리, 게임에 9-patch 자리가 아직 없음). 다시 받을 조건은 `assets/design/ASSET_REQUESTS.md`.
 - **아이콘**: `assets/branding/`과 `godot/icon.svg`는 `tools/generate_icon.py`로 만든 자체 제작 아이콘이다.
 - **디자인 목업**: `assets/design/`은 ChatGPT 이미지 생성으로 만든 UI 목업과 그 조각이다(D-017). 런타임에는 쓰지 않으며 화면의 기준이다(D-018).
-- **UI 아이콘**: `godot/ui/icons/*.svg`는 `tools/generate_ui_icons.py`로 그린 자체 제작 단색 아이콘이다. 정식 아이콘으로 교체할 대상.
+- **UI 아이콘**: `godot/ui/icons/*.png` 58개(2026-10-11, 아래 "UI 아이콘 한 벌")가 같은 이름의 `*.svg`(`tools/generate_ui_icons.py`로 그린 자체 제작 도형)를 대신한다. 토글·드롭다운 화살표 3개(`theme_*.svg`)만 도형이다.
 - **폰트** (`godot/fonts/`, D-031): Gowun Dodum(본문)·Jua(제목)·M PLUS Rounded 1c Regular/Bold(일본어), 모두 SIL Open Font License 1.1.
   github.com/google/fonts에서 2026-10-07 받아 `tools/subset_fonts.py`로 게임에 쓰는 글자만 남겨 woff2로 넣었다(수정됨, 예약 글꼴 이름 없음).
   저작권 표시와 라이선스 전문은 `godot/fonts/OFL.txt`이며 설정 > 오픈소스 라이선스 화면에 함께 나온다(export `include_filter`에 포함).
@@ -75,3 +75,7 @@
   상업적 이용은 OpenAI 이용 약관을 따른다. 1254 캔버스의 투명 여백을 잘라 가장 긴 변 256px로 줄여 넣었다(수정됨). 크기·위치는 `art.json` `character`의 `hat_width`·`head`.
 - **그림 — Asset Drop 14** (`godot/art/map/map_background.png`): OpenAI 이미지 생성으로 2026-10-08 만든 섬 없는 지도 배경(`ripple_garden_asset_drop_14.zip`, 저장소 밖 보관).
   상업적 이용은 OpenAI 이용 약관을 따른다. 1024×1536 원본 그대로(수정 없음). 현재 지역은 섬 뒤에 도형 대신 부드러운 후광을 그린다.
+- **UI 아이콘 한 벌** (`godot/ui/icons/*.png` 58개): 흰색 단색 실루엣, 투명 배경. 사용자가 Codex에서 만든 11개(`icon_bundle_complete.zip`: 일지·장비·낚시·캠프·설정·지역·날씨 5종)를 기준으로,
+  나머지 47개는 Codex CLI(`codex exec`, 모델 `gpt-5.6-luna`, 추론 `low`, 기준 아이콘 4개를 한 장으로 붙인 참고 이미지 1장 첨부)로 2026-10-11 만들었다.
+  상업적 이용은 OpenAI 이용 약관을 따른다. `tools/import_icons.py`가 이름을 게임 이름에 맞추고(`fishing`→`fish`, `region`→`mountain`, `weather_*`→날씨 이름)
+  128px로 줄여 넣는다(수정됨). 특수·미끼·낚시 릴·낚싯대·서명·자·축소는 첫 결과가 가늘거나 복잡하거나 배경 무늬가 박혀 굵고 단순하게 다시 만들었다.

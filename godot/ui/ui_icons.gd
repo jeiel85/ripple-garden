@@ -1,7 +1,7 @@
 class_name UiIcons
 extends RefCounted
 
-## The icon set (res://ui/icons, drawn by tools/generate_ui_icons.py). Icons are white silhouettes;
+## The icon set (res://ui/icons: drawn PNGs from tools/import_icons.py, else the SVGs of tools/generate_ui_icons.py). Icons are white silhouettes;
 ## controls tint them, so one picture serves cream buttons (dark brown) and dark pills (cream).
 ## Asking for a name that is not in NAMES is a programming error: it is reported and an empty
 ## texture comes back, so a typo never crashes a screen.
@@ -26,7 +26,9 @@ static func texture(icon_name: String) -> Texture2D:
 	if not has_icon(icon_name):
 		push_error("UiIcons: unknown icon '%s'" % icon_name)
 		return PlaceholderTexture2D.new()
-	var loaded: Texture2D = load(DIR + icon_name + ".svg")
+	# The drawn icon set (PNG, tools/import_icons.py) replaces the coded SVG of the same name.
+	var picture := DIR + icon_name + ".png"
+	var loaded: Texture2D = load(picture) if ResourceLoader.exists(picture) else load(DIR + icon_name + ".svg")
 	_cache[icon_name] = loaded
 	return loaded
 
