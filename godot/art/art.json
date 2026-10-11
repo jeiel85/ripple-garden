@@ -57,6 +57,7 @@
     "ui_green_tab": {"slice": [0.11, 0.52, 0.11, 0.36]},
     "ui_dark_pill": {"slice": [0.14, 0.45, 0.14, 0.45]},
     "ui_round_dark": {"slice": [0.45, 0.45, 0.45, 0.45]},
+    "ui_photo_wood": {"slice": [0.14, 0.11, 0.14, 0.11], "scale": 0.75},
     "ui_leaf_corner": {"width": 56},
     "ui_notebook_binding": {"width": 40},
     "ui_tension_bar": {"slice": [0.11, 0.3, 0.11, 0.3], "outset": 10}
