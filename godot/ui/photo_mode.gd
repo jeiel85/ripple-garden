@@ -210,19 +210,21 @@ class PhotoFrame extends Control:
 		var font_size := get_theme_default_font_size()
 		match frame_id:
 			"polaroid":
+				# Drawn from shapes: its caption strip is a fixed 160 px, which a stretched picture could not match.
 				_border(area, Vector4(POLAROID_SIDE, POLAROID_SIDE, POLAROID_SIDE, POLAROID_BOTTOM), UiTheme.PAPER)
 				draw_rect(area.grow_individual(-POLAROID_SIDE, -POLAROID_SIDE, -POLAROID_SIDE, -POLAROID_BOTTOM), UiTheme.CREAM_BORDER, false, 2.0)
 				var baseline := area.end.y - POLAROID_BOTTOM * 0.5 + font_size * 0.35
 				draw_string(font, Vector2(POLAROID_SIDE + 8.0, baseline), caption, HORIZONTAL_ALIGNMENT_LEFT,
 					area.size.x * 0.6, font_size, UiTheme.INK)
 			"wood":
-				_border(area, Vector4(WOOD_WIDTH, WOOD_WIDTH, WOOD_WIDTH, WOOD_WIDTH), UiTheme.WOOD)
-				draw_rect(area.grow(-3.0), UiTheme.WOOD_BORDER, false, 4.0)
-				draw_rect(area.grow(-WOOD_WIDTH), UiTheme.WOOD_BORDER, false, 4.0)
-				for i in 6:  # a little grain
-					var y := WOOD_WIDTH * (0.25 + 0.1 * i)
-					draw_line(Vector2(WOOD_WIDTH, y), Vector2(area.size.x - WOOD_WIDTH, y), Color(UiTheme.WOOD_BORDER, 0.35), 1.5)
-					draw_line(Vector2(WOOD_WIDTH, area.size.y - y), Vector2(area.size.x - WOOD_WIDTH, area.size.y - y), Color(UiTheme.WOOD_BORDER, 0.35), 1.5)
+				if not _drawn_frame(area, WOOD_WIDTH):
+					_border(area, Vector4(WOOD_WIDTH, WOOD_WIDTH, WOOD_WIDTH, WOOD_WIDTH), UiTheme.WOOD)
+					draw_rect(area.grow(-3.0), UiTheme.WOOD_BORDER, false, 4.0)
+					draw_rect(area.grow(-WOOD_WIDTH), UiTheme.WOOD_BORDER, false, 4.0)
+					for i in 6:  # a little grain
+						var y := WOOD_WIDTH * (0.25 + 0.1 * i)
+						draw_line(Vector2(WOOD_WIDTH, y), Vector2(area.size.x - WOOD_WIDTH, y), Color(UiTheme.WOOD_BORDER, 0.35), 1.5)
+						draw_line(Vector2(WOOD_WIDTH, area.size.y - y), Vector2(area.size.x - WOOD_WIDTH, area.size.y - y), Color(UiTheme.WOOD_BORDER, 0.35), 1.5)
 			"soft":
 				_soft_edges(area)
 		if logo:
@@ -234,6 +236,19 @@ class PhotoFrame extends Control:
 			if frame_id != "polaroid":
 				draw_string(font, at + Vector2(2, 2), SIGNATURE, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0, 0, 0, 0.35))
 			draw_string(font, at, SIGNATURE, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, ink)
+
+	## The drawn border `ui/ui_photo_<frame>.png` (ASSET_REQUESTS §8) as a 9-slice around the photo window, its
+	## left border `side` design px wide (the other sides follow the picture's own slices, `art.json` `ui`).
+	## False when that picture has not been drawn: the frame is then drawn from shapes.
+	func _drawn_frame(area: Rect2, side: float) -> bool:
+		var style := ArtFrameStyle.from_art("ui_photo_" + frame_id)
+		if style == null:
+			return false
+		style.draw_center = false  # the photo shows through
+		if style.scale <= 0.0:  # `art.json` gives the scale that puts the visible border at `side`; else guess from the slice
+			style.scale = side / maxf(1.0, style.slice_px().x)
+		style.draw(get_canvas_item(), area)
+		return true
 
 	## Four bands around `area`: left, top, right, bottom widths in x, y, z, w.
 	func _border(area: Rect2, widths: Vector4, color: Color) -> void:

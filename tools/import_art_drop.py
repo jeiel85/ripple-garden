@@ -540,20 +540,28 @@ def ui_frames(drop: zipfile.ZipFile) -> None:
         _write(shrink(image, longest / max(image.size)), source, target)
 
 
+def cut_with_margin(image: Image.Image, longest: int) -> Image.Image:
+    """The visible part of a cut-out, scaled so it is `longest` px with a PAD px transparent margin all round: a
+    picture whose outline touches the texture's edge looks clipped once the texture is filtered."""
+    image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
+    image = shrink(image, (longest - 2 * PAD) / max(image.size))
+    canvas = Image.new("RGBA", (image.width + 2 * PAD, image.height + 2 * PAD))
+    canvas.paste(image, (PAD, PAD))
+    return canvas
+
+
 def hats(drop: zipfile.ZipFile) -> None:
     for name in HATS_13:
         source = f"hats/{name}.png"
         image = Image.open(BytesIO(drop.read(PREFIX % "drop_13" + source))).convert("RGBA")
-        image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
-        _write(shrink(image, 256 / max(image.size)), source, source)
+        _write(cut_with_margin(image, 256), source, source)
 
 
 def region_islands(drop: zipfile.ZipFile) -> None:
     for index, name in enumerate(ISLANDS_12, 1):
         source = f"map/map_island_region_0{index}_{name}.png"
         image = Image.open(BytesIO(drop.read(PREFIX % "drop_12" + source))).convert("RGBA")
-        image = image.crop(image.getchannel("A").point(lambda a: 255 if a > UI_VISIBLE else 0).getbbox())
-        _write(shrink(image, 512 / max(image.size)), source, "map/" + source.removeprefix("map/"))
+        _write(cut_with_margin(image, 512), source, "map/" + source.removeprefix("map/"))
 
 
 def copy(drop: zipfile.ZipFile, name: str) -> None:
