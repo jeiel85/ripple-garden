@@ -610,6 +610,7 @@ func _apply_theme() -> void:
 		GameState.get_setting("large_ui") == true,
 		GameState.get_setting("high_contrast_meter") == true)
 	fight_meter.configure(fight_meter.band_min, fight_meter.band_max, GameState.get_setting("high_contrast_meter") == true)
+	hud.set_nav_pictures(GameState.get_setting("high_contrast_meter") != true)  # High Contrast keeps the plain buttons
 	_apply_motion()
 	_apply_layout()
 
