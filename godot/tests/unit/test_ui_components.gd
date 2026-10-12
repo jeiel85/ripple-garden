@@ -318,6 +318,8 @@ func test_safe_insets_apply_only_on_mobile_screens() -> void:
 func test_mockup_pieces_replace_their_controls_and_step_aside_in_high_contrast() -> void:
 	if not ArtLibrary.has("ui", "sign_journal"):
 		return  # the pieces are optional art (D-032)
+	var previous := TranslationServer.get_locale()
+	TranslationServer.set_locale("ko")  # the pieces have Korean words baked in
 	GameState.set_setting("high_contrast_meter", false)
 	var host := Control.new()
 	host.theme = UiTheme.build(1.0, false, false)
@@ -332,4 +334,9 @@ func test_mockup_pieces_replace_their_controls_and_step_aside_in_high_contrast()
 	assert_false(board.get_meta("mockup_picture", true), "High Contrast gives the drawn board back")
 	assert_true(board.get_child(0).visible)
 	GameState.set_setting("high_contrast_meter", false)
+	TranslationServer.set_locale("en")
+	var english := UiKit.sign_board("fish", "Journal", "sign_journal")
+	host.add_child(english)
+	assert_false(english.get_meta("mockup_picture", true), "the Korean picture is not used in another language")
+	TranslationServer.set_locale(previous)
 	host.free()

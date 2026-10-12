@@ -247,9 +247,15 @@ static func sign_board(icon_name: String, title: String, picture_name: String = 
 const MOCKUP_SCALE := 720.0 / 941.0
 const PICTURE_STATES: PackedStringArray = ["panel", "normal", "hover", "pressed", "disabled"]
 
+## True when the mockup pieces may be shown: the game is in Korean (their words are baked in, D-032) and
+## High Contrast is off. A language change reloads the scene, so this is read again then.
+static func mockup_pictures_allowed() -> bool:
+	return TranslationServer.get_locale().begins_with("ko") and GameState.get_setting("high_contrast_meter") != true
+
 ## Shows `control` as the piece `ui/<picture_name>.png` cut from a mockup (D-032: Korean words baked in) at
-## the mockup's scale, hiding `content` (what the control draws itself). High Contrast gives the drawn
-## control back, with its theme's strong borders; the swap follows the setting whenever the theme is rebuilt.
+## the mockup's scale, hiding `content` (what the control draws itself). Other languages and High Contrast
+## get the drawn control (translated, with the theme's strong borders); the swap follows the setting
+## whenever the theme is rebuilt.
 ## Nothing happens when the picture does not exist. The control keeps its tooltip as its accessibility name.
 static func mockup_picture(control: Control, picture_name: String, content: Array) -> void:
 	var picture := ArtLibrary.texture("ui", picture_name)
@@ -263,7 +269,7 @@ static func mockup_picture(control: Control, picture_name: String, content: Arra
 		style.modulate_color = UiTheme.FRAME_TINTS.get(state, Color.WHITE)
 		styles[state] = style
 	var apply := func() -> void:
-		var on: bool = GameState.get_setting("high_contrast_meter") != true
+		var on: bool = mockup_pictures_allowed()
 		if control.get_meta("mockup_picture", false) == on and control.has_meta("mockup_picture"):
 			return
 		control.set_meta("mockup_picture", on)

@@ -343,7 +343,7 @@ func _build_bottom() -> Control:
 			_nav_art[button] = picture
 			_nav_plain[button] = {"text": button.text, "icon": button.icon, "size": button.custom_minimum_size,
 				"h_flags": button.size_flags_horizontal, "v_flags": button.size_flags_vertical}
-	set_nav_pictures(GameState.get_setting("high_contrast_meter") != true)
+	set_nav_pictures(UiKit.mockup_pictures_allowed())
 	journal_dot = UiKit.notice_dot(journal_button)
 	camp_dot = UiKit.notice_dot(camp_button)
 	row.add_child(journal_button)
