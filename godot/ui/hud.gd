@@ -212,14 +212,16 @@ const NAV_HEIGHT_PX := 104.0
 ## Bottom-bar buttons drawn as pictures cut from the mockup (`ui/nav_*.png`, Korean words baked in):
 ## button -> its picture. A button without a picture keeps its icon and label.
 var _nav_art: Dictionary = {}
+## Button -> its own text, icon, size and size flags, given back when the pictures are turned off.
+var _nav_plain: Dictionary = {}
+var _nav_pictures_on := false
+var _cta_content: Control
 ## Design px per mockup px (720 / 941).
 const MOCKUP_SCALE := 720.0 / 941.0
 
 ## Makes `button` show `picture` instead of its own box, icon and text. The word stays as its tooltip
 ## (accessibility name); pressed and disabled are the same picture, darker.
 func _use_nav_picture(button: Button, picture: Texture2D) -> void:
-	if button.tooltip_text.is_empty():
-		button.tooltip_text = button.text
 	button.text = ""
 	button.icon = null
 	for state in ["normal", "hover", "pressed", "disabled"]:
@@ -227,6 +229,39 @@ func _use_nav_picture(button: Button, picture: Texture2D) -> void:
 		style.texture = picture
 		style.modulate_color = UiTheme.FRAME_TINTS[state]
 		button.add_theme_stylebox_override(state, style)
+
+## Turns the bottom bar's pictures on or off. Off (High Contrast) gives the buttons back their theme box,
+## icon and word, so they get the same strong borders and colours as the rest of the High Contrast UI.
+func set_nav_pictures(on: bool) -> void:
+	_nav_pictures_on = on and not _nav_art.is_empty()
+	for button in _nav_art:
+		var plain: Dictionary = _nav_plain[button]
+		if _nav_pictures_on:
+			_use_nav_picture(button, _nav_art[button])
+		else:
+			button.text = plain["text"]
+			button.icon = plain["icon"]
+			for state in ["normal", "hover", "pressed", "disabled"]:
+				button.remove_theme_stylebox_override(state)
+			button.custom_minimum_size = plain["size"]
+			button.size_flags_horizontal = plain["h_flags"]
+			button.size_flags_vertical = plain["v_flags"]
+	if _nav_art.has(cta_button):
+		_cta_content.visible = not _nav_pictures_on  # "낚시" and the fish are part of the picture
+		cta_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if _nav_pictures_on else _nav_plain[cta_button]["h_flags"]
+	_refresh_nav_names()
+
+## A picture button has no text of its own, so its word is its tooltip (the accessibility name) unless a
+## notice says more.
+func _refresh_nav_names() -> void:
+	for button in _nav_art:
+		if _nav_pictures_on and button.tooltip_text.is_empty():
+			button.tooltip_text = _nav_plain[button]["text"]
+
+## The word a bottom-bar button's tooltip falls back to when there is no notice: its name while it is a
+## picture (it shows no text), nothing otherwise (its text already says it).
+func _nav_name(button: Button) -> String:
+	return _nav_plain[button]["text"] if _nav_pictures_on and _nav_art.has(button) else ""
 
 ## Picture buttons at the mockup's scale (the mockup is 941 px wide, the design 720), shrunk if the row
 ## would not fit `width`. A picture smaller than a touch target sits in the middle of a touch-target-sized
@@ -299,14 +334,16 @@ func _build_bottom() -> Control:
 	camp_button.custom_minimum_size.x = NAV_SIDE_PX * 1.5
 	cta_button.custom_minimum_size.y = NAV_HEIGHT_PX
 	_nav_art = {}
+	_nav_plain = {}
+	_cta_content = cta_content
 	for entry in [[journal_button, "nav_journal"], [gear_button, "nav_gear"], [cta_button, "nav_cast"], [camp_button, "nav_camp"]]:
+		var button: Button = entry[0]
 		var picture := ArtLibrary.texture("ui", entry[1])
 		if picture != null:
-			_use_nav_picture(entry[0], picture)
-			_nav_art[entry[0]] = picture
-	if _nav_art.has(cta_button):
-		cta_content.visible = false  # "낚시" and the fish are part of the picture
-		cta_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			_nav_art[button] = picture
+			_nav_plain[button] = {"text": button.text, "icon": button.icon, "size": button.custom_minimum_size,
+				"h_flags": button.size_flags_horizontal, "v_flags": button.size_flags_vertical}
+	set_nav_pictures(GameState.get_setting("high_contrast_meter") != true)
 	journal_dot = UiKit.notice_dot(journal_button)
 	camp_dot = UiKit.notice_dot(camp_button)
 	row.add_child(journal_button)
@@ -442,12 +479,12 @@ func set_restore_ready(is_ready: bool) -> void:
 ## Something new to look at in the camp (a decoration that became available).
 func set_camp_notice(has_news: bool) -> void:
 	camp_dot.visible = has_news
-	camp_button.tooltip_text = tr("ui.notice.camp_new") if has_news else ""
+	camp_button.tooltip_text = tr("ui.notice.camp_new") if has_news else _nav_name(camp_button)
 
 ## Something new waits in the journal (a species met but not looked at yet).
 func set_journal_notice(has_new: bool) -> void:
 	journal_dot.visible = has_new
-	journal_button.tooltip_text = tr("ui.notice.journal_new") if has_new else ""
+	journal_button.tooltip_text = tr("ui.notice.journal_new") if has_new else _nav_name(journal_button)
 
 ## Applies safe-area insets and the minimum touch size (design pixels), and drops optional words from
 ## the top bar when the screen is too narrow for them (the icons stay; they also carry tooltips).
@@ -458,7 +495,8 @@ func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> vo
 	for button in [settings_button, water_mind_button, restore_button]:
 		button.custom_minimum_size = Vector2(touch_min, touch_min)
 	cta_button.custom_minimum_size.y = touch_min * 1.3
-	_layout_nav_pictures(touch_min, get_viewport_rect().size.x if is_inside_tree() else 720.0)
+	if _nav_pictures_on:
+		_layout_nav_pictures(touch_min, get_viewport_rect().size.x if is_inside_tree() else 720.0)
 	action_button.custom_minimum_size = Vector2.ONE * touch_min * 1.75
 	fit_top_bar(get_viewport_rect().size.x if is_inside_tree() else 720.0)
 
