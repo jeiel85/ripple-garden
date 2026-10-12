@@ -83,3 +83,6 @@
   `items/` 미끼 5·모자 3(별밤 모자는 첫 결과가 뾰족한 마법사 모자라 벙거지로 다시), `moments/moment_rainbow`(꽉 찬 장면), `ui/ui_photo_wood`(나무 사진 액자).
   현재 그림 1장을 참고로 `codex exec`(모델 `gpt-5.6-luna`, 추론 `low`)로 "같은 디자인으로 더 크고 깨끗하게" 요청했다. 상업적 이용은 OpenAI 이용 약관을 따른다.
   `tools/codex_images.py`가 만들고 `tools/import_generated.py`가 보이는 부분으로 잘라 가장 긴 변 256px(순간 512px)로 줄여 넣는다(수정됨).
+- **그림 만들기 도구의 대체 경로** (2026-10-12): `tools/codex_images.py`는 Codex가 그리지 못하면(이미지 한도 등) Antigravity CLI(`agy -p`,
+  Gemini 이미지 생성)로 바꿔 그린다. agy는 진짜 투명 배경을 주지 못해(체크무늬를 그려 넣음) 잘라 쓸 그림은 단색 마젠타 배경으로 받아
+  `key_flat_background`로 지운다. 유리처럼 비치는 부분은 배경색이 조금 남을 수 있어 검수가 필요하다. 상업적 이용은 Google 이용 약관을 따른다.
