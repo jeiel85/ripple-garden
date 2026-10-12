@@ -340,3 +340,25 @@ func test_mockup_pieces_replace_their_controls_and_step_aside_in_high_contrast()
 	assert_false(english.get_meta("mockup_picture", true), "the Korean picture is not used in another language")
 	TranslationServer.set_locale(previous)
 	host.free()
+
+func test_mockup_picture_buttons_grow_with_large_ui() -> void:
+	if not ArtLibrary.has("ui", "btn_map_back"):
+		return
+	var previous := TranslationServer.get_locale()
+	TranslationServer.set_locale("ko")
+	GameState.set_setting("high_contrast_meter", false)
+	GameState.set_setting("large_ui", false)
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	var back := UiKit.icon_button("back", "뒤로", func() -> void: pass)
+	UiKit.mockup_picture(back, "btn_map_back", [])
+	host.add_child(back)
+	assert_true(back.custom_minimum_size.y >= UiTheme.TOUCH_MIN_PX)
+	GameState.set_setting("large_ui", true)
+	host.theme = UiTheme.build(1.0, true, false)
+	assert_true(back.custom_minimum_size.x >= UiTheme.TOUCH_MIN_LARGE_PX and back.custom_minimum_size.y >= UiTheme.TOUCH_MIN_LARGE_PX,
+		"Large UI makes the touch target bigger around the picture")
+	GameState.set_setting("large_ui", false)
+	TranslationServer.set_locale(previous)
+	host.free()

@@ -267,41 +267,62 @@ static func mockup_picture(control: Control, picture_name: String, content: Arra
 	var plain_icon: Texture2D = button.icon if button != null else null
 	if control.tooltip_text.is_empty():
 		control.tooltip_text = plain_text  # the picture has the word painted on; this stays its name
-	# The picture at the mockup's scale; a button keeps at least a touch target, the picture centred in it.
 	var drawn := picture.get_size() * MOCKUP_SCALE
-	var box := drawn
-	if button != null:
-		box = Vector2(maxf(drawn.x, UiTheme.TOUCH_MIN_PX), maxf(drawn.y, UiTheme.TOUCH_MIN_PX))
-	var inset := (box - drawn) * 0.5
 	var styles := {}
 	for state in PICTURE_STATES:
 		var style := StyleBoxTexture.new()
 		style.texture = picture
 		style.modulate_color = UiTheme.FRAME_TINTS.get(state, Color.WHITE)
-		style.expand_margin_left = -inset.x
-		style.expand_margin_right = -inset.x
-		style.expand_margin_top = -inset.y
-		style.expand_margin_bottom = -inset.y
 		styles[state] = style
 	var apply := func() -> void:
-		var on: bool = mockup_pictures_allowed()
-		if control.get_meta("mockup_picture", false) == on and control.has_meta("mockup_picture"):
+		# Changing a style box makes its control emit theme_changed again, synchronously: ignore those echoes.
+		if control.get_meta("mockup_applying", false):
 			return
-		control.set_meta("mockup_picture", on)
-		for node in content:
-			(node as CanvasItem).visible = not on
-		if button != null:
-			button.text = "" if on else plain_text
-			button.icon = null if on else plain_icon
-		for state in PICTURE_STATES:
-			if on:
-				control.add_theme_stylebox_override(state, styles[state])
-			else:
-				control.remove_theme_stylebox_override(state)
-		# The picture is not stretched: callers lay the control out shrunk (or switch on "mockup_picture").
-		control.custom_minimum_size = box if on else plain_size
+		control.set_meta("mockup_applying", true)
+		_apply_mockup_picture(control, picture, drawn, styles, content, plain_size, plain_text, plain_icon)
+		control.set_meta("mockup_applying", false)
 	control.theme_changed.connect(apply)
 	apply.call()
+
+## The swap itself (mockup_picture): picture or drawn control, sized to the current touch target.
+static func _apply_mockup_picture(control: Control, _picture: Texture2D, drawn: Vector2, styles: Dictionary, content: Array,
+		plain_size: Vector2, plain_text: String, plain_icon: Texture2D) -> void:
+	var button := control as Button
+	var on: bool = mockup_pictures_allowed()
+	# The picture at the mockup's scale; a button keeps at least the current touch target (Large UI makes
+	# it bigger), the picture centred in it. Recomputed whenever the theme is rebuilt.
+	var touch := UiTheme.touch_min(GameState.get_setting("large_ui") == true)
+	var box := drawn
+	if button != null:
+		box = Vector2(maxf(drawn.x, touch), maxf(drawn.y, touch))
+	var inset := (box - drawn) * 0.5
+	# Only touch the styles when the inset changes.
+	var first: StyleBoxTexture = styles[PICTURE_STATES[0]]
+	if not is_equal_approx(first.expand_margin_left, -inset.x) or not is_equal_approx(first.expand_margin_top, -inset.y):
+		for state in PICTURE_STATES:
+			var style: StyleBoxTexture = styles[state]
+			style.expand_margin_left = -inset.x
+			style.expand_margin_right = -inset.x
+			style.expand_margin_top = -inset.y
+			style.expand_margin_bottom = -inset.y
+	if on and control.custom_minimum_size != box:
+		control.custom_minimum_size = box
+	if control.get_meta("mockup_picture", false) == on and control.has_meta("mockup_picture"):
+		return
+	control.set_meta("mockup_picture", on)
+	for node in content:
+		(node as CanvasItem).visible = not on
+	if button != null:
+		button.text = "" if on else plain_text
+		button.icon = null if on else plain_icon
+	for state in PICTURE_STATES:
+		if on:
+			control.add_theme_stylebox_override(state, styles[state])
+		else:
+			control.remove_theme_stylebox_override(state)
+	# The picture is not stretched: callers lay the control out shrunk (or switch on "mockup_picture").
+	if not on:
+		control.custom_minimum_size = plain_size
 
 ## Small "something new to look at" dot in the top-right corner of `owner_control` (D-018). It is a
 ## shape as well as a colour, and the owner's tooltip names it for assistive tech.
