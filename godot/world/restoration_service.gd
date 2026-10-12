@@ -6,7 +6,8 @@ extends RefCounted
 ## threshold, but it takes effect when the player chooses to restore, which is what triggers the
 ## visible change in the world. Levels cannot be lost and points are never spent.
 ##
-## The playable region can reach `vertical_slice.max_restoration_level` (10 since P1-001); points keep
+## Every region with a world (a layout, D-035) can reach `vertical_slice.max_restoration_level` (10 since
+## P1-001); a region whose world has not arrived stays at 0. Points keep
 ## accumulating past any cap, so raising it never loses progress. The free-trial boundary (BALANCE §8)
 ## is applied with the full-game entitlement (P1-011/012).
 
@@ -33,7 +34,7 @@ func _init(game_state: Node, thresholds: Array, slice: Dictionary) -> void:
 
 ## Highest level the player can currently reach in the region.
 func max_level(region_id: String) -> int:
-	if region_id == _slice["region_id"]:
+	if region_id == _slice["region_id"] or RegionUnlocks.has_world(region_id):
 		return mini(int(_slice["max_restoration_level"]), _thresholds.size() - 1)
 	return 0
 

@@ -159,3 +159,14 @@ func test_the_map_says_why_it_cannot_leave_while_fishing() -> void:
 	assert_eq(root.ui.map_panel.note_text(), tr("ui.map.travel_busy"))
 	assert_eq(GameState.get_current_region(), "")
 	_stop(root)
+
+func test_the_valley_can_be_restored_like_the_pond() -> void:
+	GameState.new_game()
+	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
+	assert_eq(restoration.max_level(R2), restoration.max_level(R1), "the valley is capped below the pond")
+	assert_eq(restoration.max_level(R3), 0, "a region without a world cannot be restored yet")
+	GameState.add_restoration_points(R2, restoration.points_for_level(1))
+	assert_true(restoration.can_restore(R2))
+	assert_true(restoration.restore(R2))
+	assert_eq(GameState.get_restoration_level(R2), 1)
+	GameState.new_game()
