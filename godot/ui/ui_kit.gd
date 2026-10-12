@@ -262,11 +262,26 @@ static func mockup_picture(control: Control, picture_name: String, content: Arra
 	if picture == null:
 		return
 	var plain_size := control.custom_minimum_size
+	var button := control as Button
+	var plain_text := button.text if button != null else ""
+	var plain_icon: Texture2D = button.icon if button != null else null
+	if control.tooltip_text.is_empty():
+		control.tooltip_text = plain_text  # the picture has the word painted on; this stays its name
+	# The picture at the mockup's scale; a button keeps at least a touch target, the picture centred in it.
+	var drawn := picture.get_size() * MOCKUP_SCALE
+	var box := drawn
+	if button != null:
+		box = Vector2(maxf(drawn.x, UiTheme.TOUCH_MIN_PX), maxf(drawn.y, UiTheme.TOUCH_MIN_PX))
+	var inset := (box - drawn) * 0.5
 	var styles := {}
 	for state in PICTURE_STATES:
 		var style := StyleBoxTexture.new()
 		style.texture = picture
 		style.modulate_color = UiTheme.FRAME_TINTS.get(state, Color.WHITE)
+		style.expand_margin_left = -inset.x
+		style.expand_margin_right = -inset.x
+		style.expand_margin_top = -inset.y
+		style.expand_margin_bottom = -inset.y
 		styles[state] = style
 	var apply := func() -> void:
 		var on: bool = mockup_pictures_allowed()
@@ -275,13 +290,16 @@ static func mockup_picture(control: Control, picture_name: String, content: Arra
 		control.set_meta("mockup_picture", on)
 		for node in content:
 			(node as CanvasItem).visible = not on
+		if button != null:
+			button.text = "" if on else plain_text
+			button.icon = null if on else plain_icon
 		for state in PICTURE_STATES:
 			if on:
 				control.add_theme_stylebox_override(state, styles[state])
 			else:
 				control.remove_theme_stylebox_override(state)
 		# The picture is not stretched: callers lay the control out shrunk (or switch on "mockup_picture").
-		control.custom_minimum_size = picture.get_size() * MOCKUP_SCALE if on else plain_size
+		control.custom_minimum_size = box if on else plain_size
 	control.theme_changed.connect(apply)
 	apply.call()
 

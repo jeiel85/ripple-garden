@@ -2,7 +2,7 @@
 """Cuts fixed-word UI pieces out of the mockups into godot/art/ui/ (D-032; Korean only: the words are baked in).
 
 The bottom bar (mockup 01), the title boards of the journal, gear, camp and map (04-07) and the catch result's three
-action cards (03).
+action cards (03), and the fixed-word buttons of the fishing row (02), the camp sheet (06) and the map (07).
 
 Each mockup is one flat picture, so each piece is cut with a rounded-rectangle mask fitted to its border (the
 blurred scenery around it is left out). The camp button has the mockup's orange "new" dot baked on its top-right
@@ -35,6 +35,11 @@ PIECES = {
     "card_release": ("03_catch_result.png", 38, 1386, 292, 1553, 36),
     "card_record": ("03_catch_result.png", 324, 1386, 582, 1553, 36),
     "card_again": ("03_catch_result.png", 602, 1370, 905, 1554, 40),
+    # Fixed-word buttons on opaque boards (the see-through ones show the mockup's scenery inside, so not those).
+    "btn_fish_cancel": ("02_fishing_bite_reel.png", 45, 1478, 177, 1587, 26),
+    "btn_fish_journal": ("02_fishing_bite_reel.png", 762, 1478, 899, 1587, 26),
+    "btn_camp_done": ("06_camp_edit.png", 312, 1520, 638, 1628, 50),
+    "btn_map_back": ("07_region_map.png", 35, 1509, 166, 1628, 26),
 }
 DOT_CORNER = 62  # px of the camp button's top-right corner replaced (covers the baked dot)
 

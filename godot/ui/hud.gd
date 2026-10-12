@@ -364,6 +364,8 @@ func _build_fishing() -> Control:
 	fishing_journal_button.size_flags_vertical = Control.SIZE_SHRINK_END
 	for button in [cancel_button, fishing_journal_button]:
 		button.custom_minimum_size.x = 132
+	UiKit.mockup_picture(cancel_button, "btn_fish_cancel", [])
+	UiKit.mockup_picture(fishing_journal_button, "btn_fish_journal", [])
 	action_button = ReelButton.new()
 	action_button.button_down.connect(func() -> void: cta_down.emit())
 	action_button.button_up.connect(func() -> void: cta_up.emit())
@@ -491,7 +493,8 @@ func set_journal_notice(has_new: bool) -> void:
 func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> void:
 	_set_margins(top_inset, bottom_inset)
 	for button in [journal_button, gear_button, camp_button, cancel_button, fishing_journal_button]:
-		button.custom_minimum_size.y = touch_min * 1.1
+		if not button.get_meta("mockup_picture", false):  # a mockup piece keeps its own size
+			button.custom_minimum_size.y = touch_min * 1.1
 	for button in [settings_button, water_mind_button, restore_button]:
 		button.custom_minimum_size = Vector2(touch_min, touch_min)
 	cta_button.custom_minimum_size.y = touch_min * 1.3
