@@ -58,13 +58,18 @@ func test_japanese_starts_from_its_own_face_and_falls_back_to_the_other() -> voi
 	assert_true((japanese["body"] as FontVariation).base_font.resource_path.ends_with("MPLUSRounded1c-Regular.woff2"))
 	assert_eq((japanese["body"] as FontVariation).fallbacks[0], (korean["body"] as FontVariation).base_font)
 
+## The caption size at Text Scale `scale`: TEXT_SIZES["caption"] of the body size (BASE_FONT_PX, scaled).
+static func _caption_px(scale: float) -> int:
+	return roundi(roundi(UiTheme.BASE_FONT_PX * scale) * float(UiTheme.TEXT_SIZES["caption"]))
+
 func test_the_theme_uses_the_bundled_fonts_and_the_named_sizes() -> void:
 	var theme := UiTheme.build(1.0, false, false)
 	assert_true(theme.default_font is FontVariation)
 	assert_true(theme.get_font("font", "SignLabel") != theme.default_font, "signs are lettered")
-	assert_eq(theme.get_font_size("caption", UiTheme.SIZES_TYPE), 21)
+	assert_eq(theme.get_font_size("caption", UiTheme.SIZES_TYPE), _caption_px(1.0))
 	assert_eq(theme.get_font_size("font_size", "SmallLabel"), theme.get_font_size("small", UiTheme.SIZES_TYPE))
-	assert_eq(UiTheme.build(1.4, false, false).get_font_size("caption", UiTheme.SIZES_TYPE), 29, "Text Scale grows every size")
+	assert_eq(UiTheme.build(1.4, false, false).get_font_size("caption", UiTheme.SIZES_TYPE), _caption_px(1.4), "Text Scale grows every size")
+	assert_true(_caption_px(1.4) > _caption_px(1.0))
 
 func test_a_named_text_size_follows_the_theme() -> void:
 	var host := Control.new()
@@ -73,9 +78,9 @@ func test_a_named_text_size_follows_the_theme() -> void:
 	var caption := UiKit.label("x")
 	UiKit.text_size(caption, "caption")
 	host.add_child(caption)
-	assert_eq(caption.get_theme_font_size("font_size"), 21)
+	assert_eq(caption.get_theme_font_size("font_size"), _caption_px(1.0))
 	host.theme = UiTheme.build(1.4, false, false)
-	assert_eq(caption.get_theme_font_size("font_size"), 29, "a rebuilt theme (Text Scale) resizes it")
+	assert_eq(caption.get_theme_font_size("font_size"), _caption_px(1.4), "a rebuilt theme (Text Scale) resizes it")
 	host.free()
 
 func test_screens_take_text_and_icon_sizes_from_the_scales() -> void:

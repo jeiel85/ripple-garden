@@ -69,26 +69,27 @@ func _init() -> void:
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
 	back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(back)
-	var sign_board := PanelContainer.new()
-	sign_board.theme_type_variation = "SignPanel"
-	sign_board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var sign_row := UiKit.hbox(14)
-	sign_row.add_child(UiKit.icon("gear", UiTheme.ICON_L, UiTheme.WOOD_TEXT))
-	var sign_text := UiKit.vbox(0)
-	sign_text.add_child(UiKit.label(tr("ui.gear.title"), "SignLabel", HORIZONTAL_ALIGNMENT_LEFT, false))
-	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
-	subtitle.add_theme_color_override("font_color", UiTheme.WOOD_TEXT)
-	sign_text.add_child(subtitle)
-	sign_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sign_row.add_child(sign_text)
-	sign_board.add_child(sign_row)
-	header.add_child(sign_board)
+	# The same title board as the journal, camp and map, the subtitle on a pill under it: a two-line
+	# subtitle inside the board ran past the painted planks.
+	var titles := UiKit.vbox(6)
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sign_board := UiKit.sign_board("gear", tr("ui.gear.title"))
+	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	titles.add_child(sign_board)
+	var hint := PanelContainer.new()
+	hint.theme_type_variation = "PillPanel"
+	hint.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	UiKit.text_size(subtitle, "caption")
+	hint.add_child(subtitle)
+	titles.add_child(hint)
+	header.add_child(titles)
 	column.add_child(header)
 
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var category: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_S, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_M, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_tabs[category] = button
 		tab_row.add_child(button)

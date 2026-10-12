@@ -23,7 +23,7 @@ extends RefCounted
 ## soon as they are drawn (`_framed`): FRAMES lists which box takes which picture. High Contrast keeps the
 ## coded boxes, whose borders are part of the contrast.
 
-const BASE_FONT_PX := 30
+const BASE_FONT_PX := 24
 const TOUCH_MIN_PX := 96.0
 const TOUCH_MIN_LARGE_PX := 120.0
 const LARGE_UI_FONT_FACTOR := 1.15
@@ -184,6 +184,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_type_variation("TabSelected", "Button")
 	_button_states(theme, "TabSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
 	_font_colors(theme, "TabSelected", GREEN_TEXT)
+	_icon_colors(theme, "TabSelected", GREEN_TEXT)  # the icon stays as readable as the word on green
 	theme.set_font_size("font_size", "TabButton", text_px(font, "small"))
 	theme.set_font_size("font_size", "TabSelected", text_px(font, "small"))
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
@@ -324,7 +325,8 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_color("font_color", "PopupMenu", ink)
 	theme.set_color("font_hover_color", "PopupMenu", ink)
 	# Rows of the drop-down list are touch targets too: 30 px text plus padding reaches ~96 px.
-	theme.set_constant("v_separation", "PopupMenu", 48)
+	# Rows stay a full touch target whatever the body size.
+	theme.set_constant("v_separation", "PopupMenu", maxi(48, int(TOUCH_MIN_PX) - font))
 
 	theme.set_stylebox("slider", "HSlider", _box(Color("#dccdae"), Color(0, 0, 0, 0), 0, 8, 12))
 	theme.set_stylebox("grabber_area", "HSlider", _box(GREEN, Color(0, 0, 0, 0), 0, 8, 12))
