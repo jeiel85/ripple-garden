@@ -4,15 +4,18 @@ extends Control
 ## The region map (UI_UX §2, mockup 07, P1-010): five islands on a sea under drifting clouds, joined by a
 ## dotted route. Each island carries a cream name sign and a dark pill with the species met there; the
 ## current island glows, locked ones are dimmed with a lock. Tapping a sign says where you are, what a
-## locked island needs (its real condition and how far along you are), or that an open island's world
-## comes in a later update — in a pill at the bottom of the map (the global toast sits under open screens,
-## and the map covers it). Opened from the region pill of the status bar.
+## locked island needs (its real condition and how far along you are), offers to travel to an open island
+## (D-035, a "떠나기" button in the note), or says that an open island's world comes in a later update — in a
+## pill at the bottom of the map (the global toast sits under open screens, and the map covers it). Opened
+## from the region pill of the status bar.
 ##
 ## The map is painted from shapes (MapView) until the map art of ASSET_REQUESTS §7 arrives (D-029):
 ## `map/map_background.png` replaces the sea and clouds, `map/map_island_<region id>.png` an island. The
 ## route, the glow of the current island, the locks and the signs stay the game's.
 
 signal close_pressed
+## The player chose to travel to an open region.
+signal travel_requested(region_id: String)
 
 const FULLSCREEN := true
 const KEEPS_STATUS := true
@@ -26,6 +29,9 @@ var _signs: Dictionary = {}
 var _signs_layer: Control
 var _note: PanelContainer
 var _note_label: Label
+var _travel_button: Button
+## The open region the travel button goes to.
+var _travel_target := ""
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -68,8 +74,17 @@ func _init() -> void:
 	_note.offset_right = -24
 	_note.offset_bottom = -40
 	_note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var note_row := UiKit.hbox(10)
+	note_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_note_label = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, true)
-	_note.add_child(_note_label)
+	_note_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	note_row.add_child(_note_label)
+	_travel_button = UiKit.icon_button("forward", tr("ui.map.travel"), func() -> void: travel_requested.emit(_travel_target), "", UiTheme.ICON_M)
+	_travel_button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
+	_travel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_travel_button.visible = false
+	note_row.add_child(_travel_button)
+	_note.add_child(note_row)
 	_note.visible = false
 	add_child(_note)
 	resized.connect(_place_signs)
@@ -103,9 +118,13 @@ func sign_count() -> int:
 ## What tapping an island's sign says (and returns, for tests).
 func tap(region_id: String) -> String:
 	var text := ""
+	_travel_target = ""
 	match _unlocks.state_of(region_id, current_region):
 		RegionUnlocks.CURRENT:
 			text = tr("ui.map.here") % _name(region_id)
+		RegionUnlocks.OPEN:
+			text = tr("ui.map.can_travel") % _name(region_id)
+			_travel_target = region_id
 		RegionUnlocks.COMING:
 			text = tr("ui.map.coming") % _name(region_id)
 		RegionUnlocks.LOCKED:
@@ -114,7 +133,17 @@ func tap(region_id: String) -> String:
 				condition["fish"], condition["fish_now"]]
 	_note_label.text = text
 	_note.visible = not text.is_empty()
+	_travel_button.visible = not _travel_target.is_empty()
 	return text
+
+## Where the travel button goes now ("" when it is hidden).
+func travel_target() -> String:
+	return _travel_target
+
+## Says why a requested journey did not start (shown in the map's own note).
+func show_note(text: String) -> void:
+	_note_label.text = text
+	_note.visible = true
 
 ## The answer shown at the bottom of the map ("" when nothing was tapped yet).
 func note_text() -> String:

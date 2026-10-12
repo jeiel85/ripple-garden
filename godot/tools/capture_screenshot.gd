@@ -15,6 +15,7 @@ extends SceneTree
 ##   --hc            high contrast + large UI        --reduced      reduced motion
 ##   --ripple=N      add Ripple                      --memory=N     add Memory
 ##   --size=WxH      window size (default 405x720)
+##   --region=ID     start in this region (every other region is restored and its fish met, so it is open)
 
 var _args := {}
 
@@ -37,6 +38,16 @@ func _run() -> void:
 	game_state.new_game()
 	if _args.has("lang"):
 		game_state.set_setting("language", _args["lang"])  # ko | en | ja (default: the device's)
+
+	if _args.has("region"):
+		for other in content.regions:
+			if other == _args["region"]:
+				continue
+			game_state.add_restoration_points(other, 100000)
+			game_state.set_restoration_level(other, 10)
+			for fish_def in content.get_fish_for_region(other):
+				game_state.record_encounter(fish_def["id"], float(fish_def["size_cm"]["min"]), fish_def["behavior"])
+		game_state.set_current_region(_args["region"])
 
 	var packed: PackedScene = load("res://world/game_root.tscn")
 	var game: Node = packed.instantiate()

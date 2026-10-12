@@ -596,3 +596,8 @@ moment.waiting_pond.hint,"잠시 쉬었다가 돌아와 보세요.","Take a brea
 "ui.language.en","English","English","English"
 "ui.language.ja","日本語","日本語","日本語"
 "ui.toast.language_unsaved","저장하지 못해 일부 글자는 다음에 시작할 때 바뀌어요.","Couldn't save, so some text will change next time you start.","保存できなかったため、一部の文字は次の起動時に変わります。"
+"ui.map.can_travel","%s에서 낚시할 수 있어요.","You can fish at %s.","%sで釣りができます。"
+"ui.map.travel","떠나기","Travel","出かける"
+"ui.map.travelling","%s(으)로 가는 중이에요…","Heading to %s…","%sへ向かっています…"
+"ui.map.travel_busy","낚싯줄을 거두고 잡은 물고기를 놓아준 뒤에 떠날 수 있어요.","Reel in the line and let your catch go before you travel.","糸を巻き取り、釣った魚を放してから出かけましょう。"
+"ui.map.travel_unsaved","저장하지 못해 지금은 떠날 수 없어요.","Couldn't save, so you can't travel right now.","保存できなかったため、いまは出かけられません。"

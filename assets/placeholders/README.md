@@ -86,3 +86,7 @@
 - **그림 만들기 도구의 대체 경로** (2026-10-12): `tools/codex_images.py`는 Codex가 그리지 못하면(이미지 한도 등) Antigravity CLI(`agy -p`,
   Gemini 이미지 생성)로 바꿔 그린다. agy는 진짜 투명 배경을 주지 못해(체크무늬를 그려 넣음) 잘라 쓸 그림은 단색 마젠타 배경으로 받아
   `key_flat_background`로 지운다. 유리처럼 비치는 부분은 배경색이 조금 남을 수 있어 검수가 필요하다. 상업적 이용은 Google 이용 약관을 따른다.
+- **Region 02 숲속 계곡 그림** (2026-10-12~13, Codex CLI `codex exec`, 모델 `gpt-5.6-luna`, 추론 `low`): `world/r02_scene.png`(Region 01 풍경을 참고로 같은 화풍·카메라의 계곡),
+  `world/r02_scene_barren.png`(계곡 그림을 참고로 같은 구도의 시든 모습), 물고기 10종의 옆모습·위에서 본 모습 20장(`fish/fish_<id>_side|top.png`, 붕어·미꾸라지 그림을 참고).
+  위에서 본 모습은 첫 결과가 옆모습이라 등 쪽에서 내려다본 그림을 다시 요청했다. 상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 물고기는
+  `tools/import_generated.py`로 잘라 가장 긴 변 256px로 줄였다(수정됨).

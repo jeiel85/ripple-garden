@@ -302,7 +302,7 @@ func test_layout_zone_habitat_must_belong_to_the_region() -> void:
 	raw["layouts"]["region_01_quiet_pond"]["zones"][1]["habitat"] = "lagoon"
 	var result := ContentValidator.validate(raw)
 	_assert_error(result, "is not a habitat of the region")
-	assert_true(result["layouts"].is_empty(), "invalid layout kept")
+	assert_false(result["layouts"].has("region_01_quiet_pond"), "invalid layout kept")
 
 func test_layout_must_cover_every_habitat() -> void:
 	var raw := _raw()

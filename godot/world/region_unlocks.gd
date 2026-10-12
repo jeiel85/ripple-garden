@@ -6,13 +6,15 @@ extends RefCounted
 ## have been met. Unlocking is derived from the save every time, never stored, so it can never disagree
 ## with the progress it depends on.
 ##
-## Travelling needs a second region's world, which arrives with P2-001; until then an open region other
-## than the current one says honestly that its world comes in a later update.
+## An open region whose world exists (a layout in region_layouts.json) can be travelled to (D-035); an open
+## region without one says honestly that its world comes in a later update.
 
 ## Map states of a region.
 const CURRENT := "current"
 const LOCKED := "locked"
 const COMING := "coming"
+## Open and its world exists: the player can travel there.
+const OPEN := "open"
 
 var _state: Node
 
@@ -52,11 +54,28 @@ func species_met(region_id: String) -> int:
 static func species_total(region_id: String) -> int:
 	return ContentDB.get_fish_for_region(region_id).size()
 
-## What the map shows for a region: CURRENT, COMING (open, its world arrives later) or LOCKED.
+## What the map shows for a region: CURRENT, OPEN (can travel there), COMING (open, its world arrives
+## later) or LOCKED.
 func state_of(region_id: String, current_region: String) -> String:
 	if region_id == current_region:
 		return CURRENT
-	return COMING if is_unlocked(region_id) else LOCKED
+	if not is_unlocked(region_id):
+		return LOCKED
+	return OPEN if has_world(region_id) else COMING
+
+## Whether the player can be in this region: it is open and its world exists.
+func can_travel(region_id: String) -> bool:
+	return has_world(region_id) and is_unlocked(region_id)
+
+static func has_world(region_id: String) -> bool:
+	return not ContentDB.get_layout(region_id).is_empty()
+
+## The region a new game starts in (the one whose unlock condition is "start").
+static func start_region() -> String:
+	for unlock in ContentDB.progression.get("region_unlocks", []):
+		if unlock["condition"].get("type", "") == "start":
+			return unlock["region_id"]
+	return ""
 
 ## The condition of a locked region as {"region", "level", "fish", "level_now", "fish_now"} ({} for the start).
 func condition_of(region_id: String) -> Dictionary:
