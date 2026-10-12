@@ -117,9 +117,13 @@ func _init() -> void:
 	# Seven tabs do not fit a phone in every language: the strip scrolls sideways instead of squeezing.
 	var tab_scroll := ScrollContainer.new()
 	tab_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	tab_scroll.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX + 8
+	tab_scroll.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
 	tab_scroll.add_child(tab_row)
-	column.add_child(tab_scroll)
+	# The tabs stand on the notebook like folder tabs (mockup 04): no gap between them.
+	var folder := UiKit.vbox(0)
+	folder.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	folder.add_child(tab_scroll)
+	column.add_child(folder)
 
 	# Notebook: cards on the left, the chosen fish on the right.
 	var book := UiKit.hbox(8)
@@ -220,7 +224,7 @@ func _init() -> void:
 	right_scroll.add_child(page_margin)
 	right.add_child(UiKit.margin(right_scroll, 14))
 	book.add_child(right)
-	column.add_child(book)
+	folder.add_child(book)
 
 func setup(p_journal: JournalModel, p_region_id: String) -> void:
 	journal = p_journal
@@ -595,7 +599,7 @@ static func _moment_picture(art: Texture2D, height: float) -> TextureRect:
 func page_shows_moment_art() -> bool:
 	return _page_moment.visible and _page_moment.get_parent().visible
 
-## A tiny painted view of the species' home water (until region thumbnails arrive as art).
+## A small view of the species' home water: the region's scene painting, or shapes without one.
 class HomeView extends Control:
 	var region_id := ""
 
@@ -605,6 +609,14 @@ class HomeView extends Control:
 
 	func _draw() -> void:
 		var layout := ContentDB.get_layout(region_id)
+		# The region's painted scene, cropped to the pond (mockup 04's "home water" picture).
+		var scene := ArtLibrary.texture("world", String(layout.get("art", "")) + "_scene") if not layout.is_empty() else null
+		if scene != null:
+			var crop := Rect2(Vector2(scene.get_width() * 0.08, scene.get_height() * 0.22), Vector2.ZERO)
+			crop.size.x = scene.get_width() * 0.84
+			crop.size.y = minf(crop.size.x * size.y / maxf(1.0, size.x), scene.get_height() * 0.6)
+			draw_texture_rect_region(scene, Rect2(Vector2.ZERO, size), crop)
+			return
 		var palette: Dictionary = layout.get("levels", [{}])[-1] if not layout.is_empty() else {}
 		var water := Color(palette.get("water_shallow", "#5fb3a9"))
 		var grass := Color(palette.get("grass", "#6db35e"))

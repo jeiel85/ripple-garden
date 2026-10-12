@@ -99,14 +99,23 @@ func _init() -> void:
 		button.tooltip_text = button.text
 		_tabs[category] = button
 		tab_row.add_child(button)
-	column.add_child(tab_row)
 
-	column.add_child(_build_featured())
-	column.add_child(_build_list())
+	# Mockup 05: the cards lie on a wooden board, the tabs stand on the first card like folder tabs.
+	var board := PanelContainer.new()
+	board.theme_type_variation = "WoodPanel"
+	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var on_board := UiKit.vbox(12)
+	var folder := UiKit.vbox(0)
+	folder.add_child(tab_row)
+	folder.add_child(_build_featured())
+	on_board.add_child(folder)
+	on_board.add_child(_build_list())
 	var summaries := UiKit.hbox(10)
 	summaries.add_child(_build_summary("bait"))
 	summaries.add_child(_build_summary("bag"))
-	column.add_child(summaries)
+	on_board.add_child(summaries)
+	board.add_child(on_board)
+	column.add_child(board)
 
 func _build_featured() -> Control:
 	var card := PanelContainer.new()
