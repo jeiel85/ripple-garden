@@ -109,6 +109,7 @@ func _init() -> void:
 	var done := UiKit.centered_button("check", tr("ui.camp.finish"), func() -> void: close_pressed.emit(), "WaterButton")
 	done.custom_minimum_size = Vector2(320, UiTheme.TOUCH_MIN_PX * 1.2)
 	done.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	UiKit.mockup_picture(done, "btn_camp_done", [done.get_child(0)] if done.get_child_count() > 0 else [])
 	box.add_child(done)
 	sheet.add_child(UiKit.margin(box, 14))
 	add_child(sheet)

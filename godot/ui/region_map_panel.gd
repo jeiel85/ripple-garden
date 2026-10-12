@@ -57,6 +57,7 @@ func _init() -> void:
 	back.offset_left = 24
 	back.offset_bottom = -28
 	back.custom_minimum_size = Vector2(120, 120)
+	UiKit.mockup_picture(back, "btn_map_back", [])
 	add_child(back)
 
 	_note = PanelContainer.new()
