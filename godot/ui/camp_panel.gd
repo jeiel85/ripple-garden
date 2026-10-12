@@ -93,7 +93,7 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_S, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_M, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_tabs[tab_id] = button
 		tab_row.add_child(button)

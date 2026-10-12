@@ -448,7 +448,7 @@ acc.straw_hat.desc,"햇살을 가려 주는 꽃 장식 밀짚모자예요.","A f
 acc.bucket_hat.desc,"숲 빛깔로 물든 포근한 모자예요.","A soft hat in forest green.","森の色に染まった、やわらかな帽子です。"
 acc.river_cap.desc,"강바람처럼 시원한 파란 모자예요.","A cool blue cap like the river breeze.","川風のように涼しげな青い帽子です。"
 acc.starry_hat.desc,"밤하늘을 닮은 모자에 별 하나가 반짝여요.","A night-sky hat with a single star.","夜空に似た帽子に、星がひとつきらめきます。"
-"ui.gear.subtitle","더 좋은 장비로\n더 특별한 낚시를 즐겨요.","Better gear,\nmore special fishing.","もっといい装備で\nもっと特別な釣りを。"
+"ui.gear.subtitle","더 좋은 장비로 더 특별한 낚시를 즐겨요.","Better gear, more special fishing.","もっといい装備で、もっと特別な釣りを。"
 "ui.gear.tab.rod","낚싯대","Rods","釣り竿"
 "ui.gear.tab.bait","미끼","Bait","エサ"
 "ui.gear.tab.bag","가방","Bags","バッグ"

@@ -107,7 +107,7 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_S, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_M, false)
 		button.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
 		button.add_theme_constant_override("h_separation", 2)
 		button.custom_minimum_size.x = 104

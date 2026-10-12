@@ -205,6 +205,10 @@ func _build_top() -> Control:
 	row.add_child(settings_button)
 	return row
 
+## The bottom bar's side buttons (journal, gear, camp): a touch target, icon over a small caption.
+const NAV_SIDE_PX := 100.0
+const NAV_HEIGHT_PX := 104.0
+
 func _build_bottom() -> Control:
 	var row := UiKit.hbox(12)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -230,11 +234,15 @@ func _build_bottom() -> Control:
 	cta_button.button_down.connect(func() -> void: cta_down.emit())
 	cta_button.button_up.connect(func() -> void: cta_up.emit())
 	camp_button = UiKit.icon_button("camp", tr("ui.button.camp"), func() -> void: camp_pressed.emit())
+	# Mockup 01: two small square buttons, the wide fishing board, and a wider camp button.
 	for button in [journal_button, gear_button, camp_button]:
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.size_flags_horizontal = Control.SIZE_FILL
 		button.clip_text = false
 		button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
-	camp_button.size_flags_stretch_ratio = 1.3
+		button.custom_minimum_size = Vector2(NAV_SIDE_PX, NAV_HEIGHT_PX)
+		UiKit.text_size(button, "caption")
+	camp_button.custom_minimum_size.x = NAV_SIDE_PX * 1.5
+	cta_button.custom_minimum_size.y = NAV_HEIGHT_PX
 	journal_dot = UiKit.notice_dot(journal_button)
 	camp_dot = UiKit.notice_dot(camp_button)
 	row.add_child(journal_button)
