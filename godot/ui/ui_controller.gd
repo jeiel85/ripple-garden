@@ -179,7 +179,9 @@ func setup(deps: Dictionary) -> void:
 	_refresh_restore_hint()
 	_refresh_journal_notice()
 	_refresh_camp_notice()
-	_refresh_auto()
+	# After the game root has finished starting: a catch still in hand or a "while you were away" card comes
+	# up first, and the one-time "auto fishing is ready" note must not be used up behind it (Codex review #67).
+	_refresh_auto.call_deferred()
 	_show_first_hint()
 
 func _build_modal_host() -> void:

@@ -119,3 +119,24 @@ func test_the_ready_note_is_shown_once_per_save() -> void:
 	_finish_onboarding(root)
 	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the ready note was not shown")
 	_stop(root)
+
+func test_the_ready_note_waits_for_a_catch_still_in_hand_at_startup() -> void:
+	GameState.new_game()
+	var start_region: String = ContentDB.balance["vertical_slice"]["region_id"]
+	var species := ContentDB.get_fish_for_region(start_region)
+	for i in int(ContentDB.balance["auto_fishing"]["unlock_species"]):
+		GameState.record_encounter(species[i]["id"], 10.0)
+	GameState.set_pending_catch({"fish_id": species[0]["id"], "region_id": start_region, "size_cm": 10.0, "rarity": 1, "first_discovery": false})
+	var save_service: Node = tree.root.get_node("SaveService")
+	_was_blocked = save_service.write_blocked
+	save_service.write_blocked = true
+	var root: GameRoot = (load(SCENE) as PackedScene).instantiate()
+	root.load_save = false
+	tree.root.add_child(root)
+	await tree.process_frame  # the deferred refresh runs after the game root has started
+	assert_eq(root.fishing.state, FishingController.State.INSPECT)
+	assert_false(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the note was used up behind the catch result")
+	root.ui.inspect_panel.release_pressed.emit()
+	_run(root, 3.0, func() -> bool: return root.fishing.state == FishingController.State.READY)
+	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the note never came after the catch was released")
+	_stop(root)
