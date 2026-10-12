@@ -445,9 +445,12 @@ func test_bottom_bar_pictures_keep_names_and_step_aside_in_high_contrast() -> vo
 	GameState.set_setting("high_contrast_meter", false)
 	assert_true(hud.journal_button.text.is_empty(), "the picture comes back")
 	_stop(root)
+	var offered := LocalizationCheck.offered
+	LocalizationCheck.offered = LocalizationCheck.LANGUAGES  # were English offered again
 	GameState.new_game()
 	GameState.set_setting("language", "en")
 	var english := _start(false)
 	assert_false(english.ui.hud.journal_button.text.is_empty(), "another language keeps the translated button")
 	_stop(english)
+	LocalizationCheck.offered = offered
 	TranslationServer.set_locale(previous)

@@ -71,15 +71,26 @@ func test_a_row_with_missing_columns_is_reported_not_skipped() -> void:
 	assert_true(problems[2].contains(":5: key 'a.name' is already on line 2"), problems[2])
 	DirAccess.remove_absolute(path)
 
+func test_only_korean_is_offered_for_now() -> void:
+	assert_eq(Array(LocalizationCheck.offered), ["ko"], "the game is sold in Korean (2026-10-12)")
+	assert_eq(LocalizationCheck.locale_for("auto", "de"), "ko", "any device plays in Korean")
+	assert_eq(LocalizationCheck.locale_for("en", "en"), "ko", "an old saved English setting plays in Korean")
+
 func test_the_language_setting_picks_the_locale() -> void:
+	# The multi-language rules, for when English and Japanese are offered again.
+	var previous := LocalizationCheck.offered
+	LocalizationCheck.offered = LocalizationCheck.LANGUAGES
 	assert_eq(LocalizationCheck.locale_for("ja", "ko"), "ja", "an explicit choice wins over the device")
 	assert_eq(LocalizationCheck.locale_for("auto", "ja"), "ja")
 	assert_eq(LocalizationCheck.locale_for("auto", "ko"), "ko")
 	assert_eq(LocalizationCheck.locale_for("auto", "de"), "en", "an untranslated device language reads English")
 	assert_eq(LocalizationCheck.locale_for("klingon", "ko"), "ko", "an unknown setting follows the device")
+	LocalizationCheck.offered = previous
 
 func test_choosing_japanese_in_settings_switches_the_game() -> void:
 	var previous := TranslationServer.get_locale()
+	var offered := LocalizationCheck.offered
+	LocalizationCheck.offered = LocalizationCheck.LANGUAGES  # as if all three were offered
 	GameState.new_game()
 	var save_service: Node = tree.root.get_node("SaveService")
 	var was_blocked: bool = save_service.write_blocked
@@ -104,6 +115,7 @@ func test_choosing_japanese_in_settings_switches_the_game() -> void:
 	save_service.write_blocked = was_blocked
 	GameState.new_game()
 	TranslationServer.set_locale(previous)
+	LocalizationCheck.offered = offered
 
 func test_references_cover_every_content_category() -> void:
 	var owners := {}
