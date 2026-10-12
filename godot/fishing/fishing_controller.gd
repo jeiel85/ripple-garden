@@ -44,6 +44,10 @@ var region_id := "region_01_quiet_pond"
 var rng := RandomNumberGenerator.new()
 ## Where the current/last line landed and the habitat there.
 var landing := Vector2.ZERO
+
+## Seconds until the current timed state ends (the bite, while waiting); 0 outside timed states.
+func time_left() -> float:
+	return maxf(_timer, 0.0) if state in TIMED_STATES else 0.0
 var habitat := ""
 var reeling := false
 ## The fish on the line (null while nothing has bitten) and the active fight, if any.

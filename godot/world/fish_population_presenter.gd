@@ -17,6 +17,8 @@ const NEAR_RADIUS := 260.0
 const NEAR_TICK_SEC := 1.0 / 15.0
 const FAR_TICK_SEC := 1.0 / 3.0
 const ARRIVE_DISTANCE := 16.0
+## The approaching fish stops this far below the bobber (a nibble seen from above, not on top of it).
+const APPROACH_BELOW := 10.0
 
 var region_id := ""
 var habitat_map: HabitatMap = null
@@ -132,6 +134,7 @@ func _process(delta: float) -> void:
 	var slow: bool = _state().get_setting("battery_saver") == true
 	for agent in _active:
 		agent.think_left -= delta
+		agent.approach_left = maxf(agent.approach_left - delta, 0.0)
 		if agent.think_left <= 0.0:
 			var near := agent.position.distance_to(focus) < NEAR_RADIUS
 			agent.think_left = (NEAR_TICK_SEC if near else FAR_TICK_SEC) * (2.0 if slow else 1.0)
@@ -139,8 +142,47 @@ func _process(delta: float) -> void:
 		_move(agent, delta)
 		agent.animate(delta, reduced_motion)
 
+## A fish swims to the bobber before it bites (the fish that is going to bite: one of that species when the
+## pond shows one, else the nearest fish), arriving under it in about `seconds`. Returns the agent, or null
+## when there is no fish to send.
+func approach(fish_id: String, at: Vector2, seconds: float) -> FishAgent:
+	end_approach()
+	var chosen: FishAgent = null
+	var best := INF
+	for agent in _active:
+		# The same species first, then the nearest (a fish of another species is a far second choice).
+		var score := agent.position.distance_to(at) + (0.0 if agent.fish_id == fish_id else 100000.0)
+		if score < best:
+			best = score
+			chosen = agent
+	if chosen == null:
+		return null
+	chosen.approach_to = at
+	chosen.approach_left = maxf(seconds, 0.5)
+	chosen.think_left = 0.0
+	return chosen
+
+## The approaching fish goes back to its own wandering (the line came out, the fish was hooked or it left).
+func end_approach() -> void:
+	for agent in _active:
+		if agent.approach_to != Vector2.ZERO:
+			agent.approach_to = Vector2.ZERO
+			agent.target = Vector2.ZERO
+			agent.think_left = 0.0
+
 ## The AI tick: pick a destination and a velocity for the species' temperament.
 func _think(agent: FishAgent) -> void:
+	if agent.approach_to != Vector2.ZERO:
+		# Heading for the bobber, slowing to a hover just under it: a steady glide timed to the bite.
+		var to_bobber := agent.approach_to + Vector2(0, APPROACH_BELOW) - agent.position
+		var distance := to_bobber.length()
+		if distance < ARRIVE_DISTANCE:
+			agent.velocity = Vector2.ZERO
+			return
+		# Fast enough to be there for the bite (a fish going for food may hurry), never more than five times its cruise.
+		var speed := clampf(distance / maxf(agent.approach_left, 0.3), agent.base_speed * 0.4, agent.base_speed * 5.0)
+		agent.velocity = to_bobber / distance * speed
+		return
 	if agent.position.distance_to(agent.target) < ARRIVE_DISTANCE or agent.target == Vector2.ZERO:
 		agent.target = habitat_map.random_point(agent.habitats, rng)
 	var to_target := agent.target - agent.position
@@ -166,6 +208,12 @@ func _move(agent: FishAgent, delta: float) -> void:
 	var next := agent.position + agent.velocity * delta
 	if habitat_map.is_water(next):
 		agent.position = next
+	elif agent.approach_to != Vector2.ZERO:
+		# On its way to the bobber a bank in between is skirted: slide along it on one axis.
+		for step in [Vector2(agent.velocity.x, 0.0), Vector2(0.0, agent.velocity.y)]:
+			if habitat_map.is_water(agent.position + step * delta):
+				agent.position += step * delta
+				break
 	else:
 		agent.velocity = Vector2.ZERO
 		agent.target = Vector2.ZERO  # pick a new destination at the next tick

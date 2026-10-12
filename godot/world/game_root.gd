@@ -122,6 +122,12 @@ func _on_fishing_state_changed(_previous: int, current: int) -> void:
 	var line_out := current in [FishingController.State.CAST, FishingController.State.WAIT, FishingController.State.BITE_HINT,
 		FishingController.State.HOOK, FishingController.State.FIGHT]
 	region.fish_presenter.focus = fishing.landing if line_out else Vector2(-100000, -100000)
+	# The fish that is going to bite swims to the bobber while the player waits (it stays there for the
+	# nibble and the hook), then goes back to wandering once it is hooked or the line comes out.
+	if current == FishingController.State.WAIT and fishing.encounter != null:
+		region.fish_presenter.approach(fishing.encounter.fish_id, fishing.landing, fishing.time_left())
+	elif not current in [FishingController.State.WAIT, FishingController.State.BITE_HINT, FishingController.State.HOOK]:
+		region.fish_presenter.end_approach()
 
 ## Lets the pond catch up on the time away and, when something changed, tells the player (P1-007).
 func _handle_time_away() -> void:
