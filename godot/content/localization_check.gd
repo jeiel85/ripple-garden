@@ -10,16 +10,22 @@ extends RefCounted
 
 const CSV_PATH := "res://data/localization.csv"
 const REQUIRED_LOCALES: PackedStringArray = ["ko", "en", "ja"]
-## The languages a player can pick (settings "language"); "auto" follows the device.
+## The languages the game is translated into ("auto" follows the device).
 const LANGUAGES: PackedStringArray = ["ko", "en", "ja"]
-const FALLBACK := "en"
+## The languages offered to players. The game is sold in Korea in Korean only (owner, 2026-10-12): the
+## English and Japanese text stays translated and checked, so offering them again is this one line.
+## With one language the settings show no language choice. Tests may widen it.
+static var offered: PackedStringArray = ["ko"]
 
-## The locale to use for a language setting and the device language ("auto" follows the device, and a
-## device language the game is not translated into falls back to English).
+## The locale to use for a language setting and the device language: an offered setting wins, "auto"
+## follows the device when that is offered, anything else reads the first offered language (English when
+## several are offered and the device is not one of them).
 static func locale_for(setting: String, device_language: String) -> String:
-	if setting in LANGUAGES:
+	if setting in offered:
 		return setting
-	return device_language if device_language in LANGUAGES else FALLBACK
+	if device_language in offered:
+		return device_language
+	return "en" if offered.size() > 1 and "en" in offered else offered[0]
 
 ## Lines (1-based, header = 1) that read_csv() would drop or overwrite unseen: a column count that differs
 ## from the header's, an empty key, or a key already used on an earlier line.
