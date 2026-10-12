@@ -78,8 +78,10 @@ func _init() -> void:
 	titles.add_child(sign_board)
 	var hint := PanelContainer.new()
 	hint.theme_type_variation = "PillPanel"
-	hint.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	# As wide as the header allows and wrapping: at the largest Text Scale with Large UI a one-line
+	# subtitle is wider than the screen (the page does not scroll sideways).
+	hint.size_flags_horizontal = Control.SIZE_FILL
+	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	UiKit.text_size(subtitle, "caption")
 	hint.add_child(subtitle)
 	titles.add_child(hint)
@@ -91,6 +93,10 @@ func _init() -> void:
 		var category: String = entry[0]
 		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_M, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# A long word ends in "…" instead of widening the page past the screen (largest Text Scale).
+		button.clip_text = true
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.tooltip_text = button.text
 		_tabs[category] = button
 		tab_row.add_child(button)
 	column.add_child(tab_row)
