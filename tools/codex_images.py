@@ -56,8 +56,18 @@ AGY_CUTOUT = ("Use your image generation tool to draw ONE image. Warm miniature-
               "the upper left, clean crisp edges, centered, on a perfectly flat solid pure magenta background (#FF00FF) filling "
               "the whole image, no shadow or gradient on the background, no checkerboard, no text, no watermark. ")
 LIMIT_WORDS = ("usage limit", "usage_limit", "rate limit", "429", "한도")
-# A picture path agy prints: plain (C:\...\brain\...\x.jpg) or inside a file:/// link (C:/.../brain/.../x.jpg).
-AGY_PATH_RE = re.compile(r"(?<![A-Za-z])([A-Za-z]:[\\/][^\s()\[\]\"'`]*antigravity-cli[\\/]brain[\\/][^\s()\[\]\"'`]+\.(?:png|jpe?g|webp))")
+# A picture path agy prints: plain or inside a file:// link, on Windows (C:\...\brain\x.jpg, C:/.../brain/x.jpg)
+# or Linux/macOS (/home/.../brain/x.jpg).
+AGY_PATH_RE = re.compile(r"(?<![A-Za-z/])((?:[A-Za-z]:[\\/]|/)[^\s()\[\]\"'`]*antigravity-cli[\\/]brain[\\/][^\s()\[\]\"'`]+\.(?:png|jpe?g|webp))")
+
+
+def agy_paths(stdout: str) -> list[str]:
+    """The picture paths in agy's output, file:// links turned into plain paths (file:///C:/x -> C:/x, file:///home/x -> /home/x)."""
+    text = re.sub(r"file:///([A-Za-z]:)", lambda match: match.group(1), stdout).replace("file://", "")
+    return [os.path.normpath(match) for match in AGY_PATH_RE.findall(text)]
+
+
+BACKGROUND_REACH = 110.0  # colour distance from the key that still counts as background or its soft edge
 
 
 def key_flat_background(image: Image.Image) -> Image.Image:
@@ -68,25 +78,32 @@ def key_flat_background(image: Image.Image) -> Image.Image:
     band = np.concatenate([rgb[:8].reshape(-1, 3), rgb[-8:].reshape(-1, 3), rgb[:, :8].reshape(-1, 3), rgb[:, -8:].reshape(-1, 3)])
     key = np.median(band, axis=0)
     distance = np.sqrt(((rgb - key) ** 2).sum(-1))
-    alpha = np.clip((distance - 40.0) / 70.0, 0.0, 1.0)
+    # Only the background reached from the border is removed: a pink or purple detail inside the subject,
+    # however close to the key, stays opaque.
+    from scipy import ndimage
+    near, _ = ndimage.label(distance < BACKGROUND_REACH)
+    edge_labels = np.unique(np.concatenate([near[0], near[-1], near[:, 0], near[:, -1]]))
+    background = np.isin(near, edge_labels[edge_labels > 0])
+    alpha = np.where(background, np.clip((distance - 40.0) / 70.0, 0.0, 1.0), 1.0)
     colour = np.clip((rgb - key * (1.0 - alpha[..., None])) / np.maximum(alpha, 1e-3)[..., None], 0, 255)
     return Image.fromarray(np.dstack([colour, alpha * 255.0]).astype("uint8"), "RGBA")
 
 
 def run_agy(job: dict, dest: Path, work: Path) -> str:
+    # agy runs in OUT/_work: references are made absolute against the caller's directory first.
+    refs = [Path(ref).resolve() for ref in job.get("refs", [])]
     prompt = (SCENE if job.get("scene") else AGY_CUTOUT) + job["prompt"] + " Do not save or move any file; reply with the generated file path."
-    for ref in job.get("refs", []):
+    for ref in refs:
         prompt += f" Reference image (same style and design): {ref}"
     cmd = ["agy", "-p", prompt, "--model", AGY_MODEL, "--print-timeout", "540s"]
-    for ref in job.get("refs", []):
-        cmd += ["--add-dir", str(Path(ref).parent)]
+    for ref in refs:
+        cmd += ["--add-dir", str(ref.parent)]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, cwd=work, shell=(os.name == "nt"),
                                 encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
         return "FAILED agy timeout"
-    paths = [m.replace("/", os.sep) for m in AGY_PATH_RE.findall(result.stdout)]
-    paths = [p for p in paths if Path(p).exists()]
+    paths = [p for p in agy_paths(result.stdout) if Path(p).exists()]
     if not paths:
         return "FAILED agy: " + result.stdout[-200:]
     picture = Image.open(paths[-1])
