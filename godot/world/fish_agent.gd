@@ -31,6 +31,10 @@ var target := Vector2.ZERO
 var think_left := 0.0
 var burst_left := 0.0
 var wander_phase := 0.0
+## The bobber this fish is swimming to before it bites (FishPopulationPresenter.approach); ZERO when none.
+var approach_to := Vector2.ZERO
+## Seconds the approach should take, counted down as it swims.
+var approach_left := 0.0
 ## Seconds left of the "welcome" ring drawn around a freshly released fish.
 var highlight := 0.0
 

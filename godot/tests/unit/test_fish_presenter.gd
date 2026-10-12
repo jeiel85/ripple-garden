@@ -177,3 +177,21 @@ func test_a_pooled_agent_forgets_the_previous_species_destination() -> void:
 	agent.configure(ContentDB.get_fish("fish_catfish"))
 	assert_eq(agent.target, Vector2.ZERO)
 	agent.free()
+
+func test_the_biting_fish_swims_to_the_bobber_and_then_leaves() -> void:
+	var parts := _setup()
+	var presenter: FishPopulationPresenter = parts[0]
+	_populate(parts[1], 2)
+	presenter.refresh()
+	var bobber := Vector2(520, 520)
+	assert_true(parts[2].is_water(bobber))
+	var agent := presenter.approach("fish_crucian_carp", bobber, 3.0)
+	assert_not_null(agent)
+	assert_eq(agent.fish_id, "fish_crucian_carp", "a fish of the biting species is sent when the pond shows one")
+	var start := agent.position.distance_to(bobber)
+	for i in 240:  # four seconds at 60 fps
+		presenter._process(1.0 / 60.0)
+	assert_true(agent.position.distance_to(bobber) < minf(start, 40.0), "it arrives under the bobber (%.0f px away)" % agent.position.distance_to(bobber))
+	presenter.end_approach()
+	assert_eq(agent.approach_to, Vector2.ZERO, "back to wandering")
+	_teardown(parts)
