@@ -128,20 +128,22 @@ func _draw() -> void:
 			draw_circle(base + Vector2(part[0], part[1]) * size, part[2] * size, Color(shade.r, shade.g, shade.b, alpha))
 	var fog: float = visual.get("fog", 0.0)
 	if fog > 0.01:
-		# Soft bands of mist lying on the water, a little thicker towards the far bank.
+		# Soft bands of mist lying low on the water, a little thicker towards the far bank, cut to the pond's
+		# outline so they never cover the banks, the dock or the scenery.
 		for band in 5:
 			var y := _pond_bounds.position.y + _pond_bounds.size.y * (band + 0.5) / 5.0
 			var drift := 0.0 if reduced_motion else sin(Time.get_ticks_msec() / 4000.0 + band) * 30.0
 			var left := _pond_bounds.position.x - 200.0 + drift
 			var right := _pond_bounds.end.x + 200.0 + drift
 			var mist := Color(0.95, 0.97, 0.98, fog * (0.3 - band * 0.03))
-			var clear := Color(mist, 0.0)
-			# Each band fades out above and below, so the mist has no edges.
-			for half in [[-70.0, 0.0, clear, mist], [0.0, 70.0, mist, clear]]:
-				var top: float = y + half[0]
-				var bottom: float = y + half[1]
-				draw_polygon(PackedVector2Array([Vector2(left, top), Vector2(right, top), Vector2(right, bottom), Vector2(left, bottom)]),
-					PackedColorArray([half[2], half[2], half[3], half[3]]))
+			var strip := PackedVector2Array([Vector2(left, y - MIST_HALF), Vector2(right, y - MIST_HALF),
+				Vector2(right, y + MIST_HALF), Vector2(left, y + MIST_HALF)])
+			for piece in mist_pieces(strip, pond):
+				# Each point fades with its distance from the band's middle, so the mist has no top or bottom edge.
+				var colors := PackedColorArray()
+				for point in piece:
+					colors.append(Color(mist, mist.a * clampf(1.0 - absf(point.y - y) / MIST_HALF, 0.0, 1.0)))
+				draw_polygon(piece, colors)
 	if _flash > 0.0:
 		draw_rect(Rect2(-1000, -1000, 3000, 3600), Color(1, 1, 1, _flash * 0.35))
 	for ripple in _ripples:
@@ -152,6 +154,24 @@ func _draw() -> void:
 			var angle := TAU * i / 14.0
 			points.append(ripple["pos"] + Vector2(cos(angle) * radius, sin(angle) * radius * 0.45))
 		draw_polyline(points, Color(1, 1, 1, (1.0 - life) * 0.55), 1.5, true)
+
+## Half the height of a band of mist (design px).
+const MIST_HALF := 70.0
+
+## The parts of a mist band `strip` that lie over the water `pond_polygon`, each subdivided into thin rows
+## so the fade by height reads smoothly on the cut shape.
+static func mist_pieces(strip: PackedVector2Array, pond_polygon: PackedVector2Array) -> Array[PackedVector2Array]:
+	var result: Array[PackedVector2Array] = []
+	var top := strip[0].y
+	var rows := 8
+	var height := (strip[2].y - top) / rows
+	for row in rows:
+		var y0 := top + row * height
+		var slice := PackedVector2Array([Vector2(strip[0].x, y0), Vector2(strip[1].x, y0),
+			Vector2(strip[1].x, y0 + height), Vector2(strip[0].x, y0 + height)])
+		for piece in Geometry2D.intersect_polygons(slice, pond_polygon):
+			result.append(piece)
+	return result
 
 static func _streak_texture() -> Texture2D:
 	var image := Image.create(2, 22, false, Image.FORMAT_RGBA8)

@@ -250,3 +250,12 @@ func test_camera_effects_respect_reduced_motion_and_shake_setting() -> void:
 	assert_eq(camera.offset, Vector2.ZERO, "no shake when switched off")
 	camera.restoration_pulse(0.2)  # smoke test: must not error
 	camera.free()
+
+func test_mist_stays_over_the_water() -> void:
+	var pond := PackedVector2Array([Vector2(100, 100), Vector2(300, 100), Vector2(300, 300), Vector2(100, 300)])
+	var strip := PackedVector2Array([Vector2(-200, 150), Vector2(600, 150), Vector2(600, 290), Vector2(-200, 290)])
+	var pieces := WeatherPresenter.mist_pieces(strip, pond)
+	assert_false(pieces.is_empty())
+	for piece in pieces:
+		for point in piece:
+			assert_true(point.x >= 99.9 and point.x <= 300.1, "mist reaches past the bank at %s" % point)
