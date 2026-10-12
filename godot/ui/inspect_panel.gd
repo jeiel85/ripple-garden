@@ -35,6 +35,9 @@ var _release: Button
 var _journal: Button
 var _again: Button
 
+## How far the fish picture reaches down over the wooden card.
+const HERO_OVERLAP := 56.0
+
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -74,6 +77,9 @@ func _init() -> void:
 	_portrait = UiKit.FishPortrait.new()
 	_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_portrait.offset_right = -120
+	# Mockup 03: the fish is held up over the wooden card, its belly over the card's top edge.
+	_portrait.offset_bottom = HERO_OVERLAP
+	_portrait.z_index = 1
 	hero.add_child(_portrait)
 	var note := PanelContainer.new()
 	note.theme_type_variation = "NoteCard"
@@ -103,8 +109,17 @@ func _init() -> void:
 	var paper := PanelContainer.new()
 	paper.theme_type_variation = "CardPanel"
 	var info := UiKit.vbox(8)
+	info.add_child(UiKit.spacer(HERO_OVERLAP * 0.5))  # room under the fish's belly
+	var name_row := UiKit.hbox(10)
+	name_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var sprig_left := UiKit.icon("decorate", UiTheme.ICON_M, UiTheme.GREEN)
+	var sprig_right := UiKit.icon("decorate", UiTheme.ICON_M, UiTheme.GREEN)
+	sprig_right.flip_h = true
 	_name = UiKit.label("", "BigLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	info.add_child(_name)
+	name_row.add_child(sprig_left)
+	name_row.add_child(_name)
+	name_row.add_child(sprig_right)
+	info.add_child(name_row)
 	var size_row := UiKit.hbox(14)
 	size_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	var size_pill := PanelContainer.new()

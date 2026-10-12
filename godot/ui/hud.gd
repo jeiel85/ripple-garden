@@ -561,7 +561,12 @@ class ReelStyle extends StyleBox:
 		if focus_ring:
 			RenderingServer.canvas_item_add_polyline(to_canvas_item, _arc(center, radius + 4.0, 0.0, TAU), PackedColorArray([UiTheme.GOLD]), 4.0, true)
 			return
-		RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius + 4.0, Color(UiTheme.GOLD, 0.12 if dimmed else 0.35))
+		# A soft warm glow fading outwards (mockup 02), then the two curved "reel in" arrows beside the disc.
+		for i in 5:
+			RenderingServer.canvas_item_add_circle(to_canvas_item, center, radius + 4.0 + i * 5.0,
+				Color(UiTheme.GOLD, (0.05 if dimmed else 0.11) * (1.0 - i / 5.0)))
+		if not dimmed:
+			_arrows(to_canvas_item, center, radius + 18.0)
 		var picture := art()
 		if picture != null:
 			var tint: Color = UiTheme.FRAME_TINTS["disabled" if dimmed else "pressed" if pressed else "normal"]
@@ -581,6 +586,36 @@ class ReelStyle extends StyleBox:
 		if progress > 0.0:
 			RenderingServer.canvas_item_add_polyline(to_canvas_item, _arc(center, radius - 1.0, -PI / 2.0, -PI / 2.0 + TAU * progress),
 				PackedColorArray([UiTheme.GOLD]), 8.0, true)
+
+	## Two short arcs curving up on either side of the disc, each ending in an arrow head.
+	static func _arrows(canvas: RID, center: Vector2, radius: float) -> void:
+		var color := Color(1.0, 0.96, 0.86, 0.95)
+		for side in [-1.0, 1.0]:
+			# Left: from lower left up to the left; right: mirrored.
+			var from := deg_to_rad(140.0) if side < 0.0 else deg_to_rad(40.0)
+			var to := deg_to_rad(195.0) if side < 0.0 else deg_to_rad(-15.0)
+			var arc := _arc(center, radius, from, to)
+			var tip := arc[arc.size() - 1]
+			var back := (arc[arc.size() - 2] - tip).normalized()
+			var normal := Vector2(-back.y, back.x)
+			var head := PackedVector2Array([tip - back * 3.0, tip + back * 14.0 + normal * 9.0, tip + back * 14.0 - normal * 9.0])
+			# A dark rim under the cream arrow keeps it readable over bright water.
+			var shade := Color(0.12, 0.08, 0.04, 0.45)
+			RenderingServer.canvas_item_add_polyline(canvas, arc, PackedColorArray([shade]), 9.0, true)
+			RenderingServer.canvas_item_add_polygon(canvas, _grown(head, 2.5), PackedColorArray([shade]))
+			RenderingServer.canvas_item_add_polyline(canvas, arc, PackedColorArray([color]), 5.0, true)
+			RenderingServer.canvas_item_add_polygon(canvas, head, PackedColorArray([color]))
+
+	## `points` pushed out from their centre by `amount` px (a rim under a small polygon).
+	static func _grown(points: PackedVector2Array, amount: float) -> PackedVector2Array:
+		var middle := Vector2.ZERO
+		for point in points:
+			middle += point
+		middle /= points.size()
+		var result := PackedVector2Array()
+		for point in points:
+			result.append(point + (point - middle).normalized() * amount)
+		return result
 
 	static func _arc(center: Vector2, radius: float, from: float, to: float) -> PackedVector2Array:
 		var points := PackedVector2Array()
