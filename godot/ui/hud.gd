@@ -209,6 +209,61 @@ func _build_top() -> Control:
 const NAV_SIDE_PX := 100.0
 const NAV_HEIGHT_PX := 104.0
 
+## Bottom-bar buttons drawn as pictures cut from the mockup (`ui/nav_*.png`, Korean words baked in):
+## button -> its picture. A button without a picture keeps its icon and label.
+var _nav_art: Dictionary = {}
+## Design px per mockup px (720 / 941).
+const MOCKUP_SCALE := 720.0 / 941.0
+
+## Makes `button` show `picture` instead of its own box, icon and text. The word stays as its tooltip
+## (accessibility name); pressed and disabled are the same picture, darker.
+func _use_nav_picture(button: Button, picture: Texture2D) -> void:
+	if button.tooltip_text.is_empty():
+		button.tooltip_text = button.text
+	button.text = ""
+	button.icon = null
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var style := StyleBoxTexture.new()
+		style.texture = picture
+		style.modulate_color = UiTheme.FRAME_TINTS[state]
+		button.add_theme_stylebox_override(state, style)
+
+## Picture buttons at the mockup's scale (the mockup is 941 px wide, the design 720), shrunk if the row
+## would not fit `width`. A picture smaller than a touch target sits in the middle of a touch-target-sized
+## button (D-018: small pictures, full-size touch areas).
+func _layout_nav_pictures(touch_min: float, width: float) -> void:
+	if _nav_art.is_empty():
+		return
+	var scale := MOCKUP_SCALE * touch_min / UiTheme.TOUCH_MIN_PX
+	var room := width - 2.0 * 16.0 - 12.0 * 3.0
+	var others := 0.0  # buttons without a picture keep their own width
+	for button in [journal_button, gear_button, cta_button, camp_button]:
+		if not _nav_art.has(button):
+			others += button.custom_minimum_size.x
+	# Shrink until the buttons (each at least a touch target) fit beside each other.
+	var row_width := func(at: float) -> float:
+		var total := others
+		for button in _nav_art:
+			total += maxf((_nav_art[button] as Texture2D).get_width() * at, touch_min)
+		return total
+	while scale > 0.2 and row_width.call(scale) > room:
+		scale *= 0.97
+	for button in _nav_art:
+		# Bottoms in line as in the mockup; the picture is not stretched to the row's height.
+		button.size_flags_vertical = Control.SIZE_SHRINK_END
+		var picture: Texture2D = _nav_art[button]
+		var drawn := picture.get_size() * scale
+		var box := Vector2(maxf(drawn.x, touch_min), maxf(drawn.y, touch_min))
+		button.custom_minimum_size = box
+		var inset := (box - drawn) * 0.5
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var style := button.get_theme_stylebox(state) as StyleBoxTexture
+			if style != null:
+				style.expand_margin_left = -inset.x
+				style.expand_margin_right = -inset.x
+				style.expand_margin_top = -inset.y
+				style.expand_margin_bottom = -inset.y
+
 func _build_bottom() -> Control:
 	var row := UiKit.hbox(12)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -243,6 +298,15 @@ func _build_bottom() -> Control:
 		UiKit.text_size(button, "caption")
 	camp_button.custom_minimum_size.x = NAV_SIDE_PX * 1.5
 	cta_button.custom_minimum_size.y = NAV_HEIGHT_PX
+	_nav_art = {}
+	for entry in [[journal_button, "nav_journal"], [gear_button, "nav_gear"], [cta_button, "nav_cast"], [camp_button, "nav_camp"]]:
+		var picture := ArtLibrary.texture("ui", entry[1])
+		if picture != null:
+			_use_nav_picture(entry[0], picture)
+			_nav_art[entry[0]] = picture
+	if _nav_art.has(cta_button):
+		cta_content.visible = false  # "낚시" and the fish are part of the picture
+		cta_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	journal_dot = UiKit.notice_dot(journal_button)
 	camp_dot = UiKit.notice_dot(camp_button)
 	row.add_child(journal_button)
@@ -394,6 +458,7 @@ func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> vo
 	for button in [settings_button, water_mind_button, restore_button]:
 		button.custom_minimum_size = Vector2(touch_min, touch_min)
 	cta_button.custom_minimum_size.y = touch_min * 1.3
+	_layout_nav_pictures(touch_min, get_viewport_rect().size.x if is_inside_tree() else 720.0)
 	action_button.custom_minimum_size = Vector2.ONE * touch_min * 1.75
 	fit_top_bar(get_viewport_rect().size.x if is_inside_tree() else 720.0)
 
