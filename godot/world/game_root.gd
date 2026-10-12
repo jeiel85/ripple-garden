@@ -1,7 +1,7 @@
 class_name GameRoot
 extends Node
 
-## The main scene (TECH_SPEC §2): loads the save, builds the region for the vertical slice, wires the
+## The main scene (TECH_SPEC §2): loads the save, builds the region the player is in (D-035), wires the
 ## controllers and presenters together and hands the UI what it needs. Nothing here holds game
 ## state; it connects things and forwards events (restoration -> world change, release -> a
 ## fish appears in the pond, settings -> engine behaviour).
@@ -32,11 +32,11 @@ var hints: TutorialHints
 @onready var ui: UIController = $UIController
 
 func _ready() -> void:
-	region_id = ContentDB.balance["vertical_slice"]["region_id"]
 	if load_save:
 		SaveService.load_game()
 	else:
 		GameState.ensure_initialized()
+	region_id = pick_region(GameState)
 	_pick_language()  # after the load: the language is a saved setting
 	restoration = RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
 	journal = JournalModel.new(ContentDB.balance["journal"]["reveal_at_encounters"])
@@ -44,7 +44,8 @@ func _ready() -> void:
 	camp = CampService.new(GameState, loadout)
 	offline = OfflineService.new(GameState, ContentDB.balance["offline"])
 	moments = MomentService.new(GameState, region_id)
-	hints = TutorialHints.new(GameState, region_id)
+	# Tutorial hints are about fishing, not about a place: seen once in the whole game, not once per region.
+	hints = TutorialHints.new(GameState, RegionUnlocks.start_region())
 
 	if not region.setup(region_id, GameState.get_restoration_level(region_id), TimeService.get_time_band()):
 		return
@@ -67,6 +68,7 @@ func _ready() -> void:
 	ui.setup({
 		"fishing": fishing, "region": region, "restoration": restoration, "journal": journal,
 		"loadout": loadout, "camp": camp, "camera": camera, "hints": hints, "debug": debug, "region_id": region_id,
+		"travel": travel,
 	})
 
 	EventBus.settings_changed.connect(settings.apply)
@@ -95,6 +97,34 @@ func _ready() -> void:
 	# Time away before this scene existed (the load) is handled now; later absences arrive as events.
 	_handle_time_away()
 	moments.check()  # whatever is already true when the game opens
+
+## The region to build: the saved one while it can still be visited (open, with a world), else the start
+## region (a new save, a save from before travelling, or content that changed under it).
+static func pick_region(game_state: Node) -> String:
+	var saved: String = game_state.get_current_region()
+	if not saved.is_empty() and RegionUnlocks.new(game_state).can_travel(saved):
+		return saved
+	return RegionUnlocks.start_region()
+
+## Moves the player to another open region (D-035): the choice is saved and the scene is rebuilt for it,
+## the same way a language change rebuilds it. Refused while a line is out or a fish is in hand, for a
+## region that cannot be visited, or when the save cannot be written (the move would not survive).
+## Tests and tools (no save) only record the choice; the next scene they build starts there.
+func travel(target: String) -> bool:
+	if target == region_id or not RegionUnlocks.new(GameState).can_travel(target):
+		return false
+	if fishing.state != FishingController.State.READY or not GameState.get_pending_catch().is_empty():
+		return false
+	var previous := GameState.get_current_region()
+	GameState.set_current_region(target)
+	if not load_save:
+		return true
+	if not SaveService.save_game():
+		GameState.set_current_region(previous)
+		ui.show_message(tr("ui.map.travel_unsaved"))
+		return false
+	get_tree().reload_current_scene.call_deferred()
+	return true
 
 ## The saved language, or the device's when it is "auto" (KO / EN / JA; anything else reads English).
 ## Korean lines break between words only (KeepWordsTranslation).

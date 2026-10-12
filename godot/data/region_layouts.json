@@ -112,5 +112,76 @@
       {"id": "camp_6", "x": 110, "y": 250}
     ],
     "camp_focus": {"x": 110, "y": 190, "zoom": 1.6}
+  },
+  "region_02_forest_stream": {
+    "viewport": [720, 1280],
+    "art": "r02",
+    "horizon_y": -600,
+    "rod_origin": [380, 700],
+    "cast_forward_deg": 5,
+    "cast_reach_px": {"near": 90, "far": 560},
+    "angler": {"x": 180, "y": 860},
+    "pond": [[430, -20], [605, -20], [615, 90], [680, 175], [740, 215], [740, 300], [665, 330], [620, 380], [565, 430], [540, 480], [548, 560], [600, 612], [740, 630], [740, 1300], [385, 1300], [345, 1185], [372, 1112], [302, 1062], [272, 992], [258, 882], [238, 822], [150, 802], [80, 792], [40, 762], [-20, 742], [-20, 392], [60, 410], [200, 402], [252, 362], [332, 346], [420, 334], [520, 322], [502, 250], [490, 160], [455, 80]],
+    "zones": [
+      {"habitat": "pool", "polygon": [[60, 420], [480, 415], [545, 480], [560, 640], [610, 770], [570, 910], [420, 970], [300, 915], [262, 820], [150, 790], [60, 740]]},
+      {"habitat": "rock", "polygon": [[555, 610], [720, 628], [720, 920], [600, 915], [560, 770]]},
+      {"habitat": "rock", "polygon": [[380, 975], [580, 955], [720, 990], [720, 1180], [560, 1190], [395, 1160]]},
+      {"habitat": "vegetation", "polygon": [[0, 400], [210, 400], [250, 500], [240, 640], [160, 720], [40, 735], [0, 730]]},
+      {"habitat": "vegetation", "polygon": [[250, 820], [330, 830], [365, 960], [300, 1010], [265, 940]]},
+      {"habitat": "riffle", "polygon": [[430, 0], [610, 0], [625, 95], [690, 180], [680, 320], [610, 400], [570, 470], [520, 520], [460, 520], [420, 470], [430, 385], [515, 325], [495, 160]]}
+    ],
+    "levels": [
+      {"water_deep": "#4b4a36", "water_shallow": "#6f6a45", "grass": "#8a7a52", "canopy": "#6b5a3e"},
+      {"water_deep": "#3f5442", "water_shallow": "#5f7a55", "grass": "#7f9158", "canopy": "#6f7a45"},
+      {"water_deep": "#2d6159", "water_shallow": "#4f9077", "grass": "#71a35a", "canopy": "#5f9444"},
+      {"water_deep": "#22697a", "water_shallow": "#4aa395", "grass": "#69ad5c", "canopy": "#4f9f4a"},
+      {"water_deep": "#1b7086", "water_shallow": "#4fb5a6", "grass": "#6cb760", "canopy": "#47a352"},
+      {"water_deep": "#16788f", "water_shallow": "#5cc4b2", "grass": "#76bf62", "canopy": "#45a650"},
+      {"water_deep": "#137d95", "water_shallow": "#58c8b4", "grass": "#78c264", "canopy": "#43aa52"},
+      {"water_deep": "#11829a", "water_shallow": "#54ccb6", "grass": "#7ac566", "canopy": "#41ad54"},
+      {"water_deep": "#0f879f", "water_shallow": "#50d0b8", "grass": "#7cc868", "canopy": "#3fb056"},
+      {"water_deep": "#0d8ca4", "water_shallow": "#4cd3ba", "grass": "#7ecb6a", "canopy": "#3db358"},
+      {"water_deep": "#0b91a9", "water_shallow": "#48d6bc", "grass": "#80ce6c", "canopy": "#3bb65a"}
+    ],
+    "props": [
+      {"kind": "junk", "x": 420, "y": 560, "scale": 0.9, "max_level": 1},
+      {"kind": "junk", "x": 120, "y": 330, "scale": 1.0, "max_level": 1},
+      {"kind": "stump", "x": 220, "y": 250, "scale": 0.9, "max_level": 1},
+      {"kind": "grass_tuft", "x": 40, "y": 850, "scale": 1.0, "min_level": 1},
+      {"kind": "grass_tuft", "x": 210, "y": 845, "scale": 0.9, "min_level": 2},
+      {"kind": "reed", "x": 30, "y": 620, "scale": 1.0, "min_level": 2},
+      {"kind": "reed", "x": 250, "y": 760, "scale": 0.9, "min_level": 3},
+      {"kind": "flower", "x": 90, "y": 300, "scale": 1.0, "min_level": 3},
+      {"kind": "lily_pad", "x": 150, "y": 640, "scale": 0.9, "min_level": 3},
+      {"kind": "bush", "x": 30, "y": 200, "scale": 1.0, "min_level": 4},
+      {"kind": "flower", "x": 200, "y": 330, "scale": 0.9, "min_level": 4},
+      {"kind": "lily_pad", "x": 95, "y": 560, "scale": 0.8, "min_level": 5},
+      {"kind": "frog", "x": 585, "y": 420, "scale": 1.0, "min_level": 5},
+      {"kind": "reed", "x": 300, "y": 1000, "scale": 1.0, "min_level": 5},
+      {"kind": "flower", "x": 60, "y": 1000, "scale": 0.9, "min_level": 6},
+      {"kind": "grass_tuft", "x": 330, "y": 330, "scale": 0.9, "min_level": 6},
+      {"kind": "flower", "x": 160, "y": 180, "scale": 0.9, "min_level": 7},
+      {"kind": "bush", "x": 250, "y": 160, "scale": 0.9, "min_level": 7},
+      {"kind": "lily_pad", "x": 230, "y": 700, "scale": 0.8, "min_level": 8},
+      {"kind": "flower", "x": 120, "y": 880, "scale": 0.9, "min_level": 8},
+      {"kind": "flower", "x": 640, "y": 470, "scale": 0.8, "min_level": 9},
+      {"kind": "cat", "x": 60, "y": 930, "scale": 1.0, "min_level": 9},
+      {"kind": "rainbow", "x": 560, "y": 160, "scale": 1.0, "min_level": 10}
+    ],
+    "ambient_animals": [
+      {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
+      {"kind": "butterfly", "count": 3, "min_level": 4, "time_bands": ["morning", "day"]},
+      {"kind": "firefly", "count": 10, "min_level": 5, "time_bands": ["dusk", "night"]},
+      {"kind": "bird", "count": 2, "min_level": 8, "time_bands": ["dawn", "morning", "day", "dusk"]},
+      {"kind": "butterfly", "count": 3, "min_level": 9, "time_bands": ["day", "dusk"]},
+      {"kind": "firefly", "count": 8, "min_level": 9, "time_bands": ["dusk", "night"]}
+    ],
+    "camp_slots": [
+      {"id": "camp_1", "x": 40, "y": 160},
+      {"id": "camp_2", "x": 130, "y": 215},
+      {"id": "camp_3", "x": 215, "y": 180},
+      {"id": "camp_4", "x": 70, "y": 280}
+    ],
+    "camp_focus": {"x": 130, "y": 220, "zoom": 1.6}
   }
 }

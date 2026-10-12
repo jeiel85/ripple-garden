@@ -226,6 +226,7 @@ func _build_panels(deps: Dictionary) -> void:
 	map_panel = RegionMapPanel.new()
 	map_panel.setup(RegionUnlocks.new(GameState), _region_id)
 	map_panel.close_pressed.connect(close_panel)
+	map_panel.travel_requested.connect(_on_travel_requested)
 	away_panel = AwayPanel.new()
 	away_panel.close_pressed.connect(close_panel)
 	settings_panel = SettingsPanel.new()
@@ -456,6 +457,16 @@ func _on_fish_released(fish_id: String, _region: String, _size_cm: float) -> voi
 		if reward.memory > 0:
 			parts.append(tr("ui.toast.memory") % reward.memory)
 		show_message("  ·  ".join(parts))
+
+## The map's "떠나기" (D-035): the line must be in and no fish in hand first; the game root then saves and
+## rebuilds the scene in the chosen region.
+func _on_travel_requested(target: String) -> void:
+	if _fishing.state != FishingController.State.READY or not GameState.get_pending_catch().is_empty():
+		map_panel.show_note(tr("ui.map.travel_busy"))
+		return
+	var travel: Callable = game.get("travel", Callable())
+	if travel.is_valid() and travel.call(target):
+		map_panel.show_note(tr("ui.map.travelling") % RegionMapPanel._name(target))
 
 func _on_restore_confirmed() -> void:
 	if _restoration.restore(_region_id):

@@ -119,7 +119,8 @@ static func default_collection_record() -> Dictionary:
 static func default_save(now: int) -> Dictionary:
 	return {
 		"save_version": CURRENT_VERSION,
-		"profile": {"created_at": now, "last_session_at": now, "game_minutes": 480.0},
+		# `current_region`: where the player last was ("" = the start region; D-035).
+		"profile": {"created_at": now, "last_session_at": now, "game_minutes": 480.0, "current_region": ""},
 		"economy": {"ripple": 0, "memory": 0},
 		"regions": {},
 		"collection": {},
@@ -163,6 +164,7 @@ static func normalize(raw: Variant, now: int) -> Dictionary:
 	profile["created_at"] = maxi(0, _int_or(profile.get("created_at"), now))
 	profile["last_session_at"] = maxi(0, _int_or(profile.get("last_session_at"), now))
 	profile["game_minutes"] = _float_or(profile.get("game_minutes"), 480.0)
+	profile["current_region"] = _string_or(profile.get("current_region"), "")
 
 	var economy: Dictionary = result["economy"]
 	economy["ripple"] = clampi(_int_or(economy.get("ripple"), 0), 0, MAX_CURRENCY)

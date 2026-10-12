@@ -40,8 +40,20 @@ func test_a_region_opens_with_its_neighbours_restoration_and_species() -> void:
 	assert_eq(unlocks.condition_of(R2)["fish_now"], int(need["fish"]) - 1, "progress is reported")
 	_meet_species(R1, int(need["fish"]))
 	assert_true(unlocks.is_unlocked(R2))
-	assert_eq(unlocks.state_of(R2, R1), RegionUnlocks.COMING, "open, its world arrives with P2")
+	assert_eq(unlocks.state_of(R2, R1), RegionUnlocks.OPEN, "open, and its world exists: it can be visited (D-035)")
 	assert_false(unlocks.is_unlocked(R3), "the next region waits for this one's own progress")
+	GameState.new_game()
+
+func test_an_open_region_without_a_world_says_it_comes_later() -> void:
+	GameState.new_game()
+	var unlocks := RegionUnlocks.new(GameState)
+	for region_id in [R1, R2]:
+		_restore(region_id, 10)
+		_meet_species(region_id, 99)
+	assert_true(unlocks.is_unlocked(R3))
+	assert_true(ContentDB.get_layout(R3).is_empty(), "this test needs a region whose world has not arrived yet")
+	assert_eq(unlocks.state_of(R3, R1), RegionUnlocks.COMING)
+	assert_false(unlocks.can_travel(R3))
 	GameState.new_game()
 
 func test_the_map_shows_every_island_and_says_what_each_needs() -> void:

@@ -602,3 +602,8 @@ moment.waiting_pond.hint,"잠시 쉬었다가 돌아와 보세요.","Take a brea
 "ui.toast.auto_off","자동 낚시를 멈췄어요.","Auto fishing stopped.","オート釣りを止めました。"
 "ui.toast.auto_ready","이제 자동 낚시를 쓸 수 있어요. 오른쪽 버튼을 눌러 보세요.","You can fish automatically now. Try the button on the right.","オート釣りが使えるようになりました。右のボタンを押してみましょう。"
 "ui.tip.auto","자동으로 낚시하는 중이에요","Fishing by itself","自動で釣っています"
+"ui.map.can_travel","%s에서 낚시할 수 있어요.","You can fish at %s.","%sで釣りができます。"
+"ui.map.travel","떠나기","Travel","出かける"
+"ui.map.travelling","%s(으)로 가는 중이에요…","Heading to %s…","%sへ向かっています…"
+"ui.map.travel_busy","낚싯줄을 거두고 잡은 물고기를 놓아준 뒤에 떠날 수 있어요.","Reel in the line and let your catch go before you travel.","糸を巻き取り、釣った魚を放してから出かけましょう。"
+"ui.map.travel_unsaved","저장하지 못해 지금은 떠날 수 없어요.","Couldn't save, so you can't travel right now.","保存できなかったため、いまは出かけられません。"

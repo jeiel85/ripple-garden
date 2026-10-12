@@ -106,6 +106,17 @@ func set_game_minutes(minutes: float) -> void:
 		data["profile"]["game_minutes"] = clamped
 		_changed()
 
+## The region the player is in ("" = the start region: a new save, or one from before travelling; D-035).
+func get_current_region() -> String:
+	ensure_initialized()
+	return data["profile"].get("current_region", "")
+
+func set_current_region(region_id: String) -> void:
+	ensure_initialized()
+	if data["profile"].get("current_region", "") != region_id:
+		data["profile"]["current_region"] = region_id
+		_changed()
+
 func get_last_session_at() -> int:
 	ensure_initialized()
 	return data["profile"]["last_session_at"]
