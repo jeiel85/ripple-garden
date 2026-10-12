@@ -140,3 +140,13 @@ func test_the_ready_note_waits_for_a_catch_still_in_hand_at_startup() -> void:
 	_run(root, 3.0, func() -> bool: return root.fishing.state == FishingController.State.READY)
 	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the note never came after the catch was released")
 	_stop(root)
+
+func test_the_ready_note_comes_when_a_startup_card_is_closed() -> void:
+	var root := _start()
+	var start_region: String = ContentDB.balance["vertical_slice"]["region_id"]
+	root.ui._open(root.ui.away_panel)  # like the "while you were away" card shown at startup
+	_finish_onboarding(root)
+	assert_false(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the note was used up behind the card")
+	root.ui.close_panel()
+	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "closing the card did not bring the note")
+	_stop(root)

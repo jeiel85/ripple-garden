@@ -316,6 +316,7 @@ func close_panel() -> void:
 	if _fishing.state == FishingController.State.INSPECT:
 		_show_inspect()
 	_show_pending_away()
+	_refresh_auto()  # a note that waited behind this screen (the away card at startup) comes now
 
 func is_panel_open() -> bool:
 	return _current_panel != null
