@@ -28,6 +28,8 @@
 - PCK를 실행 파일에 내장(`embed_pck=true`)해 단일 exe로 배포한다.
 - `application/modify_resources=false`: rcedit 의존을 두지 않는다. 따라서 exe 아이콘·버전 리소스는
   아직 Godot 기본값이다. 정식 아이콘이 생기면 CI에 rcedit을 추가하고 켠다.
+  - 갱신(2026-10-12): Godot 4.7은 rcedit 없이 exe 리소스를 직접 고치므로 `modify_resources=true`로 켜고 아이콘을
+    `res://branding/ripple_garden.ico`로 지정했다(두 Windows 프리셋). CI에 추가 도구는 필요 없다.
 - `tests/*`는 export에서 제외한다.
 
 ## D-005 콘텐츠 검증 실패 처리: 항목 단위 제외 + 오류 기록 (2026-10-06, P0-002)

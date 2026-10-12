@@ -6,7 +6,7 @@
 ## 출시 전 필수 (차단은 아니지만 빠뜨리면 안 되는 것)
 
 - [x] **폰트 번들** — D-031: 고운돋움·주아·M PLUS Rounded 1c 서브셋 번들. 새 문구에 새 한자가 들어가면 `tools/subset_fonts.py`를 다시 돌린다(`test_fonts.gd`가 잡는다).
-- [ ] **Windows exe 아이콘** — rcedit 없이 빌드해 exe 자체 아이콘은 Godot 기본이다(D-004). CI에 rcedit을 추가하고 `assets/branding/ripple_garden.ico`를 지정한다. 바로가기는 이미 아이콘을 따로 가리킨다.
+- [x] **Windows exe 아이콘·버전 정보** — 프리셋 `application/modify_resources=true`, 아이콘 `res://branding/ripple_garden.ico`. Godot 4.7이 rcedit 없이 exe 리소스를 고쳐, 탐색기에서 게임 아이콘과 FileVersion/ProductVersion(config/version)이 보인다(2026-10-12).
 - [ ] **Android 릴리스 서명·AAB·CI 빌드** — 지금은 디버그 서명 APK를 로컬에서만 만든다(D-016). 배포 키스토어와 Play 정책은 P3-001/P3-009.
 - [ ] **실기기·성능 측정** — Android는 에뮬레이터(API 36)에서만 확인했다. 중급기 30 FPS, 드로콜, 메모리(현재 PSS 약 184 MB), 60분 소크, 발열/배터리는 미측정(P3-005/006).
 - [x] **그림 에셋 교체** — Region 01의 그림은 모두 그린 그림이다(v0.4~0.6: 풍경·낚시꾼·모자·물고기·소품·장비·동물·UI 프레임·아이콘·순간·지도,
