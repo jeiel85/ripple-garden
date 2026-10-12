@@ -89,6 +89,7 @@ func _init() -> void:
 	note.offset_top = 0
 	note.rotation_degrees = 4.0
 	note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	note.z_index = 2  # pinned over the raised fish (z 1), as it was before the fish was raised
 	var note_box := UiKit.vbox(4)
 	var note_title := UiKit.hbox(6)
 	note_title.alignment = BoxContainer.ALIGNMENT_CENTER
