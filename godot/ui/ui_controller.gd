@@ -17,6 +17,8 @@ extends CanvasLayer
 const TOAST_BOTTOM := 196.0
 const FISHING_TOAST_BOTTOM := 470.0
 const WATER_MIND_TOAST_BOTTOM := 230.0
+## Seen-event id of the one-time "auto fishing is ready" note.
+const AUTO_READY_EVENT := "auto_fishing_ready"
 const PHOTO_TOAST_BOTTOM := PhotoMode.POLAROID_STRIP + 210.0
 
 var game: Dictionary = {}
@@ -38,6 +40,7 @@ var away_panel: AwayPanel
 var settings_panel: SettingsPanel
 var licenses_panel: TextPanel
 var debug_menu: DebugMenu = null
+var auto_fishing: AutoFishing
 
 var _modal_host: Control
 var _backdrop: ColorRect
@@ -130,6 +133,13 @@ func setup(deps: Dictionary) -> void:
 	hud.cta_down.connect(_on_cta_down)
 	hud.cta_up.connect(_on_cta_up)
 	hud.cancel_pressed.connect(func() -> void: _fishing.cancel())
+	auto_fishing = AutoFishing.new()
+	auto_fishing.name = "AutoFishing"
+	add_child(auto_fishing)
+	# No new cast while a screen other than the catch result, water-mind or photo mode is up.
+	auto_fishing.setup(_fishing, world_input, func() -> bool:
+		return (_current_panel != null and _current_panel != inspect_panel) or water_mind.active or photo_mode.active)
+	hud.auto_pressed.connect(toggle_auto_fishing)
 	water_mind.exited.connect(exit_water_mind)
 	water_mind.message.connect(show_message)
 	water_mind.photo_requested.connect(open_photo_mode)
@@ -146,6 +156,7 @@ func setup(deps: Dictionary) -> void:
 	EventBus.fishing_cancelled.connect(func() -> void: show_message(tr("ui.toast.cancelled")))
 	EventBus.fish_released.connect(_on_fish_released)
 	EventBus.collection_changed.connect(func(_fish_id: String) -> void: _refresh_journal_notice())
+	EventBus.collection_changed.connect(func(_fish_id: String) -> void: _refresh_auto())
 	EventBus.region_restoration_changed.connect(func(_changed: String, _level: int) -> void: _refresh_camp_notice())
 	EventBus.economy_changed.connect(func(_ripple: int, _memory: int) -> void: _refresh_camp_notice())
 	EventBus.bait_ran_out.connect(func(bait_id: String, replacement_id: String) -> void:
@@ -168,6 +179,7 @@ func setup(deps: Dictionary) -> void:
 	_refresh_restore_hint()
 	_refresh_journal_notice()
 	_refresh_camp_notice()
+	_refresh_auto()
 	_show_first_hint()
 
 func _build_modal_host() -> void:
@@ -421,6 +433,7 @@ func _on_fishing_state_changed(_previous: String, current: String) -> void:
 			world_input.cast_quick()
 	if current == "ready":
 		_show_pending_away()
+		_refresh_auto()  # the "auto fishing is ready" note waits until the catch result is closed
 
 func _on_cast_rejected(reason: String) -> void:
 	show_message(tr("ui.toast.no_fish_here") if reason == "no_fish_here" else "")
@@ -480,6 +493,27 @@ func _on_state_replaced() -> void:
 	hud.refresh_currency()
 	_refresh_restore_hint()
 	_refresh_journal_notice()
+	_refresh_auto()
+
+# --- auto fishing (D-034) ---
+
+## The auto fishing switch was pressed: turn it over and say so.
+func toggle_auto_fishing() -> void:
+	var on := not auto_fishing.enabled
+	if auto_fishing.set_enabled(on):
+		show_message(tr("ui.toast.auto_on") if on else tr("ui.toast.auto_off"))
+	_refresh_auto()
+
+## Shows the switch once auto fishing is available (and says so once per save, when the screen is quiet).
+func _refresh_auto() -> void:
+	var available := AutoFishing.is_available(GameState)
+	if not available and auto_fishing.enabled:
+		auto_fishing.set_enabled(false)  # a replaced save that has not come this far yet
+	hud.set_auto(available, auto_fishing.enabled)
+	var start_region: String = ContentDB.balance["vertical_slice"]["region_id"]
+	if available and _current_panel == null and _fishing.state == FishingController.State.READY 			and not GameState.has_seen_event(start_region, AUTO_READY_EVENT):
+		GameState.mark_event_seen(start_region, AUTO_READY_EVENT)
+		show_message(tr("ui.toast.auto_ready"))
 
 # --- hints (Tutorial Hints setting) ---
 

@@ -294,6 +294,10 @@ func _roll_wait() -> float:
 	var seconds := _roll(wait) / maxf(0.1, float(rod.get("bite_speed", 1.0)))
 	return maxf(float(wait["floor"]), seconds)
 
+## Whether a line landing in `habitat_tag` could catch anything in this region ("" is not water).
+func can_fish_in(habitat_tag: String) -> bool:
+	return _can_fish_in(habitat_tag)
+
 func _can_fish_in(habitat_tag: String) -> bool:
 	if habitat_tag.is_empty():
 		return false

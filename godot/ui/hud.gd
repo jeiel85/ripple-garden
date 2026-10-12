@@ -26,6 +26,7 @@ signal water_mind_pressed
 signal cta_down
 signal cta_up
 signal cancel_pressed
+signal auto_pressed
 
 const IDLE_FADE_SEC := 5.0
 const FADE_TIME := 0.5
@@ -85,6 +86,10 @@ var cta_button: Button
 var cta_label: Label
 var restore_button: Button
 var restore_dot: UiKit.NoticeDot
+## Auto fishing on/off (D-034): hidden until it is available, shown pressed while it runs.
+var auto_button: Button
+var _auto_on := false
+const AUTO_ON_TINT := Color("#9fe08a")
 var camp_button: Button
 var camp_dot: UiKit.NoticeDot
 var journal_dot: UiKit.NoticeDot
@@ -123,6 +128,10 @@ func _init() -> void:
 	restore_button = UiKit.round_button("sprout", tr("ui.button.restore"), func() -> void: restore_pressed.emit())
 	restore_dot = UiKit.notice_dot(restore_button)
 	side_column.add_child(restore_button)
+	auto_button = UiKit.round_button("rotate", tr("ui.button.auto_fishing"), func() -> void: auto_pressed.emit())
+	auto_button.toggle_mode = true
+	auto_button.visible = false
+	side_column.add_child(auto_button)
 	add_child(side_column)
 
 	bottom_bar = MarginContainer.new()
@@ -446,6 +455,8 @@ func set_cta_for_state(state_name: String) -> void:
 	if state_name != "fight":
 		action_button.set_progress(0.0)
 	var tip_key: String = TIP_BY_STATE.get(state_name, "")
+	if _auto_on and fishing:
+		tip_key = "ui.tip.auto"  # the hands-on tips would ask for what the game is doing by itself
 	tip_label.text = tr(tip_key) if not tip_key.is_empty() else ""
 	tip_label.get_parent().visible = not tip_key.is_empty()
 	# Opening the journal mid-fight would leave the fish unattended: only while waiting. Settings follow
@@ -478,6 +489,17 @@ func set_restore_ready(is_ready: bool) -> void:
 	restore_button.tooltip_text = tr("ui.button.restore_ready") if is_ready else tr("ui.button.restore")
 	restore_dot.visible = is_ready
 
+## Shows the auto fishing switch once it is available, pressed while auto fishing runs.
+func set_auto(available: bool, on: bool) -> void:
+	auto_button.visible = available
+	auto_button.set_pressed_no_signal(on)
+	# Pressed alone barely shows on a round button: a fresh green tint says "running" (the tooltip says it in words).
+	auto_button.self_modulate = AUTO_ON_TINT if on else Color.WHITE
+	auto_button.tooltip_text = tr("ui.button.auto_fishing_stop") if on else tr("ui.button.auto_fishing")
+	if _auto_on != on:
+		_auto_on = on
+		set_cta_for_state(_state_name)
+
 ## Something new to look at in the camp (a decoration that became available).
 func set_camp_notice(has_news: bool) -> void:
 	camp_dot.visible = has_news
@@ -495,7 +517,7 @@ func apply_layout(top_inset: float, bottom_inset: float, touch_min: float) -> vo
 	for button in [journal_button, gear_button, camp_button, cancel_button, fishing_journal_button]:
 		if not button.get_meta("mockup_picture", false):  # a mockup piece keeps its own size
 			button.custom_minimum_size.y = touch_min * 1.1
-	for button in [settings_button, water_mind_button, restore_button]:
+	for button in [settings_button, water_mind_button, restore_button, auto_button]:
 		button.custom_minimum_size = Vector2(touch_min, touch_min)
 	cta_button.custom_minimum_size.y = touch_min * 1.3
 	if _nav_pictures_on:
