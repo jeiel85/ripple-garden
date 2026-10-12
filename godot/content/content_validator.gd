@@ -550,6 +550,15 @@ func _validate_balance(data: Variant, regions: Dictionary, rods: Dictionary, bai
 		_check_balance_number(offline, "offline", "ripple_per_level_hour", 0, 20)
 		_check_balance_number(offline, "offline", "max_ripple", 0, 10000, true)
 
+	var auto_fishing: Variant = data.get("auto_fishing")
+	if typeof(auto_fishing) != TYPE_DICTIONARY:
+		_errors.append("%s.auto_fishing: must be an object" % file_name)
+	else:
+		_check_balance_number(auto_fishing, "auto_fishing", "unlock_species", 0, 50, true)
+		_check_balance_number(auto_fishing, "auto_fishing", "cast_delay_sec", 0.2, 30)
+		_check_balance_number(auto_fishing, "auto_fishing", "hook_delay_sec", 0, 5)
+		_check_balance_number(auto_fishing, "auto_fishing", "inspect_sec", 0.5, 30)
+
 	var equipment: Variant = data.get("equipment")
 	if typeof(equipment) != TYPE_DICTIONARY:
 		_errors.append("%s.equipment: must be an object" % file_name)

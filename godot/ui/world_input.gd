@@ -85,7 +85,7 @@ func _on_release(world_position: Vector2) -> void:
 	elif _aim.is_cancel(world_position):
 		fishing.cancel()
 	else:
-		_cast_at(_aim.landing_for(world_position))
+		cast_at(_aim.landing_for(world_position))
 
 func _update_aim(world_position: Vector2) -> void:
 	var landing := _aim.landing_for(world_position)
@@ -94,9 +94,10 @@ func _update_aim(world_position: Vector2) -> void:
 
 ## The fishing button and a screen tap: cast at the last landing spot, or straight ahead.
 func cast_quick() -> bool:
-	return _cast_at(_aim.quick_cast_point(last_landing))
+	return cast_at(_aim.quick_cast_point(last_landing))
 
-func _cast_at(landing: Vector2) -> bool:
+## Casts at a world point (the auto fisher picks its own spots).
+func cast_at(landing: Vector2) -> bool:
 	var habitat := region.habitat_map.habitat_at(landing)
 	var cast_ok := fishing.cast(landing, habitat)
 	if cast_ok:

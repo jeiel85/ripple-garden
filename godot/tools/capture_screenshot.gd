@@ -15,6 +15,7 @@ extends SceneTree
 ##   --hc            high contrast + large UI        --reduced      reduced motion
 ##   --ripple=N      add Ripple                      --memory=N     add Memory
 ##   --size=WxH      window size (default 405x720)
+##   --auto          turn auto fishing on (needs --populate: it unlocks after the first species)
 ##   --region=ID     start in this region (every other region is restored and its fish met, so it is open)
 
 var _args := {}
@@ -82,6 +83,8 @@ func _run() -> void:
 		game_state.add_memory(int(_args["memory"]))
 	if _args.has("seed"):
 		game.fishing.set_seed(int(_args["seed"]))
+	if _args.has("auto"):
+		game.ui.toggle_auto_fishing()
 	game.region.fish_presenter.refresh()
 
 	match _args.get("state", ""):
