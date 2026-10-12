@@ -43,7 +43,7 @@ func _init() -> void:
 	title.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	title.offset_top = 112
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var board := UiKit.sign_board("map", tr("ui.map.title"))
+	var board := UiKit.sign_board("map", tr("ui.map.title"), "sign_map")
 	board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title.add_child(board)
 	var subtitle := UiKit.label(tr("ui.map.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, false)

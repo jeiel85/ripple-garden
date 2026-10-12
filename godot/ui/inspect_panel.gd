@@ -153,9 +153,18 @@ func _init() -> void:
 	_release = UiKit.action_card("release", tr("ui.inspect.release"), tr("ui.inspect.release_sub"), func() -> void: release_pressed.emit())
 	_journal = UiKit.action_card("record", tr("ui.inspect.journal"), tr("ui.inspect.journal_sub"), func() -> void: journal_pressed.emit())
 	_again = UiKit.action_card("hook", tr("ui.inspect.fish_again"), tr("ui.inspect.fish_again_sub"), func() -> void: fish_again_pressed.emit(), "WaterButton")
-	for button in [_release, _journal, _again]:
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for entry in [[_release, "card_release"], [_journal, "card_record"], [_again, "card_again"]]:
+		var button: Button = entry[0]
 		actions.add_child(button)
+		# The cards cut from mockup 03 (D-032) keep their own size; the drawn ones share the row.
+		UiKit.mockup_picture(button, entry[1], [button.get_node("Content")])
+		var lay_out := func() -> void:
+			var picture: bool = button.get_meta("mockup_picture", false)
+			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if picture else Control.SIZE_EXPAND_FILL
+			button.size_flags_vertical = Control.SIZE_SHRINK_END if picture else Control.SIZE_FILL  # bottoms in line
+		button.theme_changed.connect(lay_out)
+		lay_out.call()
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_child(actions)
 
 ## A pin/calendar fact: icon, a small caption and the value. Returns the box; the value label is

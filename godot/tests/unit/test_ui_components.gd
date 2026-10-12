@@ -314,3 +314,22 @@ func test_safe_insets_apply_only_on_mobile_screens() -> void:
 	assert_true(absf(mobile.y - 50.0 * 1600.0 / 2400.0) < 0.01)
 	assert_eq(UIController.safe_insets(Rect2i(), Vector2i(1080, 2400), 1600.0, true), Vector2.ZERO)
 	assert_eq(UIController.safe_insets(safe, Vector2i(0, 0), 1600.0, true), Vector2.ZERO)
+
+func test_mockup_pieces_replace_their_controls_and_step_aside_in_high_contrast() -> void:
+	if not ArtLibrary.has("ui", "sign_journal"):
+		return  # the pieces are optional art (D-032)
+	GameState.set_setting("high_contrast_meter", false)
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	var board := UiKit.sign_board("fish", "도감", "sign_journal")
+	host.add_child(board)
+	assert_true(board.get_meta("mockup_picture", false), "the board cut from the mockup is shown")
+	assert_false(board.get_child(0).visible, "the drawn icon and title hide under it")
+	assert_eq(board.tooltip_text, "도감", "it keeps its name")
+	GameState.set_setting("high_contrast_meter", true)
+	host.theme = UiTheme.build(1.0, false, true)
+	assert_false(board.get_meta("mockup_picture", true), "High Contrast gives the drawn board back")
+	assert_true(board.get_child(0).visible)
+	GameState.set_setting("high_contrast_meter", false)
+	host.free()

@@ -178,6 +178,8 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 	column.add_child(sub_label)
 	node.add_child(column)
 	var fit := func() -> void:
+		if node.get_meta("mockup_picture", false):
+			return  # sized by its mockup picture
 		var needed := column.get_combined_minimum_size()
 		# The column's own insets, including the room kept above the water band.
 		var insets := column.offset_top - column.offset_bottom
@@ -222,11 +224,14 @@ static func divider(height: float = 26.0, color: Color = Color(1, 0.96, 0.88, 0.
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return node
 
-## A wooden sign with an icon and a title (the mockups' "도감", "캠프", "지역 선택" boards).
-static func sign_board(icon_name: String, title: String) -> PanelContainer:
+## A wooden sign with an icon and a title (the mockups' "도감", "캠프", "지역 선택" boards). With
+## `picture_name` the board cut from the mockup is shown instead when it exists (D-032), and `also_hide`
+## (a subtitle already painted on that board) is hidden with the drawn content.
+static func sign_board(icon_name: String, title: String, picture_name: String = "", also_hide: Array = []) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = "SignPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.tooltip_text = title
 	var row := hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(icon(icon_name, UiTheme.ICON_L, UiTheme.WOOD_TEXT))
@@ -234,7 +239,45 @@ static func sign_board(icon_name: String, title: String) -> PanelContainer:
 	title_label.name = "Title"
 	row.add_child(title_label)
 	panel.add_child(row)
+	if not picture_name.is_empty():
+		mockup_picture(panel, picture_name, [row] + also_hide)
 	return panel
+
+## Design px per mockup px: the mockups are 941 px wide, the design 720.
+const MOCKUP_SCALE := 720.0 / 941.0
+const PICTURE_STATES: PackedStringArray = ["panel", "normal", "hover", "pressed", "disabled"]
+
+## Shows `control` as the piece `ui/<picture_name>.png` cut from a mockup (D-032: Korean words baked in) at
+## the mockup's scale, hiding `content` (what the control draws itself). High Contrast gives the drawn
+## control back, with its theme's strong borders; the swap follows the setting whenever the theme is rebuilt.
+## Nothing happens when the picture does not exist. The control keeps its tooltip as its accessibility name.
+static func mockup_picture(control: Control, picture_name: String, content: Array) -> void:
+	var picture := ArtLibrary.texture("ui", picture_name)
+	if picture == null:
+		return
+	var plain_size := control.custom_minimum_size
+	var styles := {}
+	for state in PICTURE_STATES:
+		var style := StyleBoxTexture.new()
+		style.texture = picture
+		style.modulate_color = UiTheme.FRAME_TINTS.get(state, Color.WHITE)
+		styles[state] = style
+	var apply := func() -> void:
+		var on: bool = GameState.get_setting("high_contrast_meter") != true
+		if control.get_meta("mockup_picture", false) == on and control.has_meta("mockup_picture"):
+			return
+		control.set_meta("mockup_picture", on)
+		for node in content:
+			(node as CanvasItem).visible = not on
+		for state in PICTURE_STATES:
+			if on:
+				control.add_theme_stylebox_override(state, styles[state])
+			else:
+				control.remove_theme_stylebox_override(state)
+		# The picture is not stretched: callers lay the control out shrunk (or switch on "mockup_picture").
+		control.custom_minimum_size = picture.get_size() * MOCKUP_SCALE if on else plain_size
+	control.theme_changed.connect(apply)
+	apply.call()
 
 ## Small "something new to look at" dot in the top-right corner of `owner_control` (D-018). It is a
 ## shape as well as a colour, and the owner's tooltip names it for assistive tech.

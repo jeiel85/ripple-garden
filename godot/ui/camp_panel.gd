@@ -59,7 +59,9 @@ func _init() -> void:
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
 	header.add_child(back)
 	var titles := UiKit.vbox(6)
-	titles.add_child(UiKit.sign_board("camp", tr("ui.camp.title")))
+	var sign_board := UiKit.sign_board("camp", tr("ui.camp.title"), "sign_camp")
+	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	titles.add_child(sign_board)
 	var hint := PanelContainer.new()
 	hint.theme_type_variation = "PillPanel"
 	_note = UiKit.label(tr("ui.camp.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
