@@ -73,9 +73,6 @@ func _init() -> void:
 	# subtitle inside the board ran past the painted planks.
 	var titles := UiKit.vbox(6)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var sign_board := UiKit.sign_board("gear", tr("ui.gear.title"))
-	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	titles.add_child(sign_board)
 	var hint := PanelContainer.new()
 	hint.theme_type_variation = "PillPanel"
 	# As wide as the header allows and wrapping: at the largest Text Scale with Large UI a one-line
@@ -84,6 +81,10 @@ func _init() -> void:
 	var subtitle := UiKit.label(tr("ui.gear.subtitle"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	UiKit.text_size(subtitle, "caption")
 	hint.add_child(subtitle)
+	# The board cut from mockup 05 has the subtitle painted on it, so the pill hides with the drawn board.
+	var sign_board := UiKit.sign_board("gear", tr("ui.gear.title"), "sign_gear", [hint])
+	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	titles.add_child(sign_board)
 	titles.add_child(hint)
 	header.add_child(titles)
 	column.add_child(header)

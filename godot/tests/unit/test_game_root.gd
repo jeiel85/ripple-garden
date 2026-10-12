@@ -424,7 +424,11 @@ func test_leaving_water_mind_brings_back_a_catch_that_arrived_meanwhile() -> voi
 	_stop(root)
 
 func test_bottom_bar_pictures_keep_names_and_step_aside_in_high_contrast() -> void:
-	var root := _start()
+	var previous := TranslationServer.get_locale()
+	# The bottom-bar pictures have Korean words baked in (D-032); the game picks its locale from the setting.
+	GameState.new_game()
+	GameState.set_setting("language", "ko")
+	var root := _start(false)
 	var hud: Hud = root.ui.hud
 	for button in [hud.journal_button, hud.gear_button, hud.cta_button, hud.camp_button]:
 		if not ArtLibrary.has("ui", {hud.journal_button: "nav_journal", hud.gear_button: "nav_gear", hud.cta_button: "nav_cast", hud.camp_button: "nav_camp"}[button]):
@@ -441,3 +445,9 @@ func test_bottom_bar_pictures_keep_names_and_step_aside_in_high_contrast() -> vo
 	GameState.set_setting("high_contrast_meter", false)
 	assert_true(hud.journal_button.text.is_empty(), "the picture comes back")
 	_stop(root)
+	GameState.new_game()
+	GameState.set_setting("language", "en")
+	var english := _start(false)
+	assert_false(english.ui.hud.journal_button.text.is_empty(), "another language keeps the translated button")
+	_stop(english)
+	TranslationServer.set_locale(previous)

@@ -80,7 +80,7 @@ func _init() -> void:
 	header.add_child(back)
 	var title_column := UiKit.vbox(6)
 	title_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"))
+	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"), "sign_journal")
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
 	var subtitle := UiKit.label(tr("ui.journal.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
