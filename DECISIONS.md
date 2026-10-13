@@ -388,6 +388,8 @@
 - 결정자: 프로젝트 오너("Secrets 등록하고 CI 자동화"). v1.0.0-rc.1·rc.2는 로컬에서 손으로 서명해 올렸다 — 태그와 다른 커밋으로 빌드하거나 빠뜨릴 수 있었다(#81).
 - 업로드 키: `CN=Ripple Garden, O=jeiel85, C=KR`, 인증서 SHA-256 `646b2f10…08a1`. 원본은 로컬 `.keystore/`(git 제외), 백업은 `G:\내 드라이브\모바일 앱 개발\Ripple Garden\릴리즈 키스토어`.
   저장소 Secrets `ANDROID_KEYSTORE_BASE64`·`ANDROID_KEYSTORE_PASSWORD`·`ANDROID_KEY_ALIAS`에 같은 키가 있다.
-- CI `android` 잡: 이 저장소의 PR과 `v*` 태그에서 Godot로 Android 프리셋을 내보내 서명하고, 인증서가 위 지문과 다르면 실패한다. PR에서는 산출물(artifact)로만 남기고,
-  태그에서는 Windows 릴리스 잡이 받아 `RippleGarden-<tag>-android.apk`로 릴리스에 올리고 SHA256SUMS에 함께 적는다. 포크 PR은 Secrets가 없어 이 잡을 건너뛴다.
+- CI `android` 잡: PR과 `v*` 태그에서 Godot로 Android 프리셋을 내보낸다. **업로드 키는 태그 빌드에만 준다** — PR은 그 자리에서 만든 일회용 키로 서명해
+  내보내기가 깨지지 않았는지만 확인한다(브랜치를 밀 수 있는 사람이 워크플로를 고쳐 키를 빼낼 수 없게, Codex 리뷰 #84). 태그 빌드는 인증서가 위 지문과 다르면 실패하고,
+  Windows 릴리스 잡이 APK를 받아 `RippleGarden-<tag>-android.apk`로 릴리스에 올리고 SHA256SUMS에 함께 적는다.
+- 남은 위험: 태그를 밀 수 있는 사람은 태그 빌드에서 키에 닿는다. 지금은 오너 혼자 쓰는 저장소라 그대로 두고, 협업자가 생기면 태그 보호 규칙이나 승인이 필요한 environment로 옮긴다.
 - Play 스토어 제출용 AAB(gradle 빌드)와 Play App Signing은 아직이다(#81).

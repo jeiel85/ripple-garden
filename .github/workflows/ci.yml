@@ -46,8 +46,9 @@ jobs:
   android:
     name: Build signed Android APK
     needs: validate
-    # Pull requests from this repository (not forks: they get no secrets) and release tags.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Pull requests (a check that the Android export still works, signed with a throwaway key) and release tags
+    # (signed with the real upload key). The upload key is only ever given to tag builds (Codex review #84).
+    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     env:
       # Certificate of the Ripple Garden upload key (D-038): a build signed with anything else fails here.
@@ -93,7 +94,22 @@ jobs:
           export/android/debug_keystore_pass = "android"
           EOF
 
-      - name: Export and sign the release APK
+      - name: Import project
+        run: '"$GODOT_BIN" --headless --path godot --import'
+
+      - name: Export with a throwaway key (pull requests)
+        if: github.event_name == 'pull_request'
+        run: |
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/throwaway.jks"
+          export GODOT_ANDROID_KEYSTORE_RELEASE_USER=throwaway
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=throwaway
+          keytool -genkeypair -keystore "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" -storetype PKCS12 -storepass throwaway -keypass throwaway             -alias throwaway -keyalg RSA -keysize 2048 -validity 1 -dname "CN=PR check" -noprompt
+          mkdir -p build/android
+          "$GODOT_BIN" --headless --path godot --export-release "Android" ../build/android/RippleGarden.apk
+          test -f build/android/RippleGarden.apk || { echo "::error::Export produced no APK"; exit 1; }
+
+      - name: Export and sign with the upload key (release tags)
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -102,13 +118,13 @@ jobs:
           if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing"; exit 1; fi
           export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/release.jks"
           echo "$KEYSTORE_BASE64" | base64 -d > "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
-          "$GODOT_BIN" --headless --path godot --import
           mkdir -p build/android
           "$GODOT_BIN" --headless --path godot --export-release "Android" ../build/android/RippleGarden.apk
           rm -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
           test -f build/android/RippleGarden.apk || { echo "::error::Export produced no APK"; exit 1; }
 
-      - name: Check the signing certificate
+      - name: Check the signing certificate (release tags)
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
           cert=$("$apksigner" verify --print-certs build/android/RippleGarden.apk | sed -n 's/.*certificate SHA-256 digest: //p' | head -1)
@@ -117,6 +133,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          # A pull request's APK is signed with a throwaway key: it proves the export works, it is not a build to install.
           name: android-apk
           path: build/android/RippleGarden.apk
           retention-days: 7
