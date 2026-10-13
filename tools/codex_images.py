@@ -40,10 +40,15 @@ from PIL import Image
 
 MODEL = "gpt-5.6-luna"
 EFFORT = "low"
-CUTOUT = ("Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting from the "
+# Codex' built-in image tool takes no model or quality option (the server picks the image model); what costs
+# tokens is the agent around it, which by default first reads the image skill (~12k tokens) and more. The
+# prompt therefore asks for one direct tool call with nothing read first (2026-10-13).
+DIRECT = ("Call the image generation tool exactly once, right away. Do not read any files, skills or instructions "
+          "first and do not run any commands. ")
+CUTOUT = (DIRECT + "Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting from the "
           "upper left, clean crisp edges with NO white or grey halo, true transparent background (real alpha, not a "
           "checkerboard), no text, no watermark. ")
-SCENE = ("Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting, a full "
+SCENE = (DIRECT + "Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting, a full "
          "opaque square scene with a painted background, no text, no watermark, no UI. ")
 
 
