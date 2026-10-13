@@ -113,6 +113,16 @@ func test_the_angler_and_the_camp_stand_on_land_in_every_region() -> void:
 		for slot in layout.get("camp_slots", []):
 			assert_false(Geometry2D.is_point_in_polygon(Vector2(float(slot["x"]), float(slot["y"])), pond), "%s: %s is in the water" % [region_id, slot["id"]])
 
+func test_camp_slots_of_later_regions_leave_room_between_decorations() -> void:
+	# #90: big decorations (tent, hammock, rowboat) hid each other on the coast and the isle. They are drawn
+	# in depth order like the pond's camp, so some overlap is fine; slots this close are not.
+	for region_id in _visited_regions():
+		var slots: Array = ContentDB.get_layout(region_id).get("camp_slots", [])
+		for i in slots.size():
+			for j in range(i + 1, slots.size()):
+				var gap := Vector2(slots[i]["x"], slots[i]["y"]).distance_to(Vector2(slots[j]["x"], slots[j]["y"]))
+				assert_true(gap >= 85.0, "%s: %s and %s are only %d px apart" % [region_id, slots[i]["id"], slots[j]["id"], gap])
+
 func test_the_game_builds_each_region_when_the_player_is_there() -> void:
 	for region_id in _visited_regions():
 		GameState.new_game()
@@ -261,4 +271,19 @@ func test_the_valley_can_be_restored_like_the_pond() -> void:
 	assert_true(restoration.can_restore(R2))
 	assert_true(restoration.restore(R2))
 	assert_eq(GameState.get_restoration_level(R2), 1)
+	GameState.new_game()
+
+func test_the_waterfall_rainbow_only_comes_where_water_falls() -> void:
+	# #90: "폭포 무지개" was recorded on the coast and the isle, which have no waterfall.
+	GameState.new_game()
+	var context := func() -> Dictionary: return {"weather": "clear", "band": "day", "water_mind": false}
+	for region_id in [R1, R2, R3, R4, R5]:
+		GameState.add_restoration_points(region_id, 100000)
+		GameState.set_restoration_level(region_id, 10)
+	var coast := MomentService.new(GameState, R4)
+	coast.context_provider = context
+	assert_false("moment_rainbow" in coast.check(), "the rainbow came on the coast")
+	var pond := MomentService.new(GameState, R1)
+	pond.context_provider = context
+	assert_true("moment_rainbow" in pond.check(), "the pond's waterfall rainbow did not come")
 	GameState.new_game()

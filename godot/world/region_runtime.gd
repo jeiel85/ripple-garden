@@ -64,6 +64,7 @@ func angler_position() -> Vector2:
 ## Shows a restoration level. With `animate` the world eases to it (UI_UX §6: a short, quiet change).
 func apply_level(level: int, animate: bool) -> void:
 	environment.set_level(level, animate)
+	foreground.follow_restoration()
 	props.refresh()
 	animals.set_level(level)
 
