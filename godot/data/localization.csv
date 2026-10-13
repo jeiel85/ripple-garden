@@ -616,3 +616,6 @@ moment.heron_reeds.hint,"강이 살아난 해 질 녘에…","At dusk, once the 
 moment.tide_pool.name,"갯바위 웅덩이","The Tide Pool","磯だまり"
 moment.tide_pool.desc,"물이 빠진 갯바위 웅덩이에 게와 불가사리가 모여 있었어요.","At low tide, a crab and a starfish gathered in a rock pool.","潮が引いた磯だまりに、カニとヒトデが集まっていました。"
 moment.tide_pool.hint,"바다가 맑아진 날, 물이 빠지면…","On a clear-sea day, when the tide goes out…","海が澄んだ日、潮が引いたら…"
+moment.moon_road.name,"달빛 물길","The Moon Road","月の道"
+moment.moon_road.desc,"보름달 아래 석호 위로 반짝이는 달빛 물길이 열렸어요.","Under the full moon, a shimmering road of moonlight opened across the lagoon.","満月の下、ラグーンにきらめく月の道が開きました。"
+moment.moon_road.hint,"섬이 깨어난 밤, 달이 뜨면…","On a night when the isle has awoken, when the moon rises…","島が目覚めた夜、月がのぼったら…"

@@ -325,7 +325,42 @@ def tern():
     return normalize(np.concatenate(parts), 0.4)
 
 
+def lagoon_loop():
+    """Region 05: a still lagoon — soft, glassy lapping with a faint far surf on the reef."""
+    rng = _rng("lagoon")
+    sr = LOOP_SR
+    seconds = 12.0
+    n = int(seconds * sr)
+    laps = band(noise(rng, seconds, sr), sr, 200, 1200) * smooth_random(rng, n, sr, 1.4) ** 3
+    far_surf = band(noise(rng, seconds, sr), sr, 60, 400) * (0.5 + 0.5 * smooth_random(rng, n, sr, 0.15))
+    return normalize(make_seamless(laps + far_surf * 0.6, sr), 0.65)
+
+
+def tropic_bird():
+    """Region 05: a tropical bird's rising, bubbling trill."""
+    sr = SHOT_SR
+    parts = []
+    for i in range(7):
+        f0 = 1800 + i * 160
+        parts.append(chirp(sr, f0, f0 + 500, 0.06, 0.03))
+        parts.append(np.zeros(int(0.025 * sr)))
+    return normalize(np.concatenate(parts), 0.45)
+
+
+def dolphin():
+    """Region 05: a dolphin's whistle from beyond the reef (dusk and night)."""
+    sr = SHOT_SR
+    n = int(0.7 * sr)
+    t = np.arange(n) / sr
+    freq = 5200 + 1800 * np.sin(2 * np.pi * 1.4 * t) + 600 * np.sin(2 * np.pi * 7 * t)
+    tone = np.sin(2 * np.pi * np.cumsum(freq) / sr)
+    return normalize(tone * envelope(n, 0.05, 0.35, sr), 0.35)
+
+
 SOUNDS = {
+    "lagoon_loop.wav": (lagoon_loop, LOOP_SR),
+    "tropic_bird.wav": (tropic_bird, SHOT_SR),
+    "dolphin.wav": (dolphin, SHOT_SR),
     "waves_loop.wav": (waves_loop, LOOP_SR),
     "gull.wav": (gull, SHOT_SR),
     "tern.wav": (tern, SHOT_SR),

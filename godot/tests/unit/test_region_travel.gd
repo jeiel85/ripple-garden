@@ -9,11 +9,23 @@ const R1 := "region_01_quiet_pond"
 const R2 := "region_02_forest_stream"
 const R3 := "region_03_reed_river"
 const R4 := "region_04_blue_coast"
-## A region whose world has not arrived yet.
+const R5 := "region_05_moonlight_isle"
+## The region whose world a test holds back (`_hold_world`) to stand for one that has not arrived yet.
 const NO_WORLD := "region_05_moonlight_isle"
 const DT := 1.0 / 30.0
 
 var _was_blocked := false
+
+## Every region has a world now: a test about one whose world has not arrived holds back a layout for its
+## duration (`_restore_world` puts it back).
+func _hold_world(region_id: String) -> Dictionary:
+	var held: Dictionary = ContentDB.layouts.get(region_id, {})
+	ContentDB.layouts.erase(region_id)
+	return held
+
+func _restore_world(region_id: String, held: Dictionary) -> void:
+	if not held.is_empty():
+		ContentDB.layouts[region_id] = held
 
 func _open_r2() -> void:
 	var condition: Dictionary = RegionUnlocks.entry(R2)["condition"]
@@ -48,8 +60,10 @@ func test_a_saved_region_is_used_only_while_it_can_be_visited() -> void:
 	assert_eq(GameRoot.pick_region(GameState), R1, "a locked region is never built")
 	_open_r2()
 	assert_eq(GameRoot.pick_region(GameState), R2)
+	var held := _hold_world(NO_WORLD)
 	GameState.set_current_region(NO_WORLD)
 	assert_eq(GameRoot.pick_region(GameState), R1, "a region without a world falls back to the start")
+	_restore_world(NO_WORLD, held)
 	GameState.set_current_region("region_99_gone")
 	assert_eq(GameRoot.pick_region(GameState), R1, "an unknown id falls back to the start")
 	GameState.new_game()
@@ -81,8 +95,8 @@ func _visited_regions() -> Array:
 	return ContentDB.regions.keys().filter(func(id: String) -> bool:
 		return id != RegionUnlocks.start_region() and RegionUnlocks.has_world(id))
 
-func test_regions_two_to_four_have_worlds() -> void:
-	for region_id in [R2, R3, R4]:
+func test_every_region_has_a_world() -> void:
+	for region_id in [R2, R3, R4, R5]:
 		assert_true(region_id in _visited_regions(), "%s has no world" % region_id)
 
 func test_the_angler_and_the_camp_stand_on_land_in_every_region() -> void:
@@ -194,7 +208,9 @@ func test_travel_is_refused_while_a_line_is_out_and_to_regions_that_cannot_be_vi
 	assert_false(root.travel(R2), "a locked region")
 	_open_r2()
 	assert_false(root.travel(R3), "a region still locked")
+	var held := _hold_world(NO_WORLD)
 	assert_false(root.travel(NO_WORLD), "a region without a world")
+	_restore_world(NO_WORLD, held)
 	assert_false(root.travel(R1), "where the player already is")
 	assert_true(root.ui.world_input.cast_quick())
 	assert_false(root.travel(R2), "a line is out")
@@ -237,7 +253,10 @@ func test_the_valley_can_be_restored_like_the_pond() -> void:
 	assert_eq(restoration.max_level(R2), restoration.max_level(R1), "the valley is capped below the pond")
 	assert_eq(restoration.max_level(R3), restoration.max_level(R1), "the river is capped below the pond")
 	assert_eq(restoration.max_level(R4), restoration.max_level(R1), "the coast is capped below the pond")
+	assert_eq(restoration.max_level(R5), restoration.max_level(R1), "the isle is capped below the pond")
+	var held := _hold_world(NO_WORLD)
 	assert_eq(restoration.max_level(NO_WORLD), 0, "a region without a world cannot be restored yet")
+	_restore_world(NO_WORLD, held)
 	GameState.add_restoration_points(R2, restoration.points_for_level(1))
 	assert_true(restoration.can_restore(R2))
 	assert_true(restoration.restore(R2))
