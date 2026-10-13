@@ -53,9 +53,13 @@ func test_an_open_region_without_a_world_says_it_comes_later() -> void:
 		_restore(region_id, 10)
 		_meet_species(region_id, 99)
 	assert_true(unlocks.is_unlocked(R5))
-	assert_true(ContentDB.get_layout(R5).is_empty(), "this test needs a region whose world has not arrived yet")
+	# Every region has a world now: the isle's layout is held back to stand for one that has not arrived.
+	var held: Dictionary = ContentDB.layouts.get(R5, {})
+	ContentDB.layouts.erase(R5)
 	assert_eq(unlocks.state_of(R5, R1), RegionUnlocks.COMING)
 	assert_false(unlocks.can_travel(R5))
+	if not held.is_empty():
+		ContentDB.layouts[R5] = held
 	GameState.new_game()
 
 func test_the_map_shows_every_island_and_says_what_each_needs() -> void:

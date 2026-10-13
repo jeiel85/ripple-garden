@@ -78,14 +78,18 @@ func test_the_slice_cap_stops_restoration_but_not_point_accumulation() -> void:
 	assert_eq(parts[1].levels_available(REGION), 0)
 	parts[0].free()
 
-## D-035: a region is restorable once its world exists (Regions 02 to 04 have one); one without a world is not yet.
+## D-035: a region is restorable once its world exists (all five have one); one without a world is not yet.
+## The isle's layout is held back for the test to stand for a region whose world has not arrived.
 func test_regions_without_a_world_are_not_restorable_yet() -> void:
 	var parts := _setup()
-	assert_true(ContentDB.get_layout("region_05_moonlight_isle").is_empty(), "this test needs a region whose world has not arrived")
+	var held: Dictionary = ContentDB.layouts.get("region_05_moonlight_isle", {})
+	ContentDB.layouts.erase("region_05_moonlight_isle")
 	parts[0].add_restoration_points("region_05_moonlight_isle", 1000)
 	var requirement: RestorationService.Requirement = parts[1].get_requirement("region_05_moonlight_isle")
 	assert_true(requirement.at_cap)
 	assert_false(parts[1].restore("region_05_moonlight_isle"))
+	if not held.is_empty():
+		ContentDB.layouts["region_05_moonlight_isle"] = held
 	parts[0].free()
 
 func test_two_first_discoveries_earn_the_first_restoration() -> void:
