@@ -21,7 +21,8 @@ BACKDROP = (60, 90, 110, 255)
 
 
 def fully_opaque(picture: Image.Image) -> bool:
-    return picture.mode not in ("RGBA", "LA", "PA") or picture.getchannel("A").getextrema()[0] == 255
+    # Through RGBA, so palette (P + tRNS) and keyed transparency count as transparency too (Codex review #91).
+    return picture.convert("RGBA").getchannel("A").getextrema()[0] == 255
 
 
 def rows_of(paths: list[Path]) -> list[list[Path]]:

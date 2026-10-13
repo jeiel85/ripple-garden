@@ -60,8 +60,8 @@ SCENE = (DIRECT + "Use the image generation tool to draw ONE image. Warm miniatu
 def fully_opaque(path: Path) -> bool:
     """True when a picture has no transparent pixel at all: a cut-out that came back with its background
     painted in (often a fake checkerboard) instead of real transparency."""
-    picture = Image.open(path)
-    return picture.mode not in ("RGBA", "LA", "PA") or picture.getchannel("A").getextrema()[0] == 255
+    # Through RGBA, so palette (P + tRNS) and keyed transparency count as transparency too (Codex review #91).
+    return Image.open(path).convert("RGBA").getchannel("A").getextrema()[0] == 255
 
 
 def generated_path(stdout: str) -> Optional[Path]:
