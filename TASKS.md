@@ -107,4 +107,4 @@
 - [ ] P3-008 accessibility QA
 - [ ] P3-009 store assets/listing
 - [ ] P3-010 closed external playtest
-- [ ] P3-011 release candidate
+- [ ] P3-011 release candidate — v1.0.0-rc.1(2026-10-13)은 **콘텐츠 완성 후보**다(다섯 지역·72종). 결제(P3-001~003)·약관(P3-004)·기기/성능(P3-005/006)·외부 플레이테스트(P3-010) 등 출시 준비는 아직이라 이 항목은 열어 둔다
