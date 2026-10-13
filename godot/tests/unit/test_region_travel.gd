@@ -85,6 +85,20 @@ func test_regions_two_to_four_have_worlds() -> void:
 	for region_id in [R2, R3, R4]:
 		assert_true(region_id in _visited_regions(), "%s has no world" % region_id)
 
+func test_the_angler_and_the_camp_stand_on_land_in_every_region() -> void:
+	# Codex review #75: a water outline that covered the dock let casts and fish land on the angler.
+	for region_id in ContentDB.regions:
+		var layout := ContentDB.get_layout(region_id)
+		if layout.is_empty():
+			continue
+		var pond := PackedVector2Array()
+		for point in layout["pond"]:
+			pond.append(Vector2(float(point[0]), float(point[1])))
+		var angler: Dictionary = layout["angler"]
+		assert_false(Geometry2D.is_point_in_polygon(Vector2(float(angler["x"]), float(angler["y"])), pond), "%s: the angler stands in the water" % region_id)
+		for slot in layout.get("camp_slots", []):
+			assert_false(Geometry2D.is_point_in_polygon(Vector2(float(slot["x"]), float(slot["y"])), pond), "%s: %s is in the water" % [region_id, slot["id"]])
+
 func test_the_game_builds_each_region_when_the_player_is_there() -> void:
 	for region_id in _visited_regions():
 		GameState.new_game()
