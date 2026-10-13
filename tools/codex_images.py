@@ -41,10 +41,15 @@ from PIL import Image
 MODEL = "gpt-5.6-luna"
 EFFORT = "low"
 # Codex' built-in image tool takes no model or quality option (the server picks the image model); what costs
-# tokens is the agent around it, which by default first reads the image skill (~12k tokens) and more. The
-# prompt therefore asks for one direct tool call with nothing read first (2026-10-13).
+# tokens is the agent around it. Measured 2026-10-13 (input tokens for one picture, gpt-5.6-luna / low):
+#   plain prompt ~84k -> "call the tool right away, read nothing" ~61k -> also without the plugins, apps,
+#   browser, computer use, multi-agent and node REPL it never needs ~46k (with one reference picture too).
+# One run in four still answered without a picture; the retry and the agy fallback cover that.
 DIRECT = ("Call the image generation tool exactly once, right away. Do not read any files, skills or instructions "
           "first and do not run any commands. ")
+# Everything a one-shot drawing job does not use is switched off for it (fewer tool definitions to read).
+LEAN = ["features.apps=false", "features.plugins=false", "features.browser_use=false", "features.browser_use_external=false",
+        "features.computer_use=false", "features.multi_agent=false", "features.goals=false", "mcp_servers.node_repl.enabled=false"]
 CUTOUT = (DIRECT + "Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting from the "
           "upper left, clean crisp edges with NO white or grey halo, true transparent background (real alpha, not a "
           "checkerboard), no text, no watermark. ")
@@ -137,6 +142,8 @@ def run(job: dict, out: Path, backend: str = "codex") -> tuple[str, str]:
         return job["id"], run_agy(job, dest, work)
     cmd = ["codex", "exec", "--skip-git-repo-check", "-s", "workspace-write", "-C", str(work),
            "-m", MODEL, "-c", f'model_reasoning_effort="{EFFORT}"']
+    for setting in LEAN:
+        cmd += ["-c", setting]
     for ref in job.get("refs", []):
         cmd += ["-i", str(ref)]
     cmd += ["--", (SCENE if job.get("scene") else CUTOUT) + job["prompt"] + " Reply with only the generated file path."]
