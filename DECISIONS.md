@@ -382,3 +382,14 @@
   Windows 파일 버전은 숫자만 되기 때문이다. `tools/check_version.py`는 `vX.Y.Z`와 `vX.Y.Z-rc.N`을 받아 `X.Y.Z`가 게임 버전과 같은지 본다.
 - CI 릴리스는 `-rc.N` 태그를 GitHub **사전 릴리스(prerelease)**로 올린다. 정식 1.0은 같은 버전으로 `v1.0.0` 태그를 단다(후보를 고치면 `-rc.2`, …).
 - Android `version/code`는 후보마다 올린다(같은 이름의 후보·정식이 코드로 구별된다).
+
+## D-038 Android 릴리스 APK는 CI가 업로드 키로 서명해 같은 릴리스에 올린다 (2026-10-13)
+
+- 결정자: 프로젝트 오너("Secrets 등록하고 CI 자동화"). v1.0.0-rc.1·rc.2는 로컬에서 손으로 서명해 올렸다 — 태그와 다른 커밋으로 빌드하거나 빠뜨릴 수 있었다(#81).
+- 업로드 키: `CN=Ripple Garden, O=jeiel85, C=KR`, 인증서 SHA-256 `646b2f10…08a1`. 원본은 로컬 `.keystore/`(git 제외), 백업은 `G:\내 드라이브\모바일 앱 개발\Ripple Garden\릴리즈 키스토어`.
+  저장소 Secrets `ANDROID_KEYSTORE_BASE64`·`ANDROID_KEYSTORE_PASSWORD`·`ANDROID_KEY_ALIAS`에 같은 키가 있다.
+- CI `android` 잡: PR과 `v*` 태그에서 Godot로 Android 프리셋을 내보낸다. **업로드 키는 태그 빌드에만 준다** — PR은 그 자리에서 만든 일회용 키로 서명해
+  내보내기가 깨지지 않았는지만 확인한다(브랜치를 밀 수 있는 사람이 워크플로를 고쳐 키를 빼낼 수 없게, Codex 리뷰 #84). 태그 빌드는 인증서가 위 지문과 다르면 실패하고,
+  Windows 릴리스 잡이 APK를 받아 `RippleGarden-<tag>-android.apk`로 릴리스에 올리고 SHA256SUMS에 함께 적는다.
+- 남은 위험: 태그를 밀 수 있는 사람은 태그 빌드에서 키에 닿는다. 지금은 오너 혼자 쓰는 저장소라 그대로 두고, 협업자가 생기면 태그 보호 규칙이나 승인이 필요한 environment로 옮긴다.
+- Play 스토어 제출용 AAB(gradle 빌드)와 Play App Signing은 아직이다(#81).

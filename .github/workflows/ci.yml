@@ -43,9 +43,104 @@ jobs:
       - name: Run Godot tests
         run: '"$GODOT_BIN" --headless --path godot -s res://tests/run_tests.gd'
 
+  android:
+    name: Build signed Android APK
+    needs: validate
+    # Pull requests (a check that the Android export still works, signed with a throwaway key) and release tags
+    # (signed with the real upload key). The upload key is only ever given to tag builds (Codex review #84).
+    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    env:
+      # Certificate of the Ripple Garden upload key (D-038): a build signed with anything else fails here.
+      EXPECTED_CERT_SHA256: 646b2f100ed674e9178fa1d013f4ca24291b0fb4bfc8b260e890b7340f4b08a1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Godot and the Android export template (checksum verified)
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}"
+          editor="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          templates="Godot_v${GODOT_VERSION}_export_templates.tpz"
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o "$editor" "$base/$editor"
+          curl -fsSL -o "$templates" "$base/$templates"
+          curl -fsSL -o SHA512-SUMS.txt "$base/SHA512-SUMS.txt"
+          sha512sum -c --ignore-missing SHA512-SUMS.txt
+          unzip -q "$editor"
+          template_dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION/-/.}"
+          mkdir -p "$template_dir"
+          unzip -q -j "$templates" templates/android_release.apk templates/version.txt -d "$template_dir"
+          echo "GODOT_BIN=$RUNNER_TEMP/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Point Godot at the Android SDK and a throwaway debug key
+        run: |
+          debug="$RUNNER_TEMP/debug.keystore"
+          keytool -genkeypair -keystore "$debug" -storepass android -keypass android -alias androiddebugkey             -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -noprompt
+          major_minor=$(echo "$GODOT_VERSION" | cut -d. -f1,2)
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-${major_minor}.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$debug"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
+      - name: Import project
+        run: '"$GODOT_BIN" --headless --path godot --import'
+
+      - name: Export with a throwaway key (pull requests)
+        if: github.event_name == 'pull_request'
+        run: |
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/throwaway.jks"
+          export GODOT_ANDROID_KEYSTORE_RELEASE_USER=throwaway
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=throwaway
+          keytool -genkeypair -keystore "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" -storetype PKCS12 -storepass throwaway -keypass throwaway             -alias throwaway -keyalg RSA -keysize 2048 -validity 1 -dname "CN=PR check" -noprompt
+          mkdir -p build/android
+          "$GODOT_BIN" --headless --path godot --export-release "Android" ../build/android/RippleGarden.apk
+          test -f build/android/RippleGarden.apk || { echo "::error::Export produced no APK"; exit 1; }
+
+      - name: Export and sign with the upload key (release tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing"; exit 1; fi
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/release.jks"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
+          mkdir -p build/android
+          "$GODOT_BIN" --headless --path godot --export-release "Android" ../build/android/RippleGarden.apk
+          rm -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
+          test -f build/android/RippleGarden.apk || { echo "::error::Export produced no APK"; exit 1; }
+
+      - name: Check the signing certificate (release tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          cert=$("$apksigner" verify --print-certs build/android/RippleGarden.apk | sed -n 's/.*certificate SHA-256 digest: //p' | head -1)
+          echo "certificate: $cert"
+          if [ "$cert" != "$EXPECTED_CERT_SHA256" ]; then echo "::error::APK is not signed with the Ripple Garden upload key"; exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          # A pull request's APK is signed with a throwaway key: it proves the export works, it is not a build to install.
+          name: android-apk
+          path: build/android/RippleGarden.apk
+          retention-days: 7
+
   release:
     name: Build Windows release
-    needs: validate
+    needs: [validate, android]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: windows-latest
     permissions:
@@ -96,6 +191,11 @@ jobs:
           & $env:GODOT_BIN --headless --path godot --export-release "Windows Desktop" ..\build\windows\RippleGarden.exe
           if (-not (Test-Path build\windows\RippleGarden.exe)) { throw "Export produced no executable" }
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: android-apk
+
       - name: Package and publish release assets
         shell: pwsh
         env:
@@ -106,15 +206,17 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           $zip = "dist\RippleGarden-$tag-windows-x64.zip"
           Compress-Archive -Path build\windows\* -DestinationPath $zip
-          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
-          # LF line ending so `sha256sum -c` works on Linux/macOS/Git Bash.
-          [IO.File]::WriteAllText("$PWD\dist\SHA256SUMS.txt", "$hash  $(Split-Path $zip -Leaf)`n")
+          $apk = "dist\RippleGarden-$tag-android.apk"
+          Move-Item android-apk\RippleGarden.apk $apk
+          # LF line endings so `sha256sum -c` works on Linux/macOS/Git Bash.
+          $sums = foreach ($file in @($zip, $apk)) { "$((Get-FileHash -Algorithm SHA256 $file).Hash.ToLower())  $(Split-Path $file -Leaf)" }
+          [IO.File]::WriteAllText("$PWD\dist\SHA256SUMS.txt", (($sums -join "`n") + "`n"))
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag $zip dist\SHA256SUMS.txt --clobber
+            gh release upload $tag $zip $apk dist\SHA256SUMS.txt --clobber
           } else {
             # A release candidate tag (vX.Y.Z-rc.N) is published as a prerelease (D-037).
             $extra = @()
             if ($tag -match '-rc\.\d+$') { $extra += '--prerelease' }
-            gh release create $tag $zip dist\SHA256SUMS.txt --title "Ripple Garden $tag" --generate-notes @extra
+            gh release create $tag $zip $apk dist\SHA256SUMS.txt --title "Ripple Garden $tag" --generate-notes @extra
           }
