@@ -177,6 +177,29 @@ func test_the_foreground_only_exists_as_art() -> void:
 	front.free()
 	_restore()
 
+func test_the_foreground_withers_with_the_scene_and_blooms_when_restored() -> void:
+	# A barren pond must not be framed by fresh blossoms (2026-10-13 graphics pass).
+	assert_true(ForegroundLayer.tint_for(0.0).v < Color.WHITE.v, "a barren stage is not dulled")
+	assert_eq(ForegroundLayer.tint_for(1.0), Color.WHITE, "a restored stage keeps the picture's own colours")
+	GameState.new_game()
+	var save_service: Node = tree.root.get_node("SaveService")
+	var was_blocked: bool = save_service.write_blocked
+	save_service.write_blocked = true
+	var root: GameRoot = (load("res://world/game_root.tscn") as PackedScene).instantiate()
+	root.load_save = false
+	tree.root.add_child(root)
+	var front: ForegroundLayer = root.region.foreground
+	assert_eq(front.self_modulate, ForegroundLayer.tint_for(root.region.environment.scene_restored_share()), "the frame does not start at the scene's stage")
+	assert_true(front.self_modulate.v < 1.0, "a new game's frame is not dulled")
+	GameState.add_restoration_points(root.region_id, 100000)
+	GameState.set_restoration_level(root.region_id, 10)
+	root.region.apply_level(10, false)
+	front._process(0.016)
+	assert_eq(front.self_modulate, Color.WHITE, "the restored frame did not regain its colour")
+	root.free()
+	GameState.new_game()
+	save_service.write_blocked = was_blocked
+
 # --- the angler ---
 
 func test_the_angler_picture_follows_the_fishing_state_and_holds_the_rod_in_its_hands() -> void:
