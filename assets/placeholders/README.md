@@ -100,3 +100,6 @@
 - **Region 05 달빛섬 그림** (2026-10-13, Codex CLI, 모델 `gpt-5.6-luna`, 추론 `low`): `world/r05_scene.png`·`r05_scene_barren.png`, 열대 물고기 22종 옆·위 44장,
   `moments/moment_moon_road.png`. 상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 나머지는 `tools/import_generated.py`로 잘라 줄였다(수정됨).
   소리 `lagoon_loop`·`tropic_bird`·`dolphin`.wav는 `tools/generate_placeholder_audio.py`로 합성했다.
+- **Region 02~05 전경 테두리** (2026-10-13, Codex CLI, 모델 `gpt-5.6-luna`, 추론 `low`): `world/r02~r05_foreground.png` — 계곡(고사리·이끼), 강(부들·갈대·털부처꽃),
+  바닷가(갯잔디·갯패랭이·조개), 달빛섬(몬스테라·히비스커스·플루메리아). Region 01 테두리(회색 바탕에 합성)를 참고로 941×1672로 받아, Region 01 테두리의 알파를 넓혀 흐린 모양을
+  마스크로 곱해 가운데·낚시꾼 자리를 비웠다(수정됨). 상업적 이용은 OpenAI 이용 약관을 따른다.

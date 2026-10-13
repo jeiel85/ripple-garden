@@ -153,7 +153,7 @@
       {"kind": "reed", "x": 250, "y": 760, "scale": 0.9, "min_level": 3},
       {"kind": "flower", "x": 90, "y": 300, "scale": 1.0, "min_level": 3},
       {"kind": "lily_pad", "x": 150, "y": 640, "scale": 0.9, "min_level": 3},
-      {"kind": "bush", "x": 30, "y": 200, "scale": 1.0, "min_level": 4},
+      {"kind": "flower", "x": 30, "y": 200, "scale": 1.0, "min_level": 4},
       {"kind": "flower", "x": 200, "y": 330, "scale": 0.9, "min_level": 4},
       {"kind": "lily_pad", "x": 95, "y": 560, "scale": 0.8, "min_level": 5},
       {"kind": "frog", "x": 585, "y": 420, "scale": 1.0, "min_level": 5},
@@ -161,12 +161,12 @@
       {"kind": "flower", "x": 60, "y": 1000, "scale": 0.9, "min_level": 6},
       {"kind": "grass_tuft", "x": 330, "y": 330, "scale": 0.9, "min_level": 6},
       {"kind": "flower", "x": 160, "y": 180, "scale": 0.9, "min_level": 7},
-      {"kind": "bush", "x": 250, "y": 160, "scale": 0.9, "min_level": 7},
+      {"kind": "flower", "x": 250, "y": 160, "scale": 0.9, "min_level": 7},
       {"kind": "lily_pad", "x": 230, "y": 700, "scale": 0.8, "min_level": 8},
       {"kind": "flower", "x": 120, "y": 880, "scale": 0.9, "min_level": 8},
       {"kind": "flower", "x": 640, "y": 470, "scale": 0.8, "min_level": 9},
       {"kind": "cat", "x": 60, "y": 930, "scale": 1.0, "min_level": 9},
-      {"kind": "rainbow", "x": 560, "y": 160, "scale": 1.0, "min_level": 10}
+      {"kind": "rainbow", "x": 600, "y": 260, "scale": 1.6, "min_level": 10}
     ],
     "ambient_animals": [
       {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
@@ -234,11 +234,11 @@
       {"kind": "grass_tuft", "x": 150, "y": 930, "scale": 0.9, "min_level": 6},
       {"kind": "flower", "x": 30, "y": 640, "scale": 0.9, "min_level": 7},
       {"kind": "reed", "x": 560, "y": 230, "scale": 1.0, "min_level": 7},
-      {"kind": "bush", "x": 60, "y": 1000, "scale": 1.0, "min_level": 8},
+      {"kind": "grass_tuft", "x": 60, "y": 1000, "scale": 1.0, "min_level": 8},
       {"kind": "flower", "x": 170, "y": 1000, "scale": 0.8, "min_level": 8},
       {"kind": "cat", "x": 70, "y": 830, "scale": 1.0, "min_level": 9},
       {"kind": "lily_pad", "x": 290, "y": 360, "scale": 0.8, "min_level": 9},
-      {"kind": "rainbow", "x": 600, "y": 140, "scale": 1.0, "min_level": 10}
+      {"kind": "rainbow", "x": 440, "y": 300, "scale": 3.0, "min_level": 10}
     ],
     "ambient_animals": [
       {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
@@ -296,14 +296,12 @@
       {"kind": "flower", "x": 60, "y": 160, "scale": 0.9, "min_level": 3},
       {"kind": "grass_tuft", "x": 150, "y": 1150, "scale": 0.9, "min_level": 3},
       {"kind": "flower", "x": 230, "y": 120, "scale": 0.9, "min_level": 4},
-      {"kind": "bush", "x": 30, "y": 1180, "scale": 1.0, "min_level": 5},
       {"kind": "flower", "x": 650, "y": 1100, "scale": 0.9, "min_level": 5},
       {"kind": "grass_tuft", "x": 40, "y": 560, "scale": 0.9, "min_level": 6},
       {"kind": "flower", "x": 120, "y": 140, "scale": 0.9, "min_level": 7},
-      {"kind": "bush", "x": 680, "y": 1180, "scale": 1.0, "min_level": 7},
       {"kind": "flower", "x": 90, "y": 1130, "scale": 0.9, "min_level": 8},
       {"kind": "cat", "x": 70, "y": 790, "scale": 1.0, "min_level": 9},
-      {"kind": "rainbow", "x": 560, "y": 160, "scale": 1.0, "min_level": 10}
+      {"kind": "rainbow", "x": 470, "y": 380, "scale": 3.0, "min_level": 10}
     ],
     "ambient_animals": [
       {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
@@ -363,14 +361,12 @@
       {"kind": "flower", "x": 60, "y": 170, "scale": 0.9, "min_level": 3},
       {"kind": "grass_tuft", "x": 150, "y": 1170, "scale": 0.9, "min_level": 3},
       {"kind": "flower", "x": 230, "y": 150, "scale": 0.9, "min_level": 4},
-      {"kind": "bush", "x": 30, "y": 1180, "scale": 1.0, "min_level": 5},
       {"kind": "flower", "x": 120, "y": 1100, "scale": 0.9, "min_level": 5},
       {"kind": "grass_tuft", "x": 200, "y": 300, "scale": 0.9, "min_level": 6},
       {"kind": "flower", "x": 150, "y": 140, "scale": 0.9, "min_level": 7},
-      {"kind": "bush", "x": 260, "y": 1220, "scale": 1.0, "min_level": 7},
       {"kind": "flower", "x": 80, "y": 1150, "scale": 0.9, "min_level": 8},
       {"kind": "cat", "x": 60, "y": 760, "scale": 1.0, "min_level": 9},
-      {"kind": "rainbow", "x": 560, "y": 150, "scale": 1.0, "min_level": 10}
+      {"kind": "rainbow", "x": 500, "y": 330, "scale": 3.0, "min_level": 10}
     ],
     "ambient_animals": [
       {"kind": "dragonfly", "count": 2, "min_level": 3, "time_bands": ["dawn", "morning", "day", "dusk"]},
