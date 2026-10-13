@@ -150,8 +150,9 @@ def run(job: dict, out: Path, backend: str = "codex") -> tuple[str, str]:
         if picture is not None:
             shutil.copy(picture, dest)
             return job["id"], "ok"
-        last = result.stdout[-200:]
-        if any(word in result.stdout.lower() for word in LIMIT_WORDS):
+        output = result.stdout + result.stderr  # codex exec prints its errors (e.g. the usage limit) on stderr
+        last = output[-200:]
+        if any(word in output.lower() for word in LIMIT_WORDS):
             break  # Codex' image limit: retrying will not help
     # Codex could not draw it: Antigravity instead.
     return job["id"], run_agy(job, dest, work) + " after codex failed"
