@@ -90,3 +90,7 @@
   `world/r02_scene_barren.png`(계곡 그림을 참고로 같은 구도의 시든 모습), 물고기 10종의 옆모습·위에서 본 모습 20장(`fish/fish_<id>_side|top.png`, 붕어·미꾸라지 그림을 참고).
   위에서 본 모습은 첫 결과가 옆모습이라 등 쪽에서 내려다본 그림을 다시 요청했다. 상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 물고기는
   `tools/import_generated.py`로 잘라 가장 긴 변 256px로 줄였다(수정됨).
+- **Region 03 큰 강 그림·대표 순간 그림** (2026-10-13, Codex CLI, 모델 `gpt-5.6-luna`, 추론 `low`): `world/r03_scene.png`·`r03_scene_barren.png`(복원 전 그림은 첫 결과의 부두 위치가 달라
+  "모든 것을 같은 자리에" 다시 요청), 물고기 10종 옆·위 20장(백연어 옆모습은 첫 결과에 체크무늬가 박혀 다시), `moments/moment_leaping_trout.png`·`moment_heron_reeds.png`.
+  상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 나머지는 `tools/import_generated.py`로 잘라 줄였다(수정됨).
+- **지역 소리** (2026-10-13): `stream_loop`·`river_loop`·`dipper`·`woodpecker`·`heron`·`warbler`.wav도 `tools/generate_placeholder_audio.py`로 합성한 자체 제작 음원이다.

@@ -6,6 +6,26 @@ extends RefCounted
 ## time band and how far the pond has recovered. Pure functions over data/audio.json, so they are
 ## deterministic given a seeded RandomNumberGenerator and testable without any audio device.
 
+## The mix as it sounds in one region (CONTENT_PLAN §3 "distinct soundscape"): a copy of `config` with the
+## region's entry under `regions` applied — its own loop recordings (`streams`: loop id -> file) and mix
+## values (`mix`: loop id -> {key: value}) — and only the wildlife that lives there (a clip with a `regions`
+## list sounds only in those regions; one without sounds everywhere).
+static func for_region(config: Dictionary, region_id: String) -> Dictionary:
+	var result := config.duplicate(true)
+	if result.is_empty():
+		return result
+	var own: Dictionary = config.get("regions", {}).get(region_id, {})
+	var streams: Dictionary = own.get("streams", {})
+	for loop in result["loops"]:
+		if streams.has(loop["id"]):
+			loop["stream"] = streams[loop["id"]]
+	var mix_changes: Dictionary = own.get("mix", {})
+	for loop_id in mix_changes:
+		result["mix"][loop_id].merge(mix_changes[loop_id], true)
+	result["wildlife"]["clips"] = result["wildlife"]["clips"].filter(func(clip: Dictionary) -> bool:
+		return not clip.has("regions") or region_id in clip["regions"])
+	return result
+
 ## Target loudness (0..1) of every loop: {loop id: volume}. `cloud` and `rain` are 0..1.
 static func loop_targets(config: Dictionary, time_band: String, cloud: float, rain: float) -> Dictionary:
 	var mix: Dictionary = config["mix"]

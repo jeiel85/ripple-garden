@@ -10,6 +10,7 @@ extends RefCounted
 ##   weather [ids]  band [time bands]  min_level n  water_mind true
 ##   caught_rarity n (a catch of at least this rarity)  camp_filled n (camp slots filled)
 ##   after_away true (the pond kept something for the player while they were away)
+##   region [region ids] (a region's own signature moment, CONTENT_PLAN §3)
 ## The service is asked to look whenever something relevant changes; nothing runs per frame.
 
 var region_id := ""
@@ -45,6 +46,8 @@ func check(event: Dictionary = {}) -> Array:
 static func matches(when: Dictionary, context: Dictionary) -> bool:
 	if when.has("weather") and not context.get("weather", "") in when["weather"]:
 		return false
+	if when.has("region") and not context.get("region", "") in when["region"]:
+		return false
 	if when.has("band") and not context.get("band", "") in when["band"]:
 		return false
 	if when.has("min_level") and int(context.get("level", 0)) < int(when["min_level"]):
@@ -62,6 +65,7 @@ static func matches(when: Dictionary, context: Dictionary) -> bool:
 func _context() -> Dictionary:
 	var scene: Dictionary = context_provider.call() if context_provider.is_valid() else {}
 	return {
+		"region": region_id,
 		"weather": scene.get("weather", ""),
 		"band": scene.get("band", TimeService.get_time_band()),
 		"water_mind": scene.get("water_mind", false),

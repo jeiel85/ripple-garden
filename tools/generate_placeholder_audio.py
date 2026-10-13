@@ -6,7 +6,10 @@ reproducible and owned by the project (no third-party licence). They are stand-i
 audio (CONTENT_PLAN §4): replace the files, keep the names, and the mix in data/audio.json keeps
 working. Run only when a sound changes; the generated .wav files are committed.
 
-    python tools/generate_placeholder_audio.py
+    python tools/generate_placeholder_audio.py [file.wav ...]   (no names: every sound)
+
+Region soundscapes (data/audio.json `regions`): the valley's babbling stream and the river's broad flow
+replace the pond's water loop there, and each region has two wildlife calls of its own.
 """
 from pathlib import Path
 import wave
@@ -216,7 +219,84 @@ def released():
     return normalize(swish + bubbles, 0.55)
 
 
+def stream_loop():
+    """Region 02: a mountain stream — brighter, busier babbling over stones than the pond."""
+    rng = _rng("stream")
+    sr = LOOP_SR
+    rush = band(noise(rng, 9.0, sr), sr, 400, 3800) * (0.6 + 0.4 * smooth_random(rng, int(9.0 * sr), sr, 1.5))
+    babble = np.zeros(int(9.0 * sr))
+    for position in rng.integers(0, len(babble) - 1600, size=int(9.0 * 26)):
+        m = 1500
+        t = np.arange(m) / sr
+        f = rng.uniform(380, 1100)
+        babble[position:position + m] += np.sin(2 * np.pi * np.cumsum(np.linspace(f, f * rng.uniform(1.2, 1.8), m)) / sr) * envelope(m, 0.003, 0.025, sr) * rng.uniform(0.2, 0.6)
+    return normalize(make_seamless(rush * 0.7 + babble, sr), 0.7)
+
+
+def river_loop():
+    """Region 03: a wide lowland river — a deep, slow, even flow with soft laps on the bank."""
+    rng = _rng("river")
+    sr = LOOP_SR
+    body = band(noise(rng, 12.0, sr), sr, 40, 520) * (0.7 + 0.3 * smooth_random(rng, int(12.0 * sr), sr, 0.25))
+    laps = band(noise(rng, 12.0, sr), sr, 200, 900) * smooth_random(rng, int(12.0 * sr), sr, 0.9) ** 4
+    return normalize(make_seamless(body + laps * 0.5, sr), 0.7)
+
+
+def dipper():
+    """Region 02: a dipper's sharp, metallic "zit-zit" over the stream."""
+    sr = SHOT_SR
+    parts = []
+    for f0, f1 in [(5200, 4300), (5400, 4400), (5000, 4200)]:
+        parts.append(chirp(sr, f0, f1, 0.05))
+        parts.append(np.zeros(int(0.07 * sr)))
+    return normalize(np.concatenate(parts), 0.45)
+
+
+def woodpecker():
+    """Region 02: a woodpecker drumming on a far trunk."""
+    rng = _rng("woodpecker")
+    sr = SHOT_SR
+    hits = []
+    gap = 0.055
+    for _ in range(14):
+        n = int(0.03 * sr)
+        hits.append(band(rng.standard_normal(n), sr, 700, 2600) * envelope(n, 0.001, 0.008, sr))
+        hits.append(np.zeros(int(gap * sr)))
+        gap *= 0.97
+    return normalize(np.concatenate(hits), 0.4)
+
+
+def heron():
+    """Region 03: a heron's harsh, low croak."""
+    rng = _rng("heron")
+    sr = SHOT_SR
+    n = int(0.45 * sr)
+    t = np.arange(n) / sr
+    tone = np.sin(2 * np.pi * np.cumsum(np.linspace(420, 300, n)) / sr)
+    rasp = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 55 * t))
+    grit = band(rng.standard_normal(n), sr, 300, 1800) * 0.4
+    return normalize((tone * rasp + grit) * envelope(n, 0.01, 0.2, sr), 0.45)
+
+
+def warbler():
+    """Region 03: a reed warbler's fast, chattering song from the reeds."""
+    rng = _rng("warbler")
+    sr = SHOT_SR
+    parts = []
+    for _ in range(9):
+        f0 = rng.uniform(2400, 4200)
+        parts.append(chirp(sr, f0, f0 * rng.uniform(0.8, 1.25), rng.uniform(0.04, 0.08), 0.03))
+        parts.append(np.zeros(int(rng.uniform(0.02, 0.06) * sr)))
+    return normalize(np.concatenate(parts), 0.45)
+
+
 SOUNDS = {
+    "stream_loop.wav": (stream_loop, LOOP_SR),
+    "river_loop.wav": (river_loop, LOOP_SR),
+    "dipper.wav": (dipper, SHOT_SR),
+    "woodpecker.wav": (woodpecker, SHOT_SR),
+    "heron.wav": (heron, SHOT_SR),
+    "warbler.wav": (warbler, SHOT_SR),
     "water_loop.wav": (water_loop, LOOP_SR),
     "wind_loop.wav": (wind_loop, LOOP_SR),
     "rain_loop.wav": (rain_loop, LOOP_SR),
@@ -235,8 +315,14 @@ SOUNDS = {
 }
 
 if __name__ == "__main__":
+    import sys
+    wanted = sys.argv[1:] or list(SOUNDS)
+    unknown = [name for name in wanted if name not in SOUNDS]
+    if unknown:
+        sys.exit(f"unknown sound(s): {', '.join(unknown)}")
     total = 0
-    for file_name, (factory, sample_rate) in SOUNDS.items():
+    for file_name in wanted:
+        factory, sample_rate = SOUNDS[file_name]
         write(file_name, factory(), sample_rate)
         total += (OUT / file_name).stat().st_size
     print(f"total {total // 1024} KB")
