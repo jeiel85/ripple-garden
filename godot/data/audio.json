@@ -20,8 +20,16 @@
       {"id": "bird_b", "stream": "res://audio/streams/bird_b.wav", "bands": ["dawn", "morning", "day"], "min_level": 2, "weight": 2},
       {"id": "frog", "stream": "res://audio/streams/frog.wav", "bands": ["dusk", "night"], "min_level": 1, "weight": 2},
       {"id": "cricket", "stream": "res://audio/streams/cricket.wav", "bands": ["dusk", "night"], "min_level": 2, "weight": 3},
-      {"id": "fish_jump", "stream": "res://audio/streams/fish_jump.wav", "bands": ["dawn", "morning", "day", "dusk", "night"], "min_level": 1, "weight": 1}
+      {"id": "fish_jump", "stream": "res://audio/streams/fish_jump.wav", "bands": ["dawn", "morning", "day", "dusk", "night"], "min_level": 1, "weight": 1},
+      {"id": "dipper", "stream": "res://audio/streams/dipper.wav", "bands": ["dawn", "morning", "day"], "min_level": 1, "weight": 2, "regions": ["region_02_forest_stream"]},
+      {"id": "woodpecker", "stream": "res://audio/streams/woodpecker.wav", "bands": ["morning", "day"], "min_level": 3, "weight": 1, "regions": ["region_02_forest_stream"]},
+      {"id": "heron", "stream": "res://audio/streams/heron.wav", "bands": ["dawn", "dusk", "night"], "min_level": 1, "weight": 1, "regions": ["region_03_reed_river"]},
+      {"id": "warbler", "stream": "res://audio/streams/warbler.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 2, "weight": 2, "regions": ["region_03_reed_river"]}
     ]
+  },
+  "regions": {
+    "region_02_forest_stream": {"streams": {"water": "res://audio/streams/stream_loop.wav"}, "mix": {"water": {"base": 0.7}}},
+    "region_03_reed_river": {"streams": {"water": "res://audio/streams/river_loop.wav"}, "mix": {"water": {"base": 0.6}, "wind": {"base": 0.3}}}
   },
   "cues": {
     "cast": {"stream": "res://audio/streams/cast.wav", "bus": "Fishing", "volume": 0.8},

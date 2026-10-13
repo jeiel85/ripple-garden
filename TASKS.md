@@ -82,13 +82,13 @@
 
 ## P2 — Content Expansion
 - [x] P2-000 drawn-art pipeline: `godot/art/`의 그림이 절차적 그림을 대신한다 (D-029). 그림 요청은 `assets/design/ASSET_REQUESTS.md` 1차 묶음
-- [ ] P2-001 Region 02 production — 진행 중. 됨(v0.8.0): 풍경(복원 전·후)·물고기 10종 그림·여울/소/바위/수초 레이아웃, 지역 이동(D-035)
-  - 완료 기준(CONTENT_PLAN §3)에 남은 것: 계곡만의 소리(물 소리·바람), 계곡 대표 순간(ambient moment), 밤·날씨 모습 확인, GDD의 "유속"(물살 손맛)
+- [ ] P2-001 Region 02 production — 진행 중. 됨: 풍경(복원 전·후)·물고기 10종 그림·여울/소/바위/수초 레이아웃, 지역 이동(D-035), 계곡 소리(산골 물소리·물까마귀·딱따구리)·대표 순간 "여울을 거스르는 물고기"(D-036)
+  - 남은 것: GDD의 R02 "유속"(물살 손맛). 밤·비 모습은 공용 조명으로 확인함
   - 덜 급한 것: 계곡 전경 테두리 그림 (BACKLOG)
-- [ ] P2-002 Region 03 production
+- [x] P2-002 Region 03 production — 큰 강(갈대가 우거진 강): 풍경(복원 전·후)·물고기 10종 그림·깊은 곳/물길/모래톱 얕은 곳/갈대 레이아웃(넓은 사거리), 강 소리(넓은 강물·왜가리·개개비)·대표 순간 "갈대밭의 왜가리"(D-036)
 - [ ] P2-003 Region 04 production
 - [ ] P2-004 Region 05 production
-- [ ] P2-005 Fish catalog 72 — 데이터 72종은 있음, 그림은 Region 01·02의 20종
+- [ ] P2-005 Fish catalog 72 — 데이터 72종은 있음, 그림은 Region 01~03의 30종
 - [ ] P2-006 Rare variants 18
 - [ ] P2-007 Ambient animals 24
 - [ ] P2-008 Decorations 60+

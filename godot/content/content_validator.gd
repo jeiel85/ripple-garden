@@ -46,7 +46,7 @@ const ID_PATTERNS := {
 	"moments": "^moment_[a-z0-9_]+$",
 }
 ## The keys a moment's `when` condition may use (world/moment_service.gd).
-const MOMENT_CONDITIONS: PackedStringArray = ["weather", "band", "min_level", "water_mind", "caught_rarity", "camp_filled", "after_away"]
+const MOMENT_CONDITIONS: PackedStringArray = ["weather", "band", "min_level", "water_mind", "caught_rarity", "camp_filled", "after_away", "region"]
 const DECORATION_CATEGORIES: PackedStringArray = ["furniture", "ornament"]
 ## How an island is drawn on the region map (world/region_map_view.gd).
 const MAP_STYLES: PackedStringArray = ["pond", "valley", "river", "coast", "isle"]
@@ -296,7 +296,7 @@ func _check_moment(d: Dictionary) -> void:
 		if not key in MOMENT_CONDITIONS:
 			_item_errors.append("when.%s: unknown condition (known: %s)" % [key, ", ".join(MOMENT_CONDITIONS)])
 	# A list condition must be a non-empty list of names: an empty one could never be met.
-	for list_key in ["weather", "band"]:
+	for list_key in ["weather", "band", "region"]:
 		if not when.has(list_key):
 			continue
 		var names: Variant = when[list_key]
@@ -308,6 +308,8 @@ func _check_moment(d: Dictionary) -> void:
 				_item_errors.append("when.weather: unknown weather '%s'" % entry)
 			elif list_key == "band" and not entry in TIME_BANDS:
 				_item_errors.append("when.band: unknown time band '%s'" % entry)
+			elif list_key == "region" and not _regions.has(entry):
+				_item_errors.append("when.region: unknown region '%s'" % entry)
 	var max_level := 0
 	for region in _regions.values():
 		max_level = maxi(max_level, int(region.get("restoration_levels", 0)))
@@ -1012,6 +1014,10 @@ func _validate_audio(data: Variant) -> Dictionary:
 					_errors.append("%s.min_level: must be an integer >= 0" % label)
 				if not _is_number(clip.get("weight")) or clip["weight"] <= 0.0:
 					_errors.append("%s.weight: must be a number > 0" % label)
+				if clip.has("regions"):
+					var clip_regions: Variant = clip["regions"]
+					if typeof(clip_regions) != TYPE_ARRAY or clip_regions.is_empty() or clip_regions.any(func(id: Variant) -> bool: return not _regions.has(id)):
+						_errors.append("%s.regions: must be a non-empty array of region ids" % label)
 				var bands: Variant = clip.get("bands")
 				if typeof(bands) != TYPE_ARRAY or bands.is_empty():
 					_errors.append("%s.bands: must be a non-empty array" % label)
@@ -1019,6 +1025,39 @@ func _validate_audio(data: Variant) -> Dictionary:
 					for band in bands:
 						if not band in TIME_BANDS:
 							_errors.append("%s.bands: '%s' is not a known time band" % [label, band])
+
+	# Region soundscapes: {region id: {"streams": {loop id: file}, "mix": {loop id: {key: 0..1}}}}.
+	var region_audio: Variant = data.get("regions", {})
+	if typeof(region_audio) != TYPE_DICTIONARY:
+		_errors.append("%s.regions: must be an object" % file_name)
+	else:
+		for region_id in region_audio:
+			var label := "%s.regions.%s" % [file_name, region_id]
+			var own: Variant = region_audio[region_id]
+			if not _regions.has(region_id) or typeof(own) != TYPE_DICTIONARY:
+				_errors.append("%s: must be a known region with an object" % label)
+				continue
+			var streams: Variant = own.get("streams", {})
+			if typeof(streams) != TYPE_DICTIONARY:
+				_errors.append("%s.streams: must be an object" % label)
+			else:
+				for loop_id in streams:
+					if not loop_ids.has(loop_id):
+						_errors.append("%s.streams.%s: no such loop" % [label, loop_id])
+					elif typeof(streams[loop_id]) != TYPE_STRING or not ResourceLoader.exists(streams[loop_id]):
+						_errors.append("%s.streams.%s: file not found (%s)" % [label, loop_id, var_to_str(streams[loop_id])])
+			var own_mix: Variant = own.get("mix", {})
+			if typeof(own_mix) != TYPE_DICTIONARY:
+				_errors.append("%s.mix: must be an object" % label)
+			else:
+				for loop_id in own_mix:
+					if not loop_ids.has(loop_id) or typeof(own_mix[loop_id]) != TYPE_DICTIONARY:
+						_errors.append("%s.mix.%s: no such loop" % [label, loop_id])
+						continue
+					for key in own_mix[loop_id]:
+						if typeof(mix) == TYPE_DICTIONARY and typeof(mix.get(loop_id)) == TYPE_DICTIONARY and not mix[loop_id].has(key):
+							_errors.append("%s.mix.%s.%s: not a mix setting of that loop" % [label, loop_id, key])
+						_check_balance_number(own_mix[loop_id], "regions.%s.mix.%s" % [region_id, loop_id], key, 0.0, 1.0, false, "audio")
 
 	var cues: Variant = data.get("cues")
 	if typeof(cues) != TYPE_DICTIONARY:

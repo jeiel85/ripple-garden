@@ -31,8 +31,8 @@ var _weather: WeatherService = null
 
 ## `weather` provides the cloud/rain amounts; the rest comes from TimeService and GameState.
 func setup(p_region_id: String, weather: WeatherService) -> void:
-	config = ContentDB.audio
 	region_id = p_region_id
+	config = AmbientMix.for_region(ContentDB.audio, region_id)
 	_weather = weather
 	rng.randomize()
 	if config.is_empty():
