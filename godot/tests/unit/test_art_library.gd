@@ -194,11 +194,21 @@ func test_the_foreground_withers_with_the_scene_and_blooms_when_restored() -> vo
 	GameState.add_restoration_points(root.region_id, 100000)
 	GameState.set_restoration_level(root.region_id, 10)
 	root.region.apply_level(10, false)
+	assert_true(front.is_following(), "a level change did not wake the frame")
 	front._process(0.016)
 	assert_eq(front.self_modulate, Color.WHITE, "the restored frame did not regain its colour")
+	for i in ForegroundLayer.SETTLE_FRAMES:
+		front._process(0.016)
+	assert_false(front.is_following(), "the frame keeps running every frame after it has settled (#90)")
 	root.free()
 	GameState.new_game()
 	save_service.write_blocked = was_blocked
+
+func test_every_art_only_prop_ships_its_picture() -> void:
+	# #90: these kinds have no drawn shape, only a coloured stand-in; a missing picture must fail the build here.
+	for kind in PropKinds.ART_ONLY_COLORS:
+		assert_true(kind in PropKinds.PROPS, "%s is not a known prop kind" % kind)
+		assert_true(ResourceLoader.exists("res://art/props/%s.png" % kind), "art/props/%s.png is missing" % kind)
 
 # --- the angler ---
 

@@ -8,18 +8,23 @@ extends Node2D
 ## The flowers follow the restoration like the scene behind them: at a barren stage they are dulled
 ## towards WITHERED_TINT and they regain their colour as the region is restored (the environment's
 ## restored share, eased with its palette), so a withered pond is never framed by fresh blossoms.
+## The layer only runs while that share is moving: it goes idle once it has settled and the region wakes it
+## (`follow_restoration`) when the level changes (#90, battery).
 
 ## How the frame looks at restoration stage 0 (multiplied into the picture).
 const WITHERED_TINT := Color(0.66, 0.58, 0.46)
+## Frames without change before the layer goes idle (the palette's easing may start a frame late).
+const SETTLE_FRAMES := 30
 
 var _texture: Texture2D = null
 var _design := Vector2(720, 1280)
 var _environment: RegionEnvironment = null
 var _share := -1.0
+var _still_frames := 0
 
 func setup(layout: Dictionary, environment: RegionEnvironment = null) -> void:
 	_environment = environment
-	_follow_restoration()
+	follow_restoration()
 	var viewport: Array = layout["viewport"]
 	_design = Vector2(float(viewport[0]), float(viewport[1]))
 	var art_prefix := String(layout.get("art", ""))
@@ -33,16 +38,33 @@ func has_art() -> bool:
 static func tint_for(share: float) -> Color:
 	return WITHERED_TINT.lerp(Color.WHITE, clampf(share, 0.0, 1.0))
 
-func _process(_delta: float) -> void:
-	_follow_restoration()
+## Starts following the environment's restored share until it settles (call when the level changes).
+func follow_restoration() -> void:
+	_still_frames = 0
+	_follow()
+	set_process(_environment != null)
 
-func _follow_restoration() -> void:
+func _process(_delta: float) -> void:
+	if _follow():
+		_still_frames = 0
+	else:
+		_still_frames += 1
+		if _still_frames >= SETTLE_FRAMES:
+			set_process(false)
+
+## Applies the current share; true when it changed.
+func _follow() -> bool:
 	if _environment == null:
-		return
+		return false
 	var share := _environment.scene_restored_share()
-	if absf(share - _share) > 0.002:
-		_share = share
-		self_modulate = tint_for(share)
+	if absf(share - _share) <= 0.002:
+		return false
+	_share = share
+	self_modulate = tint_for(share)
+	return true
+
+func is_following() -> bool:
+	return is_processing()
 
 func _draw() -> void:
 	if _texture != null:
