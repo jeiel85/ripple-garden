@@ -78,14 +78,16 @@
 - [x] P1-013 KO/EN/JA localization
 - [x] P1-014 graphics quality profiles
 - [x] P1-015 battery saver
+- [x] P1-016 auto fishing — 첫 세 종을 만나면 켤 수 있는 이번 실행 동안의 스위치 (D-034, v0.8.0)
 
 ## P2 — Content Expansion
 - [x] P2-000 drawn-art pipeline: `godot/art/`의 그림이 절차적 그림을 대신한다 (D-029). 그림 요청은 `assets/design/ASSET_REQUESTS.md` 1차 묶음
-- [ ] P2-001 Region 02 production
+- [x] P2-001 Region 02 production — 숲속 계곡: 풍경(복원 전·후)·물고기 10종 그림·여울/소/바위/수초 레이아웃, 지역 이동(D-035), v0.8.0
+  - 넣지 않은 것: 물살 손맛(GDD "유속"), 계곡 전경 테두리 그림 (BACKLOG)
 - [ ] P2-002 Region 03 production
 - [ ] P2-003 Region 04 production
 - [ ] P2-004 Region 05 production
-- [ ] P2-005 Fish catalog 72
+- [ ] P2-005 Fish catalog 72 — 데이터 72종은 있음, 그림은 Region 01·02의 20종
 - [ ] P2-006 Rare variants 18
 - [ ] P2-007 Ambient animals 24
 - [ ] P2-008 Decorations 60+
