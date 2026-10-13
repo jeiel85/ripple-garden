@@ -77,16 +77,17 @@ func _init() -> void:
 	_hide_button.offset_top = 20
 	_chrome.add_child(_hide_button)
 
-	var row := UiKit.hbox(22)
+	var row := UiKit.hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	row.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	row.offset_bottom = -70
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_photo_button = UiKit.round_button("camera", tr("ui.water_mind.save"), _request_photo, true, 128.0)
-	_time_button = UiKit.round_button("clock", tr("ui.water_mind.time"), _cycle_time, true, 128.0)
-	_weather_button = UiKit.round_button("weather", tr("ui.water_mind.weather"), _cycle_weather, true, 128.0)
-	_mixer_button = UiKit.round_button("music", tr("ui.water_mind.bgm"), _toggle_mixer, true, 128.0)
+	# Glass circles with a word under the icon, as in mockup 08.
+	_photo_button = UiKit.round_button("camera", tr("ui.water_mind.save"), _request_photo, true, 104.0, "GlassButton")
+	_time_button = UiKit.round_button("clock", tr("ui.water_mind.time"), _cycle_time, true, 104.0, "GlassButton")
+	_weather_button = UiKit.round_button("weather", tr("ui.water_mind.weather"), _cycle_weather, true, 104.0, "GlassButton")
+	_mixer_button = UiKit.round_button("music", tr("ui.water_mind.bgm"), _toggle_mixer, true, 104.0, "GlassButton")
 	for button in [_photo_button, _time_button, _weather_button, _mixer_button]:
 		row.add_child(button)
 	_chrome.add_child(row)

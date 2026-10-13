@@ -95,7 +95,7 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_M, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_TAB, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_tabs[tab_id] = button
 		tab_row.add_child(button)
@@ -143,7 +143,7 @@ func refresh() -> void:
 		selected_slot = _first_empty_slot()
 	_build_markers()
 	for tab_id in _tabs:
-		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
+		(_tabs[tab_id] as Button).theme_type_variation = "TabSelectedWood" if tab_id == tab else "TabButton"
 	_fill_cards()
 	_place_buttons()
 

@@ -92,7 +92,7 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var category: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_M, false)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(category), "TabButton", UiTheme.ICON_TAB, false)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		# A long word ends in "…" instead of widening the page past the screen (largest Text Scale).
 		button.clip_text = true

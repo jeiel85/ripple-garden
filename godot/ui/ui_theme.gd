@@ -12,7 +12,8 @@ extends RefCounted
 ##
 ## Type variations (set `theme_type_variation`):
 ##   Button:  PrimaryButton (wood), WaterButton (wood with water, the fishing CTA), GreenButton,
-##            TabButton / TabSelected, RoundButton (dark circle over the scenery), PillButton,
+##            TabButton / TabSelected / TabSelectedWood (the camp's chosen tab), RoundButton (dark circle over
+##            the scenery), GlassButton (translucent circle with a caption: water-mind), PillButton,
 ##            FlatButton (no box)
 ##   Panel:   PaperPanel (default), PillPanel, WoodPanel, SignPanel (title boards), NotebookPanel (the journal's
 ##            list), CardPanel, SelectedCard, NoteCard
@@ -41,6 +42,8 @@ const SIZES_TYPE := "TextSizes"
 ## button or a sign, and the large picture of a screen.
 const ICON_S := 24.0
 const ICON_M := 32.0
+## Tab icons sit a little larger than the word beside them (mockups 04-06).
+const ICON_TAB := 38.0
 const ICON_L := 44.0
 const ICON_XL := 64.0
 ## The bundled fonts (D-031): a rounded gothic for text and a lettered face for titles and wooden boards.
@@ -79,6 +82,11 @@ const GREEN_PRESSED := Color("#4f6a3c")
 const GREEN_BORDER := Color("#455c35")
 const GREEN_TEXT := Color("#f8f2e4")
 const PILL := Color(0.12, 0.14, 0.11, 0.62)
+## The water-mind circles (mockup 08): lighter glass than the pills, with a thin light ring.
+const GLASS := Color(0.07, 0.09, 0.07, 0.58)
+const GLASS_RING := Color(1.0, 0.97, 0.9, 0.7)
+## The camp's chosen tab (mockup 06): a darker plank than the wooden buttons.
+const TAB_WOOD := Color("#6e4428")
 const PILL_BORDER := Color(1.0, 0.96, 0.88, 0.42)
 const PILL_TEXT := Color("#fbf4e6")
 const GOLD := Color("#e3b24f")
@@ -106,7 +114,8 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 		theme.set_font_size(size_name, SIZES_TYPE, text_px(font, size_name))
 	var fonts := fonts_for(TranslationServer.get_locale())
 	theme.default_font = fonts["body"]
-	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton"]:
+	# The mockups letter tabs in the same rounded display face as the boards (D-032 follow-up, 2026-10-14).
+	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton", "TabButton", "TabSelected", "TabSelectedWood", "GlassButton"]:
 		theme.set_font("font", type, fonts["title"])
 	var border_width := 4 if high_contrast else 2
 	var ink := Color.BLACK if high_contrast else INK
@@ -185,8 +194,14 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	_button_states(theme, "TabSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
 	_font_colors(theme, "TabSelected", GREEN_TEXT)
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)  # the icon stays as readable as the word on green
-	theme.set_font_size("font_size", "TabButton", text_px(font, "small"))
-	theme.set_font_size("font_size", "TabSelected", text_px(font, "small"))
+	# The camp's tabs (mockup 06): the chosen one is a dark wooden plank, not green.
+	theme.set_type_variation("TabSelectedWood", "Button")
+	_button_states(theme, "TabSelectedWood", TAB_WOOD, TAB_WOOD, WOOD_PRESSED, Color.BLACK if high_contrast else WOOD_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
+	_font_colors(theme, "TabSelectedWood", WOOD_TEXT)
+	_icon_colors(theme, "TabSelectedWood", WOOD_TEXT)
+	# Body-sized like the mockups; with Large UI (already bigger) the small size keeps four tabs' words whole.
+	for type in ["TabButton", "TabSelected", "TabSelectedWood"]:
+		theme.set_font_size("font_size", type, text_px(font, "small" if large_ui else "body"))
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
 
 	# Round and pill buttons drawn over the scenery: full-size touch target, smaller picture.
@@ -208,6 +223,30 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	_font_colors(theme, "RoundButton", PILL_TEXT)
 	_icon_colors(theme, "RoundButton", PILL_TEXT)
 	theme.set_font_size("font_size", "RoundButton", text_px(font, "caption"))
+
+	# Glass circle with a caption (water-mind, mockup 08): translucent over the scenery, a thin light ring, the
+	# icon well inside the circle above its word. Always a coded box: the dark wooden frame picture is too heavy here.
+	theme.set_type_variation("GlassButton", "Button")
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var glass := Color.BLACK if high_contrast else GLASS
+		match state:
+			"hover": glass = glass.lightened(0.08)
+			"pressed": glass = Color(glass.darkened(0.3), minf(1.0, glass.a + 0.15))
+			"disabled": glass = Color(glass, glass.a * 0.5)
+		var ring := _box(glass, Color.WHITE if high_contrast else GLASS_RING, border_width + (2 if high_contrast else 0), 999)
+		var glass_style := InsetStyle.new(ring, Vector2(6, 6), true)
+		glass_style.content_margin_left = 6
+		glass_style.content_margin_right = 6
+		glass_style.content_margin_top = 18
+		glass_style.content_margin_bottom = 10
+		theme.set_stylebox(state, "GlassButton", glass_style)
+	theme.set_stylebox("focus", "GlassButton", InsetStyle.new(_focus_box(999), Vector2(2, 2), true))
+	_font_colors(theme, "GlassButton", PILL_TEXT)
+	_icon_colors(theme, "GlassButton", PILL_TEXT)
+	theme.set_font_size("font_size", "GlassButton", text_px(font, "small"))
+	theme.set_constant("h_separation", "GlassButton", 2)
+	theme.set_constant("outline_size", "GlassButton", 0 if high_contrast else 4)
+	theme.set_color("font_outline_color", "GlassButton", SCENERY_RIM)
 
 	# Green circle: "done / confirm" floating over the world (camp slot, mockup 06).
 	theme.set_type_variation("GreenCircle", "Button")
