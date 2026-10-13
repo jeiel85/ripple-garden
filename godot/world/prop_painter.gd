@@ -68,6 +68,9 @@ static func draw_prop(canvas: CanvasItem, kind: String, at: Vector2, scale: floa
 		"campfire": _campfire(canvas, at, scale)
 		"bench": _bench(canvas, at, scale)
 		"rainbow": _rainbow(canvas, at, scale)
+		_:
+			if PropKinds.ART_ONLY_COLORS.has(kind):
+				_art_only_stand_in(canvas, at, scale, PropKinds.ART_ONLY_COLORS[kind])
 
 ## Stable 0..1 value for (position, index).
 static func noise(at: Vector2, index: int) -> float:
@@ -374,6 +377,11 @@ static func _bench(canvas: CanvasItem, at: Vector2, scale: float) -> void:
 	_quad(canvas, p.call(-46, -50), p.call(44, -58), p.call(44, -44), p.call(-46, -36), PLANK.lightened(0.08))
 	canvas.draw_line(p.call(-40, -36), p.call(-40, -20), PLANK_DARK, 4.0 * scale)
 	canvas.draw_line(p.call(38, -44), p.call(38, -28), PLANK_DARK, 4.0 * scale)
+
+## Where a region prop or decoration that only exists as art would stand, when its picture is missing.
+static func _art_only_stand_in(canvas: CanvasItem, at: Vector2, scale: float, color: Color) -> void:
+	canvas.draw_colored_polygon(_ellipse(at + Vector2(0, -8) * scale, Vector2(16, 10) * scale), color)
+	canvas.draw_colored_polygon(_ellipse(at + Vector2(-4, -12) * scale, Vector2(6, 3) * scale), color.lightened(0.3))
 
 ## A soft rainbow in the waterfall's spray: the fully restored pond's last change (P1-001).
 static func _rainbow(canvas: CanvasItem, at: Vector2, scale: float) -> void:

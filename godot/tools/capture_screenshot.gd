@@ -15,6 +15,7 @@ extends SceneTree
 ##   --hc            high contrast + large UI        --reduced      reduced motion
 ##   --ripple=N      add Ripple                      --memory=N     add Memory
 ##   --size=WxH      window size (default 405x720)
+##   --camp          fill the camp slots with this region's own decorations first, then the others
 ##   --auto          turn auto fishing on (needs --populate: it unlocks after the first species)
 ##   --region=ID     start in this region (every other region is restored and its fish met, so it is open)
 
@@ -83,6 +84,18 @@ func _run() -> void:
 		game_state.add_memory(int(_args["memory"]))
 	if _args.has("seed"):
 		game.fishing.set_seed(int(_args["seed"]))
+	if _args.has("camp"):
+		var own: Array = []
+		var others: Array = []
+		for deco_id in content.decorations:
+			var deco: Dictionary = content.decorations[deco_id]
+			(own if deco.get("unlock", {}).get("region", "") == region_id else others).append(deco_id)
+		var slots: Array = content.get_layout(region_id).get("camp_slots", [])
+		var order: Array = own + others
+		for i in mini(slots.size(), order.size()):
+			game_state.grant_decoration(order[i])
+			game_state.place_decoration(region_id, slots[i]["id"], order[i])
+		game.region.props.refresh()
 	if _args.has("auto"):
 		game.ui.toggle_auto_fishing()
 	game.region.fish_presenter.refresh()

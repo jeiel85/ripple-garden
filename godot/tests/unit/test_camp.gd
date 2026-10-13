@@ -155,3 +155,16 @@ func test_the_starting_camp_must_fit_the_layout() -> void:
 	var errors := "\n".join(ContentValidator.validate(raw)["errors"])
 	assert_true(errors.contains("'camp_9' is not a camp slot"), errors)
 	assert_true(errors.contains("deco_tent is placed twice"), errors)
+
+func test_each_region_lists_its_own_decorations_first() -> void:
+	var all := LoadoutService.catalog("decoration")
+	var coast := CampPanel.card_order(all, "region_04_blue_coast")
+	assert_eq(coast.size(), all.size(), "nothing may be dropped or repeated")
+	assert_eq(coast.slice(0, 2), ["deco_parasol", "deco_deck_chair"], "the coast's own decorations come first")
+	assert_true(coast.find("deco_tent") < coast.find("deco_hammock"), "common decorations before other regions' ones")
+	var pond := CampPanel.card_order(all, "region_01_quiet_pond")
+	assert_eq(pond[0], all[0], "the start region keeps the content order of its common decorations")
+	for region_id in ["region_02_forest_stream", "region_03_reed_river", "region_04_blue_coast", "region_05_moonlight_isle"]:
+		var own := ContentDB.decorations.keys().filter(func(id: String) -> bool:
+			return ContentDB.get_decoration(id).get("unlock", {}).get("region", "") == region_id)
+		assert_eq(own.size(), 2, "%s needs its own camp decorations" % region_id)

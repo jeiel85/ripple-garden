@@ -269,7 +269,7 @@ func _fill_cards() -> void:
 		_cards.remove_child(child)
 		child.queue_free()
 	_card_nodes.clear()
-	for decoration_id in LoadoutService.catalog("decoration"):
+	for decoration_id in card_order(LoadoutService.catalog("decoration"), region_id):
 		var def := ContentDB.get_decoration(decoration_id)
 		match tab:
 			"placed":
@@ -281,6 +281,22 @@ func _fill_cards() -> void:
 		var card := _card(decoration_id)
 		_card_nodes[decoration_id] = card
 		_cards.add_child(card)
+
+## The decorations in the order the sheet lists them: this region's own first (a parasol on the coast, a
+## hammock on the isle), then the ones that belong anywhere, then other regions' — content order within each.
+static func card_order(decoration_ids: Array, p_region_id: String) -> Array:
+	var own: Array = []
+	var common: Array = []
+	var elsewhere: Array = []
+	for decoration_id in decoration_ids:
+		var home: String = ContentDB.get_decoration(decoration_id).get("unlock", {}).get("region", "")
+		if home == p_region_id and p_region_id != RegionUnlocks.start_region():
+			own.append(decoration_id)
+		elif home.is_empty() or home == RegionUnlocks.start_region():
+			common.append(decoration_id)
+		else:
+			elsewhere.append(decoration_id)
+	return own + common + elsewhere
 
 func _card(decoration_id: String) -> Button:
 	var def := ContentDB.get_decoration(decoration_id)
