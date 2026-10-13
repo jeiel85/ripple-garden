@@ -11,5 +11,6 @@
   {"id": "moment_cozy_camp", "icon": "camp", "memory": 5, "when": {"camp_filled": 6}, "name_key": "moment.cozy_camp.name", "desc_key": "moment.cozy_camp.desc", "hint_key": "moment.cozy_camp.hint"},
   {"id": "moment_waiting_pond", "icon": "clock", "memory": 3, "when": {"after_away": true}, "name_key": "moment.waiting_pond.name", "desc_key": "moment.waiting_pond.desc", "hint_key": "moment.waiting_pond.hint"},
   {"id": "moment_leaping_trout", "icon": "valley", "memory": 6, "when": {"region": ["region_02_forest_stream"], "band": ["dawn", "morning", "day"], "min_level": 4}, "name_key": "moment.leaping_trout.name", "desc_key": "moment.leaping_trout.desc", "hint_key": "moment.leaping_trout.hint"},
-  {"id": "moment_heron_reeds", "icon": "freshwater", "memory": 6, "when": {"region": ["region_03_reed_river"], "band": ["dusk"], "min_level": 4}, "name_key": "moment.heron_reeds.name", "desc_key": "moment.heron_reeds.desc", "hint_key": "moment.heron_reeds.hint"}
+  {"id": "moment_heron_reeds", "icon": "freshwater", "memory": 6, "when": {"region": ["region_03_reed_river"], "band": ["dusk"], "min_level": 4}, "name_key": "moment.heron_reeds.name", "desc_key": "moment.heron_reeds.desc", "hint_key": "moment.heron_reeds.hint"},
+  {"id": "moment_tide_pool", "icon": "sea", "memory": 6, "when": {"region": ["region_04_blue_coast"], "band": ["morning", "day"], "min_level": 4}, "name_key": "moment.tide_pool.name", "desc_key": "moment.tide_pool.desc", "hint_key": "moment.tide_pool.hint"}
 ]

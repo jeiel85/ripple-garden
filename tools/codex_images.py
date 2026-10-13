@@ -10,6 +10,10 @@ What keeps the usage low (measured 2026-10-11): the model is `gpt-5.6-luna` with
 cannot use `gpt-5.4-mini`), and the references are ONE small picture per job: three references cost ~137 000 tokens
 for one icon, one strip of icons ~15 000. Put several reference icons side by side in one picture.
 
+stdin is always closed: `codex exec` waits for piped input when it inherits an open stdin (a background
+shell), which hung a run for 20 minutes on 2026-10-13. A cut-out that comes back fully opaque (a painted
+checkerboard instead of transparency) is asked for again.
+
 Codex' own sandboxed shell fails on this PC ("setup refresh had errors"), so the picture is read from the path
 Codex prints, not saved by Codex.
 
@@ -41,6 +45,13 @@ CUTOUT = ("Use the image generation tool to draw ONE image. Warm miniature-diora
           "checkerboard), no text, no watermark. ")
 SCENE = ("Use the image generation tool to draw ONE image. Warm miniature-diorama 3D illustration, soft lighting, a full "
          "opaque square scene with a painted background, no text, no watermark, no UI. ")
+
+
+def fully_opaque(path: Path) -> bool:
+    """True when a picture has no transparent pixel at all: a cut-out that came back with its background
+    painted in (often a fake checkerboard) instead of real transparency."""
+    picture = Image.open(path)
+    return picture.mode not in ("RGBA", "LA", "PA") or picture.getchannel("A").getextrema()[0] == 255
 
 
 def generated_path(stdout: str) -> Optional[Path]:
@@ -99,7 +110,7 @@ def run_agy(job: dict, dest: Path, work: Path) -> str:
     for ref in refs:
         cmd += ["--add-dir", str(ref.parent)]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, cwd=work, shell=(os.name == "nt"),
+        result = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=600, cwd=work, shell=(os.name == "nt"),
                                 encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
         return "FAILED agy timeout"
@@ -127,12 +138,15 @@ def run(job: dict, out: Path, backend: str = "codex") -> tuple[str, str]:
     last = ""
     for _ in range(2):  # one retry
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, shell=(os.name == "nt"),
+            result = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=600, shell=(os.name == "nt"),
                                     encoding="utf-8", errors="replace")
         except subprocess.TimeoutExpired:
             last = "timeout"
             continue
         picture = generated_path(result.stdout)
+        if picture is not None and not job.get("scene") and fully_opaque(picture):
+            last = "cut-out came back without a transparent background"
+            continue  # ask again: a painted-in background cannot be cut out cleanly
         if picture is not None:
             shutil.copy(picture, dest)
             return job["id"], "ok"

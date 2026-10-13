@@ -75,7 +75,8 @@ func test_loop_targets_follow_weather_and_time() -> void:
 			assert_true(targets[loop_id] >= 0.0 and targets[loop_id] <= 1.0, "%s out of range" % loop_id)
 
 func test_wildlife_depends_on_time_band_and_recovery() -> void:
-	var config: Dictionary = ContentDB.audio
+	# The pond's own mix (D-036): other regions' wildlife never sounds here.
+	var config := AmbientMix.for_region(ContentDB.audio, "region_01_quiet_pond")
 	var ids := func(band: String, level: int) -> Array:
 		return AmbientMix.clip_candidates(config, band, level).map(func(c: Dictionary) -> String: return c["id"])
 	assert_deep_eq(ids.call("night", 0), [], "a barren pond is silent at night")

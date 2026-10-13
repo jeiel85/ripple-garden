@@ -8,8 +8,9 @@ const SCENE := "res://world/game_root.tscn"
 const R1 := "region_01_quiet_pond"
 const R2 := "region_02_forest_stream"
 const R3 := "region_03_reed_river"
-## A region whose world has not arrived yet.
 const R4 := "region_04_blue_coast"
+## A region whose world has not arrived yet.
+const NO_WORLD := "region_05_moonlight_isle"
 const DT := 1.0 / 30.0
 
 var _was_blocked := false
@@ -47,7 +48,7 @@ func test_a_saved_region_is_used_only_while_it_can_be_visited() -> void:
 	assert_eq(GameRoot.pick_region(GameState), R1, "a locked region is never built")
 	_open_r2()
 	assert_eq(GameRoot.pick_region(GameState), R2)
-	GameState.set_current_region(R4)
+	GameState.set_current_region(NO_WORLD)
 	assert_eq(GameRoot.pick_region(GameState), R1, "a region without a world falls back to the start")
 	GameState.set_current_region("region_99_gone")
 	assert_eq(GameRoot.pick_region(GameState), R1, "an unknown id falls back to the start")
@@ -80,9 +81,9 @@ func _visited_regions() -> Array:
 	return ContentDB.regions.keys().filter(func(id: String) -> bool:
 		return id != RegionUnlocks.start_region() and RegionUnlocks.has_world(id))
 
-func test_regions_two_and_three_have_worlds() -> void:
-	assert_true(R2 in _visited_regions())
-	assert_true(R3 in _visited_regions())
+func test_regions_two_to_four_have_worlds() -> void:
+	for region_id in [R2, R3, R4]:
+		assert_true(region_id in _visited_regions(), "%s has no world" % region_id)
 
 func test_the_game_builds_each_region_when_the_player_is_there() -> void:
 	for region_id in _visited_regions():
@@ -179,7 +180,7 @@ func test_travel_is_refused_while_a_line_is_out_and_to_regions_that_cannot_be_vi
 	assert_false(root.travel(R2), "a locked region")
 	_open_r2()
 	assert_false(root.travel(R3), "a region still locked")
-	assert_false(root.travel(R4), "a region without a world")
+	assert_false(root.travel(NO_WORLD), "a region without a world")
 	assert_false(root.travel(R1), "where the player already is")
 	assert_true(root.ui.world_input.cast_quick())
 	assert_false(root.travel(R2), "a line is out")
@@ -221,7 +222,8 @@ func test_the_valley_can_be_restored_like_the_pond() -> void:
 	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])
 	assert_eq(restoration.max_level(R2), restoration.max_level(R1), "the valley is capped below the pond")
 	assert_eq(restoration.max_level(R3), restoration.max_level(R1), "the river is capped below the pond")
-	assert_eq(restoration.max_level(R4), 0, "a region without a world cannot be restored yet")
+	assert_eq(restoration.max_level(R4), restoration.max_level(R1), "the coast is capped below the pond")
+	assert_eq(restoration.max_level(NO_WORLD), 0, "a region without a world cannot be restored yet")
 	GameState.add_restoration_points(R2, restoration.points_for_level(1))
 	assert_true(restoration.can_restore(R2))
 	assert_true(restoration.restore(R2))

@@ -6,6 +6,7 @@ const R1 := "region_01_quiet_pond"
 const R2 := "region_02_forest_stream"
 const R3 := "region_03_reed_river"
 const R4 := "region_04_blue_coast"
+const R5 := "region_05_moonlight_isle"
 
 func _meet_species(region_id: String, count: int) -> void:
 	var met := 0
@@ -48,13 +49,13 @@ func test_a_region_opens_with_its_neighbours_restoration_and_species() -> void:
 func test_an_open_region_without_a_world_says_it_comes_later() -> void:
 	GameState.new_game()
 	var unlocks := RegionUnlocks.new(GameState)
-	for region_id in [R1, R2, R3]:
+	for region_id in [R1, R2, R3, R4]:
 		_restore(region_id, 10)
 		_meet_species(region_id, 99)
-	assert_true(unlocks.is_unlocked(R4))
-	assert_true(ContentDB.get_layout(R4).is_empty(), "this test needs a region whose world has not arrived yet")
-	assert_eq(unlocks.state_of(R4, R1), RegionUnlocks.COMING)
-	assert_false(unlocks.can_travel(R4))
+	assert_true(unlocks.is_unlocked(R5))
+	assert_true(ContentDB.get_layout(R5).is_empty(), "this test needs a region whose world has not arrived yet")
+	assert_eq(unlocks.state_of(R5, R1), RegionUnlocks.COMING)
+	assert_false(unlocks.can_travel(R5))
 	GameState.new_game()
 
 func test_the_map_shows_every_island_and_says_what_each_needs() -> void:

@@ -94,3 +94,6 @@
   "모든 것을 같은 자리에" 다시 요청), 물고기 10종 옆·위 20장(백연어 옆모습은 첫 결과에 체크무늬가 박혀 다시), `moments/moment_leaping_trout.png`·`moment_heron_reeds.png`.
   상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 나머지는 `tools/import_generated.py`로 잘라 줄였다(수정됨).
 - **지역 소리** (2026-10-13): `stream_loop`·`river_loop`·`dipper`·`woodpecker`·`heron`·`warbler`.wav도 `tools/generate_placeholder_audio.py`로 합성한 자체 제작 음원이다.
+- **Region 04 바닷가 그림** (2026-10-13, Codex CLI, 모델 `gpt-5.6-luna`, 추론 `low`): `world/r04_scene.png`·`r04_scene_barren.png`, 바다 생물 20종 옆·위 40장,
+  `moments/moment_tide_pool.png`. 상업적 이용은 OpenAI 이용 약관을 따른다. 풍경은 1024×1536 그대로, 나머지는 `tools/import_generated.py`로 잘라 줄였다(수정됨).
+  소리 `waves_loop`·`gull`·`tern`.wav는 `tools/generate_placeholder_audio.py`로 합성했다.
