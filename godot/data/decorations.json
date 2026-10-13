@@ -118,5 +118,133 @@
     },
     "name_key": "deco.birdhouse.name",
     "desc_key": "deco.birdhouse.desc"
+  },
+  {
+    "id": "deco_log_seat",
+    "category": "furniture",
+    "prop": "log_seat",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 140
+    },
+    "unlock": {
+      "region": "region_02_forest_stream",
+      "restoration_level": 1
+    },
+    "name_key": "deco.log_seat.name",
+    "desc_key": "deco.log_seat.desc"
+  },
+  {
+    "id": "deco_stone_lantern",
+    "category": "ornament",
+    "prop": "stone_lantern",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 180
+    },
+    "unlock": {
+      "region": "region_02_forest_stream",
+      "restoration_level": 3
+    },
+    "name_key": "deco.stone_lantern.name",
+    "desc_key": "deco.stone_lantern.desc"
+  },
+  {
+    "id": "deco_rowboat",
+    "category": "furniture",
+    "prop": "rowboat",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 220
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 1
+    },
+    "name_key": "deco.rowboat.name",
+    "desc_key": "deco.rowboat.desc"
+  },
+  {
+    "id": "deco_net_rack",
+    "category": "ornament",
+    "prop": "net_rack",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 160
+    },
+    "unlock": {
+      "region": "region_03_reed_river",
+      "restoration_level": 3
+    },
+    "name_key": "deco.net_rack.name",
+    "desc_key": "deco.net_rack.desc"
+  },
+  {
+    "id": "deco_parasol",
+    "category": "furniture",
+    "prop": "parasol",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 180
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 1
+    },
+    "name_key": "deco.parasol.name",
+    "desc_key": "deco.parasol.desc"
+  },
+  {
+    "id": "deco_deck_chair",
+    "category": "furniture",
+    "prop": "deck_chair",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 200
+    },
+    "unlock": {
+      "region": "region_04_blue_coast",
+      "restoration_level": 3
+    },
+    "name_key": "deco.deck_chair.name",
+    "desc_key": "deco.deck_chair.desc"
+  },
+  {
+    "id": "deco_hammock",
+    "category": "furniture",
+    "prop": "hammock",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 260
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 1
+    },
+    "name_key": "deco.hammock.name",
+    "desc_key": "deco.hammock.desc"
+  },
+  {
+    "id": "deco_tiki_torch",
+    "category": "ornament",
+    "prop": "tiki_torch",
+    "scale": 1.0,
+    "price": {
+      "currency": "ripple",
+      "amount": 160
+    },
+    "unlock": {
+      "region": "region_05_moonlight_isle",
+      "restoration_level": 3
+    },
+    "name_key": "deco.tiki_torch.name",
+    "desc_key": "deco.tiki_torch.desc"
   }
 ]

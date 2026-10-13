@@ -92,7 +92,7 @@
 - [x] P2-005 Fish catalog 72 — 데이터 72종은 있음, 그림은 72종 모두
 - [ ] P2-006 Rare variants 18
 - [ ] P2-007 Ambient animals 24
-- [ ] P2-008 Decorations 60+
+- [ ] P2-008 Decorations 60+ — 지금 18개(공용 10 + 지역 전용 8: 계곡 통나무 의자·돌 등롱 / 강 나룻배·그물 걸이 / 바닷가 파라솔·갑판 의자 / 섬 해먹·대나무 횃불)
 - [ ] P2-009 Rods 12 / Baits 16
 - [ ] P2-010 BGM/Ambience production
 
