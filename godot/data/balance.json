@@ -201,7 +201,7 @@
     "max_ripple": 120
   },
   "auto_fishing": {
-    "unlock_species": 3,
+    "unlock_species": 1,
     "cast_delay_sec": 1.5,
     "hook_delay_sec": 0.6,
     "inspect_sec": 2.5

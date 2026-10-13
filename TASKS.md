@@ -78,7 +78,7 @@
 - [x] P1-013 KO/EN/JA localization
 - [x] P1-014 graphics quality profiles
 - [x] P1-015 battery saver
-- [x] P1-016 auto fishing — 첫 세 종을 만나면 켤 수 있는 이번 실행 동안의 스위치 (D-034, v0.8.0)
+- [x] P1-016 auto fishing — 튜토리얼(첫 물고기)을 마치면 켤 수 있는 이번 실행 동안의 스위치 (D-034, v0.8.0; 1.0.0-rc.2에서 3종→1종)
 
 ## P2 — Content Expansion
 - [x] P2-000 drawn-art pipeline: `godot/art/`의 그림이 절차적 그림을 대신한다 (D-029). 그림 요청은 `assets/design/ASSET_REQUESTS.md` 1차 묶음

@@ -1,8 +1,8 @@
 class_name AutoFishing
 extends Node
 
-## Auto fishing (owner's request 2026-10-12, D-034): once the first steps are behind the player (enough
-## species met, balance.json `auto_fishing.unlock_species`) a switch lets the game fish by itself. It
+## Auto fishing (owner's request 2026-10-12, D-034): once the tutorial is behind the player (the first fish
+## caught — balance.json `auto_fishing.unlock_species`, now 1) a switch lets the game fish by itself. It
 ## casts at a spot where fish live, sets the hook, reels while keeping the tension in the band and lets
 ## the catch go after a short look.
 ##

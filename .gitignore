@@ -20,3 +20,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Release signing — never commit (backed up to Google Drive, see global CLAUDE.md)
+.keystore/
+*.jks
