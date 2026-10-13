@@ -613,3 +613,6 @@ moment.leaping_trout.hint,"계곡 물이 맑아진 아침이면…","On a mornin
 moment.heron_reeds.name,"갈대밭의 왜가리","Heron in the Reeds","葦原のアオサギ"
 moment.heron_reeds.desc,"노을 진 갈대밭 곁에 왜가리가 가만히 서 있었어요.","A heron stood quietly by the reeds in the sunset.","夕焼けの葦原のそばで、アオサギがじっと立っていました。"
 moment.heron_reeds.hint,"강이 살아난 해 질 녘에…","At dusk, once the river comes back to life…","川がよみがえった夕暮れに…"
+moment.tide_pool.name,"갯바위 웅덩이","The Tide Pool","磯だまり"
+moment.tide_pool.desc,"물이 빠진 갯바위 웅덩이에 게와 불가사리가 모여 있었어요.","At low tide, a crab and a starfish gathered in a rock pool.","潮が引いた磯だまりに、カニとヒトデが集まっていました。"
+moment.tide_pool.hint,"바다가 맑아진 날, 물이 빠지면…","On a clear-sea day, when the tide goes out…","海が澄んだ日、潮が引いたら…"

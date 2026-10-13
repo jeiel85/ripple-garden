@@ -24,12 +24,15 @@
       {"id": "dipper", "stream": "res://audio/streams/dipper.wav", "bands": ["dawn", "morning", "day"], "min_level": 1, "weight": 2, "regions": ["region_02_forest_stream"]},
       {"id": "woodpecker", "stream": "res://audio/streams/woodpecker.wav", "bands": ["morning", "day"], "min_level": 3, "weight": 1, "regions": ["region_02_forest_stream"]},
       {"id": "heron", "stream": "res://audio/streams/heron.wav", "bands": ["dawn", "dusk", "night"], "min_level": 1, "weight": 1, "regions": ["region_03_reed_river"]},
-      {"id": "warbler", "stream": "res://audio/streams/warbler.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 2, "weight": 2, "regions": ["region_03_reed_river"]}
+      {"id": "warbler", "stream": "res://audio/streams/warbler.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 2, "weight": 2, "regions": ["region_03_reed_river"]},
+      {"id": "gull", "stream": "res://audio/streams/gull.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 0, "weight": 3, "regions": ["region_04_blue_coast"]},
+      {"id": "tern", "stream": "res://audio/streams/tern.wav", "bands": ["morning", "day"], "min_level": 3, "weight": 1, "regions": ["region_04_blue_coast"]}
     ]
   },
   "regions": {
     "region_02_forest_stream": {"streams": {"water": "res://audio/streams/stream_loop.wav"}, "mix": {"water": {"base": 0.7}}},
-    "region_03_reed_river": {"streams": {"water": "res://audio/streams/river_loop.wav"}, "mix": {"water": {"base": 0.6}, "wind": {"base": 0.3}}}
+    "region_03_reed_river": {"streams": {"water": "res://audio/streams/river_loop.wav"}, "mix": {"water": {"base": 0.6}, "wind": {"base": 0.3}}},
+    "region_04_blue_coast": {"streams": {"water": "res://audio/streams/waves_loop.wav"}, "mix": {"water": {"base": 0.75}, "wind": {"base": 0.35}}}
   },
   "cues": {
     "cast": {"stream": "res://audio/streams/cast.wav", "bus": "Fishing", "volume": 0.8},

@@ -290,7 +290,45 @@ def warbler():
     return normalize(np.concatenate(parts), 0.45)
 
 
+def waves_loop():
+    """Region 04: the sea — slow waves rolling in and washing back over sand."""
+    rng = _rng("waves")
+    sr = LOOP_SR
+    seconds = 12.0
+    n = int(seconds * sr)
+    t = np.arange(n) / sr
+    surf = band(noise(rng, seconds, sr), sr, 120, 2600)
+    # one wave every 6 s: a rise as it breaks, a long hiss as it washes back
+    phase = (t % 6.0) / 6.0
+    swell = np.where(phase < 0.25, phase / 0.25, np.exp(-(phase - 0.25) * 3.2)) * 0.85 + 0.15
+    hiss = band(noise(rng, seconds, sr), sr, 1500, 6500) * np.clip(np.where(phase > 0.2, np.exp(-(phase - 0.2) * 4.0), 0.0), 0, 1)
+    return normalize(make_seamless(surf * swell + hiss * 0.35, sr), 0.7)
+
+
+def gull():
+    """Region 04: a gull's falling cry, twice."""
+    sr = SHOT_SR
+    one = chirp(sr, 1900, 1300, 0.32, 0.04)
+    return normalize(np.concatenate([one, np.zeros(int(0.12 * sr)), one * 0.8]), 0.45)
+
+
+def tern():
+    """Region 04: a tern's short, harsh "kik-kik"."""
+    rng = _rng("tern")
+    sr = SHOT_SR
+    parts = []
+    for _ in range(3):
+        n = int(0.07 * sr)
+        tone = chirp(sr, 3200, 2600, 0.07)
+        parts.append(tone + band(rng.standard_normal(n), sr, 2000, 5000) * envelope(n, 0.002, 0.02, sr) * 0.3)
+        parts.append(np.zeros(int(0.09 * sr)))
+    return normalize(np.concatenate(parts), 0.4)
+
+
 SOUNDS = {
+    "waves_loop.wav": (waves_loop, LOOP_SR),
+    "gull.wav": (gull, SHOT_SR),
+    "tern.wav": (tern, SHOT_SR),
     "stream_loop.wav": (stream_loop, LOOP_SR),
     "river_loop.wav": (river_loop, LOOP_SR),
     "dipper.wav": (dipper, SHOT_SR),
