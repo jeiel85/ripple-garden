@@ -150,3 +150,30 @@ func test_the_ready_note_comes_when_a_startup_card_is_closed() -> void:
 	root.ui.close_panel()
 	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "closing the card did not bring the note")
 	_stop(root)
+
+func test_it_opens_as_soon_as_the_first_fish_is_released() -> void:
+	# Owner's request 2026-10-13: available right after the tutorial (the first catch), not after a few species.
+	var root := _start()
+	var start_region: String = ContentDB.balance["vertical_slice"]["region_id"]
+	root.fishing.set_seed(2)
+	assert_false(root.ui.hud.auto_button.visible)
+	assert_true(root.ui.world_input.cast_quick())
+	var elapsed := 0.0
+	while elapsed < 300.0:
+		match root.fishing.state:
+			FishingController.State.READY:
+				if GameState.discovered_count() > 0:
+					break
+				root.ui.world_input.cast_quick()
+			FishingController.State.HOOK:
+				root.fishing.tap()
+			FishingController.State.FIGHT:
+				root.fishing.set_reeling(root.fishing.fight.tension < 0.5)
+			FishingController.State.INSPECT:
+				root.ui.inspect_panel.release_pressed.emit()
+		root.fishing.advance(DT)
+		elapsed += DT
+	assert_eq(GameState.discovered_count(), 1, "the first fish was never caught")
+	assert_true(root.ui.hud.auto_button.visible, "auto fishing is still hidden after the tutorial catch")
+	assert_true(GameState.has_seen_event(start_region, UIController.AUTO_READY_EVENT), "the ready note did not come")
+	_stop(root)
