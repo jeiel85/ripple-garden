@@ -113,5 +113,8 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $zip dist\SHA256SUMS.txt --clobber
           } else {
-            gh release create $tag $zip dist\SHA256SUMS.txt --title "Ripple Garden $tag" --generate-notes
+            # A release candidate tag (vX.Y.Z-rc.N) is published as a prerelease (D-037).
+            $extra = @()
+            if ($tag -match '-rc\.\d+$') { $extra += '--prerelease' }
+            gh release create $tag $zip dist\SHA256SUMS.txt --title "Ripple Garden $tag" --generate-notes @extra
           }

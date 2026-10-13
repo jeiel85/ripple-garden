@@ -4,6 +4,7 @@
 Usage:
     python tools/check_version.py            # project.godot vs export presets
     python tools/check_version.py v0.1.0     # additionally require tag == version
+    python tools/check_version.py v1.0.0-rc.1  # a release candidate of 1.0.0 (D-037)
 """
 from pathlib import Path
 import re
@@ -45,8 +46,11 @@ def main() -> int:
 
     if len(sys.argv) > 1:
         tag = sys.argv[1]
-        if tag.removeprefix("v") != version:
-            errors.append(f"tag '{tag}' != config/version '{version}'")
+        # A release candidate (vX.Y.Z-rc.N) carries the version it will become; Windows file versions
+        # must stay plain numbers, so the suffix lives only in the tag (D-037).
+        match = re.fullmatch(r"v?(\d+\.\d+\.\d+)(-rc\.\d+)?", tag)
+        if match is None or match.group(1) != version:
+            errors.append(f"tag '{tag}' != config/version '{version}' (or '{version}-rc.N')")
 
     if errors:
         print("VERSION CHECK FAILED")
