@@ -154,7 +154,7 @@ func _sign(region_id: String, state: String) -> Control:
 	var button := UiKit.icon_button(def["map"]["icon"] if state != RegionUnlocks.LOCKED else "lock", _name(region_id),
 		func() -> void: tap(region_id), "", UiTheme.ICON_M, false)
 	UiKit.text_size(button, "body")
-	button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
+	button.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX * UiKit.WIDE_RATIO, UiTheme.TOUCH_MIN_PX)  # a wide tag, not a square
 	button.theme_type_variation = "MapTagHere" if state == RegionUnlocks.CURRENT else "MapTag"
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(button)

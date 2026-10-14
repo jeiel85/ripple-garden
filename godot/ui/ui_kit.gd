@@ -16,11 +16,15 @@ static func label(text: String, variation: String = "", align: HorizontalAlignme
 
 ## `wrap` lets long text break onto lines. Leave it off for buttons that share a row with something
 ## that expands: a wrapping button has no minimum width, so the neighbour would squash it flat.
+## Width:height a rectangular button never goes below (tabs, word buttons, map tags).
+const WIDE_RATIO := 1.5
+
 static func button(text: String, callback: Callable, primary: bool = false, min_height: float = UiTheme.TOUCH_MIN_PX,
 		wrap: bool = false) -> Button:
 	var node := Button.new()
 	node.text = text
-	node.custom_minimum_size = Vector2(0, min_height)
+	# A word button is never narrower than 3:2 (UI_UX §14): a short word like "닫기" made a tall sliver.
+	node.custom_minimum_size = Vector2(min_height * WIDE_RATIO, min_height)
 	node.focus_mode = Control.FOCUS_ALL
 	if wrap:
 		node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

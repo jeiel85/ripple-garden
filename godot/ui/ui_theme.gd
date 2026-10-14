@@ -44,6 +44,8 @@ const ICON_S := 24.0
 const ICON_M := 32.0
 ## Tab icons sit a little larger than the word beside them (mockups 04-06).
 const ICON_TAB := 38.0
+## Side padding inside a tab (design px).
+const TAB_H_MARGIN := 26
 const ICON_L := 44.0
 const ICON_XL := 64.0
 ## The bundled fonts (D-031): a rounded gothic for text and a lettered face for titles and wooden boards.
@@ -57,7 +59,7 @@ const FRAMES := {
 	"NotebookPanel": "ui_paper_card", "WoodPanel": "ui_wood_panel", "SignPanel": "ui_wood_sign",
 	"PillPanel": "ui_dark_pill", "PillButton": "ui_dark_pill", "RoundButton": "ui_round_dark",
 	"Button": "ui_cream_button", "PrimaryButton": "ui_wood_cta", "WaterButton": "ui_wood_cta",
-	"TabButton": "ui_cream_tab", "TabSelected": "ui_green_tab",
+	"TabButton": "ui_cream_tab", "TabSelected": "ui_green_tab", "TabWide": "ui_cream_tab", "TabWideSelected": "ui_green_tab",
 }
 ## How a pictured button shows its state: the picture is tinted, never recoloured.
 const FRAME_TINTS := {"normal": Color.WHITE, "hover": Color.WHITE, "pressed": Color(0.86, 0.86, 0.86),
@@ -115,7 +117,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	var fonts := fonts_for(TranslationServer.get_locale())
 	theme.default_font = fonts["body"]
 	# The mockups letter tabs in the same rounded display face as the boards (D-032 follow-up, 2026-10-14).
-	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton", "TabButton", "TabSelected", "TabSelectedWood", "GlassButton", "GreenButton"]:
+	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton", "TabButton", "TabSelected", "TabSelectedWood", "TabWide", "TabWideSelected", "GlassButton", "GreenButton"]:
 		theme.set_font("font", type, fonts["title"])
 	var border_width := 4 if high_contrast else 2
 	var ink := Color.BLACK if high_contrast else INK
@@ -209,6 +211,18 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	# Body-sized like the mockups; with Large UI (already bigger) the small size keeps four tabs' words whole.
 	for type in ["TabButton", "TabSelected", "TabSelectedWood"]:
 		theme.set_font_size("font_size", type, text_px(font, "small" if large_ui else "body"))
+	# The journal's scrolling tab strip (mockup 04): the same tabs with wide padding on both sides, so each reads
+	# wide (about 3:2, UI_UX §14) with its icon kept beside its word — a fixed width would push the icon to one
+	# edge. Tabs that share a row's width (gear, camp) keep the narrow padding so their words fit.
+	theme.set_type_variation("TabWide", "TabButton")
+	_button_states(theme, "TabWide", Color("#efe4cf"), CREAM_HOVER, CREAM_PRESSED, Color.BLACK if high_contrast else CREAM_BORDER, border_width, 18, false, high_contrast)
+	theme.set_type_variation("TabWideSelected", "TabSelected")
+	_button_states(theme, "TabWideSelected", GREEN, GREEN, GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width + (2 if high_contrast else 0), 18, false, high_contrast)
+	for type in ["TabWide", "TabWideSelected"]:
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var wide_box := theme.get_stylebox(state, type)
+			wide_box.content_margin_left = TAB_H_MARGIN
+			wide_box.content_margin_right = TAB_H_MARGIN
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
 
 	# Round and pill buttons drawn over the scenery: full-size touch target, smaller picture.
