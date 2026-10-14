@@ -57,6 +57,7 @@ func _init() -> void:
 	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
 	back.tooltip_text = tr("ui.back")
 	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
+	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN  # a circle: the taller sign beside it must not stretch it
 	header.add_child(back)
 	var titles := UiKit.vbox(6)
 	var sign_board := UiKit.sign_board("camp", tr("ui.camp.title"), "sign_camp")

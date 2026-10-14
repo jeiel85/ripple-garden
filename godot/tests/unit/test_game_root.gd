@@ -463,3 +463,28 @@ func test_water_mind_buttons_keep_the_large_ui_touch_size() -> void:
 	root.ui._apply_layout()
 	assert_true(root.ui.water_mind.button_size() >= UiTheme.touch_min(true), "Large UI did not enlarge the water-mind buttons")
 	_stop(root)
+
+func test_rectangular_buttons_read_wide_and_circles_stay_round() -> void:
+	# Owner 2026-10-14: buttons should sit wide (about 3:2); tall slivers like "닫기" looked unnatural.
+	var root := _start()
+	var word := UiKit.button("닫기", func() -> void: pass)
+	assert_true(word.custom_minimum_size.x >= word.custom_minimum_size.y * 1.5, "a word button may be narrower than 3:2")
+	word.free()
+	root.ui.open_journal()
+	await tree.process_frame
+	for button: Button in root.ui.journal_panel._tabs.values():
+		var ratio := button.size.x / button.size.y
+		assert_true(ratio >= 1.3, "journal tab %s is %.2f wide per tall" % [button.text, ratio])
+	root.ui.close_panel()
+	root.ui._open(root.ui.map_panel)
+	await tree.process_frame
+	for sign_box: Control in root.ui.map_panel._signs.values():
+		var tag: Button = sign_box.get_child(0)
+		assert_true(tag.size.x >= tag.size.y * 1.45, "map tag %s is too narrow" % tag.text)
+	root.ui.close_panel()
+	root.ui.open_camp()
+	await tree.process_frame
+	for button: Button in root.ui.camp_panel.find_children("*", "Button", true, false):
+		if button.theme_type_variation == "CircleButton" and button.is_visible_in_tree():
+			assert_true(absf(button.size.x - button.size.y) < 2.0, "a round camp button is stretched (%s)" % str(button.size))
+	_stop(root)

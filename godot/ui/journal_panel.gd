@@ -105,10 +105,11 @@ func _init() -> void:
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:
 		var tab_id: String = entry[0]
-		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabButton", UiTheme.ICON_TAB, false)
-		button.custom_minimum_size = Vector2(0, UiTheme.TOUCH_MIN_PX)
+		var button := UiKit.icon_button(entry[1], tr(entry[2]), func() -> void: select_tab(tab_id), "TabWide", UiTheme.ICON_TAB, false)
+		# As wide as icon, word and the tabs' wide padding (UiTheme.TAB_H_MARGIN), and never under 1.4:1 even for a
+		# one-letter word ("강"): the strip scrolls.
+		button.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX * 1.4, UiTheme.TOUCH_MIN_PX)
 		button.add_theme_constant_override("h_separation", 2)
-		button.custom_minimum_size.x = 104
 		_tabs[tab_id] = button
 		tab_row.add_child(button)
 	_all_dot = UiKit.notice_dot(_tabs["all"])
@@ -257,7 +258,7 @@ func refresh() -> void:
 		_list.add_child(card)
 	_progress.text = tr("ui.journal.progress") % [tab_found, entries.size()]
 	for tab_id in _tabs:
-		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
+		(_tabs[tab_id] as Button).theme_type_variation = "TabWideSelected" if tab_id == tab else "TabWide"
 	_sort_button.text = tr("ui.journal.sort." + sort_mode)
 	_sort_button.visible = true
 	if selected_id.is_empty() or not _cards.has(selected_id):
@@ -527,7 +528,7 @@ func _refresh_moments() -> void:
 	_progress.text = tr("ui.journal.progress") % [seen, ContentDB.moments.size()]
 	_sort_button.visible = false  # moments keep the order they are listed in; there is nothing to sort
 	for tab_id in _tabs:
-		(_tabs[tab_id] as Button).theme_type_variation = "TabSelected" if tab_id == tab else "TabButton"
+		(_tabs[tab_id] as Button).theme_type_variation = "TabWideSelected" if tab_id == tab else "TabWide"
 	if selected_id.is_empty() or not _cards.has(selected_id):
 		selected_id = ContentDB.moments.keys()[0] if not ContentDB.moments.is_empty() else ""
 	_show_moment(selected_id)
