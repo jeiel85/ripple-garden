@@ -487,4 +487,11 @@ func test_rectangular_buttons_read_wide_and_circles_stay_round() -> void:
 	for button: Button in root.ui.camp_panel.find_children("*", "Button", true, false):
 		if button.theme_type_variation == "CircleButton" and button.is_visible_in_tree():
 			assert_true(absf(button.size.x - button.size.y) < 2.0, "a round camp button is stretched (%s)" % str(button.size))
+	# Large UI still enlarges the (unstretched) back circle.
+	GameState.set_setting("large_ui", true)
+	await tree.process_frame
+	var back: Button = root.ui.camp_panel.find_children("*", "Button", true, false).filter(func(b: Button) -> bool:
+		return b.tooltip_text == tr("ui.back"))[0]
+	assert_true(back.custom_minimum_size.x >= UiTheme.touch_min(true), "Large UI did not enlarge the camp back button")
+	assert_eq(back.custom_minimum_size.x, back.custom_minimum_size.y)
 	_stop(root)
