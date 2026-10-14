@@ -62,17 +62,10 @@ func _init() -> void:
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(column)
 
-	# Header: back, then the wooden sign with its subtitle.
-	var header := UiKit.hbox(10)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
-	back.tooltip_text = tr("ui.back")
-	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
-	back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	header.add_child(back)
+	# Header: back, then the wooden sign with its subtitle centred on the page.
 	# The same title board as the journal, camp and map, the subtitle on a pill under it: a two-line
 	# subtitle inside the board ran past the painted planks.
 	var titles := UiKit.vbox(6)
-	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var hint := PanelContainer.new()
 	hint.theme_type_variation = "PillPanel"
 	# As wide as the header allows and wrapping: at the largest Text Scale with Large UI a one-line
@@ -86,8 +79,7 @@ func _init() -> void:
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	titles.add_child(sign_board)
 	titles.add_child(hint)
-	header.add_child(titles)
-	column.add_child(header)
+	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), titles))
 
 	var tab_row := UiKit.hbox(6)
 	for entry in TABS:

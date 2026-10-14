@@ -375,3 +375,74 @@ func test_a_subtitle_pill_wraps_instead_of_widening_past_its_cap() -> void:
 	host.add_child(short)
 	assert_true(short.get_combined_minimum_size().x < long.get_combined_minimum_size().x, "a short subtitle is not narrower")
 	host.free()
+
+## Every way out of a screen: `variation` CircleButton circles (back or close), none of them a worded button.
+func _exit_buttons(node: Node) -> Array:
+	var found := []
+	for child in node.find_children("*", "Button", true, false):
+		var button := child as Button
+		if button.theme_type_variation == "CircleButton" and (button.tooltip_text == TranslationServer.translate("ui.close") \
+				or button.tooltip_text == TranslationServer.translate("ui.back")):
+			found.append(button)
+		assert_true(button.text != TranslationServer.translate("ui.close"), "%s keeps a worded Close button" % node.get_class())
+	return found
+
+func test_every_page_and_dialog_leaves_through_the_same_circle() -> void:
+	# The settings dialog's worded "닫기" button and the pages' back circles did not match (2026-10-14).
+	_fresh_state()
+	GameState.set_setting("large_ui", false)
+	for screen in [SettingsPanel.new(), RestorationPanel.new(), TextPanel.new(), GearPanel.new(), JournalPanel.new()]:
+		tree.root.add_child(screen)
+		var exits := _exit_buttons(screen)
+		assert_eq(exits.size(), 1, "%s has one way out" % screen.get_script().get_global_name())
+		if exits.size() == 1:
+			assert_eq((exits[0] as Button).custom_minimum_size, Vector2.ONE * UiTheme.TOUCH_MIN_PX)
+		screen.free()
+
+func test_the_way_out_grows_with_large_ui() -> void:
+	GameState.set_setting("large_ui", false)
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	var close := UiKit.exit_button("close", "닫기", func() -> void: pass)
+	host.add_child(close)
+	assert_eq(close.custom_minimum_size, Vector2.ONE * UiTheme.TOUCH_MIN_PX)
+	GameState.set_setting("large_ui", true)
+	host.theme = UiTheme.build(1.0, true, false)
+	assert_eq(close.custom_minimum_size, Vector2.ONE * UiTheme.TOUCH_MIN_LARGE_PX)
+	GameState.set_setting("large_ui", false)
+	host.free()
+
+func test_a_page_title_sits_on_the_page_centre_line() -> void:
+	# The gear sign was centred in the space right of the back button, so it sat right of the screen's centre.
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	host.size = Vector2(720, 400)
+	tree.root.add_child(host)
+	var title := Label.new()
+	title.text = "장비"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var header := UiKit.page_header(UiKit.exit_button("back", "뒤로", func() -> void: pass), title)
+	header.size = Vector2(720, 0)
+	host.add_child(header)
+	header.size = Vector2(720, header.get_combined_minimum_size().y)
+	header.notification(Container.NOTIFICATION_SORT_CHILDREN)
+	assert_true(absf(title.position.x + title.size.x / 2.0 - 360.0) <= 1.0, "title centre at %.1f" % (title.position.x + title.size.x / 2.0))
+	# Codex review #104: a trailing part wider than the back button (the journal's counter) must not pull it aside.
+	var other := Label.new()
+	other.text = "장비"
+	other.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var wide := Control.new()
+	wide.custom_minimum_size = Vector2(200, 40)
+	var with_counter := UiKit.page_header(UiKit.exit_button("back", "뒤로", func() -> void: pass), other, wide)
+	host.add_child(with_counter)
+	with_counter.size = Vector2(720, with_counter.get_combined_minimum_size().y)
+	with_counter.notification(Container.NOTIFICATION_SORT_CHILDREN)
+	assert_true(absf(other.position.x + other.size.x / 2.0 - 360.0) <= 1.0, "title centre at %.1f beside a wide counter" % (other.position.x + other.size.x / 2.0))
+	host.free()
+
+func test_the_top_bar_settings_circle_is_no_taller_than_a_status_pill() -> void:
+	var theme := UiTheme.build(1.0, false, false)
+	var style := theme.get_stylebox("normal", "TopBarButton") as InsetStyle
+	var drawn := style.draw_rect_for(Rect2(Vector2.ZERO, Vector2.ONE * UiTheme.TOUCH_MIN_PX))
+	assert_true(drawn.size.y < UiTheme.TOUCH_MIN_PX * 0.7, "the circle is %d px across" % drawn.size.y)

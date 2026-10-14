@@ -210,7 +210,8 @@ func _build_top() -> Control:
 	currency_pill.tooltip_text = "%s · %s" % [tr("ui.currency.ripple"), tr("ui.currency.memory")]
 	row.add_child(currency_pill)
 
-	settings_button = UiKit.round_button("settings", tr("ui.button.settings"), func() -> void: settings_pressed.emit())
+	settings_button = UiKit.round_button("settings", tr("ui.button.settings"), func() -> void: settings_pressed.emit(), false, UiTheme.TOUCH_MIN_PX, "TopBarButton")
+	settings_button.add_theme_constant_override("icon_max_width", int(UiTheme.ICON_M))  # inside the pill-high circle
 	row.add_child(settings_button)
 	return row
 

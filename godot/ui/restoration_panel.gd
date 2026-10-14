@@ -21,12 +21,8 @@ var _confirm: Button
 func _init() -> void:
 	custom_minimum_size = Vector2(640, 0)
 	var box := UiKit.vbox(14)
-	var header := UiKit.hbox(12)
 	var title := UiKit.label(tr("ui.restore.title"), "TitleLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
-	header.add_child(UiKit.button(tr("ui.close"), func() -> void: close_pressed.emit()))
-	box.add_child(header)
+	box.add_child(UiKit.dialog_header(title, func() -> void: close_pressed.emit()))
 	_level = UiKit.label("")
 	_points = UiKit.label("", "DimLabel")
 	_bar = ProgressBar.new()

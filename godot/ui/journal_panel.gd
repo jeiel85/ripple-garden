@@ -72,34 +72,23 @@ func _init() -> void:
 	page.add_child(column)
 
 	# Header: back, hanging sign with subtitle, species counter.
-	var header := UiKit.hbox(10)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
-	back.tooltip_text = tr("ui.back")
-	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
-	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	header.add_child(back)
 	var title_column := UiKit.vbox(6)
-	title_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"), "sign_journal")
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
 	title_column.add_child(UiKit.subtitle_pill(tr("ui.journal.subtitle")))
-	header.add_child(title_column)
 	var counter_pill := PanelContainer.new()
 	counter_pill.theme_type_variation = "PillPanel"
 	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var counter_box := UiKit.hbox(8)
 	counter_box.add_child(UiKit.icon("fish", UiTheme.ICON_M, UiTheme.PILL_TEXT))
-	var counter_text := UiKit.vbox(0)
-	var counter_caption := UiKit.label(tr("ui.journal.found"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	UiKit.text_size(counter_caption, "caption")
-	counter_text.add_child(counter_caption)
+	# One line, fish and count, about as wide as the back button: the header keeps both sides equally wide to
+	# centre the sign (Codex review #104), and a worded caption above the count ran past a phone screen.
+	counter_pill.tooltip_text = tr("ui.journal.found")
 	_counter = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	counter_text.add_child(_counter)
-	counter_box.add_child(counter_text)
+	counter_box.add_child(_counter)
 	counter_pill.add_child(counter_box)
-	header.add_child(counter_pill)
-	column.add_child(header)
+	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), title_column, counter_pill))
 
 	# Tabs.
 	var tab_row := UiKit.hbox(6)
