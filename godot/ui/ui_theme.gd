@@ -226,24 +226,34 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	_icon_colors(theme, "TabSelected", GREEN_TEXT)
 
 	# Round and pill buttons drawn over the scenery: full-size touch target, smaller picture.
-	theme.set_type_variation("RoundButton", "Button")
-	for state in ["normal", "hover", "pressed", "disabled"]:
-		var color := Color.BLACK if high_contrast else PILL
-		match state:
-			"hover": color = color.lightened(0.08)
-			"pressed": color = Color(0.05, 0.06, 0.05, 0.8)
-			"disabled": color = Color(color, 0.3)
-		var circle := _box(color, Color.WHITE if high_contrast else PILL_BORDER, border_width + 1, 999)
-		var round_style := InsetStyle.new(_framed(circle, "RoundButton", high_contrast, FRAME_TINTS[state]), Vector2(6, 6), true)
-		round_style.content_margin_left = 4
-		round_style.content_margin_right = 4
-		round_style.content_margin_top = 4
-		round_style.content_margin_bottom = 4
-		theme.set_stylebox(state, "RoundButton", round_style)
-	theme.set_stylebox("focus", "RoundButton", InsetStyle.new(_focus_box(999), Vector2(2, 2), true))
-	_font_colors(theme, "RoundButton", PILL_TEXT)
-	_icon_colors(theme, "RoundButton", PILL_TEXT)
-	theme.set_font_size("font_size", "RoundButton", text_px(font, "caption"))
+	# TopBarButton is the same circle in the top bar, drawn no taller than the status pills beside it (the
+	# settings button): at the full touch size it towered over them and touched the screen's top edge.
+	# A status pill is its icon or its small words, whichever is taller, in a 6 px margin and its border.
+	var pill_height := maxf(ICON_M, ceilf(text_px(font, "small") * 1.45)) + 12.0 + border_width * 2.0 + 4.0
+	for type in ["RoundButton", "TopBarButton"]:
+		theme.set_type_variation(type, "Button")
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var color := Color.BLACK if high_contrast else PILL
+			match state:
+				"hover": color = color.lightened(0.08)
+				"pressed": color = Color(0.05, 0.06, 0.05, 0.8)
+				"disabled": color = Color(color, 0.3)
+			var circle := _box(color, Color.WHITE if high_contrast else PILL_BORDER, border_width + 1, 999)
+			var round_style := InsetStyle.new(_framed(circle, "RoundButton", high_contrast, FRAME_TINTS[state]), Vector2(6, 6), true)
+			if type == "TopBarButton":
+				round_style.max_diameter = pill_height
+			round_style.content_margin_left = 4
+			round_style.content_margin_right = 4
+			round_style.content_margin_top = 4
+			round_style.content_margin_bottom = 4
+			theme.set_stylebox(state, type, round_style)
+		var focus := InsetStyle.new(_focus_box(999), Vector2(2, 2), true)
+		if type == "TopBarButton":
+			focus.max_diameter = pill_height + 8.0
+		theme.set_stylebox("focus", type, focus)
+		_font_colors(theme, type, PILL_TEXT)
+		_icon_colors(theme, type, PILL_TEXT)
+		theme.set_font_size("font_size", type, text_px(font, "caption"))
 
 	# Glass circle with a caption (water-mind, mockup 08): translucent over the scenery, a thin light ring, the
 	# icon well inside the circle above its word. Always a coded box: the dark wooden frame picture is too heavy here.

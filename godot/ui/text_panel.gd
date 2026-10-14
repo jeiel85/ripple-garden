@@ -11,12 +11,8 @@ var _body: Label
 func _init() -> void:
 	custom_minimum_size = Vector2(640, 980)
 	var box := UiKit.vbox(12)
-	var header := UiKit.hbox(12)
 	_title = UiKit.label("", "TitleLabel", HORIZONTAL_ALIGNMENT_LEFT, false)
-	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(_title)
-	header.add_child(UiKit.button(tr("ui.close"), func() -> void: close_pressed.emit()))
-	box.add_child(header)
+	box.add_child(UiKit.dialog_header(_title, func() -> void: close_pressed.emit()))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED

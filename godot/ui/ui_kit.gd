@@ -137,6 +137,47 @@ static func subtitle_pill(text: String, max_width: float = SUBTITLE_MAX_WIDTH) -
 
 const SUBTITLE_MAX_WIDTH := 420.0
 
+## The one way out of a page or dialog (UI_UX §14.10): a cream circle with "back" (full-screen pages) or "close"
+## (dialogs over the game), square at the current touch minimum (Large UI: 120 px) and refitted when the theme is
+## rebuilt. Every page and dialog uses this, so the way out looks and sits the same everywhere.
+static func exit_button(icon_name: String, tooltip: String, callback: Callable) -> Button:
+	var node := icon_button(icon_name, "", callback, "CircleButton", UiTheme.ICON_L)
+	node.tooltip_text = tooltip
+	node.size_flags_vertical = Control.SIZE_SHRINK_BEGIN  # a circle: a taller title beside it must not stretch it
+	var fit := func() -> void:
+		var side := UiTheme.touch_min(GameState.get_setting("large_ui") == true)
+		node.custom_minimum_size = Vector2(side, side)
+	fit.call()
+	node.theme_changed.connect(fit)
+	return node
+
+## A page header: the way out on the left, the title (sign board and subtitle) centred on the page, and
+## `trailing` on the right — or an empty box as wide as the way out, so the title stays on the page's centre
+## line instead of the centre of what is left beside the button.
+static func page_header(back: Button, middle: Control, trailing: Control = null) -> HBoxContainer:
+	var row := hbox(10)
+	row.add_child(back)
+	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(middle)
+	if trailing == null:
+		trailing = Control.new()
+		trailing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var mirror := func() -> void: trailing.custom_minimum_size.x = back.custom_minimum_size.x
+		mirror.call()
+		back.minimum_size_changed.connect(mirror)
+	row.add_child(trailing)
+	return row
+
+## A dialog header: the title on the left and the "close" circle on the right.
+static func dialog_header(title: Control, close: Callable) -> HBoxContainer:
+	var row := hbox(12)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if title is Label:
+		title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER  # on the circle's middle line
+	row.add_child(title)
+	row.add_child(exit_button("close", TranslationServer.translate("ui.close"), close))
+	return row
+
 ## A round icon-only button over the scenery. `label` is its accessibility name (tooltip); with
 ## `caption` the name is also printed under the icon (the water-mind buttons in the mockup).
 static func round_button(icon_name: String, label: String, callback: Callable, caption: bool = false,

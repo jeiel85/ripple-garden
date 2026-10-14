@@ -72,19 +72,11 @@ func _init() -> void:
 	page.add_child(column)
 
 	# Header: back, hanging sign with subtitle, species counter.
-	var header := UiKit.hbox(10)
-	var back := UiKit.icon_button("back", "", func() -> void: close_pressed.emit(), "CircleButton", UiTheme.ICON_L)
-	back.tooltip_text = tr("ui.back")
-	back.custom_minimum_size = Vector2(UiTheme.TOUCH_MIN_PX, UiTheme.TOUCH_MIN_PX)
-	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	header.add_child(back)
 	var title_column := UiKit.vbox(6)
-	title_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"), "sign_journal")
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
 	title_column.add_child(UiKit.subtitle_pill(tr("ui.journal.subtitle")))
-	header.add_child(title_column)
 	var counter_pill := PanelContainer.new()
 	counter_pill.theme_type_variation = "PillPanel"
 	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -98,8 +90,7 @@ func _init() -> void:
 	counter_text.add_child(_counter)
 	counter_box.add_child(counter_text)
 	counter_pill.add_child(counter_box)
-	header.add_child(counter_pill)
-	column.add_child(header)
+	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), title_column, counter_pill))
 
 	# Tabs.
 	var tab_row := UiKit.hbox(6)
