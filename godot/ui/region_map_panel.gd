@@ -155,10 +155,9 @@ func _sign(region_id: String, state: String) -> Control:
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var button := UiKit.icon_button(def["map"]["icon"] if state != RegionUnlocks.LOCKED else "lock", _name(region_id),
 		func() -> void: tap(region_id), "", UiTheme.ICON_M, false)
-	UiKit.text_size(button, "small")
+	UiKit.text_size(button, "body")
 	button.custom_minimum_size.y = UiTheme.TOUCH_MIN_PX
-	if state == RegionUnlocks.CURRENT:
-		button.theme_type_variation = "CardSelected"
+	button.theme_type_variation = "MapTagHere" if state == RegionUnlocks.CURRENT else "MapTag"
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(button)
 	var pill := PanelContainer.new()

@@ -115,7 +115,7 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	var fonts := fonts_for(TranslationServer.get_locale())
 	theme.default_font = fonts["body"]
 	# The mockups letter tabs in the same rounded display face as the boards (D-032 follow-up, 2026-10-14).
-	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton", "TabButton", "TabSelected", "TabSelectedWood", "GlassButton"]:
+	for type in ["TitleLabel", "BigLabel", "SignLabel", "CtaLabel", "WaterButton", "PrimaryButton", "TabButton", "TabSelected", "TabSelectedWood", "GlassButton", "GreenButton"]:
 		theme.set_font("font", type, fonts["title"])
 	var border_width := 4 if high_contrast else 2
 	var ink := Color.BLACK if high_contrast else INK
@@ -174,8 +174,15 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 
 	# Green: "this is chosen" (equipped, selected tab, confirm).
 	theme.set_type_variation("GreenButton", "Button")
-	_button_states(theme, "GreenButton", GREEN, GREEN.lightened(0.08), GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width, 24, true, high_contrast)
+	# A rounded pill like the mockup's "장착 중" (05), lettered in the title face (§14.3).
+	_button_states(theme, "GreenButton", GREEN, GREEN.lightened(0.08), GREEN_PRESSED, Color.BLACK if high_contrast else GREEN_BORDER, border_width, 44, true, high_contrast)
 	_font_colors(theme, "GreenButton", GREEN_TEXT)
+	theme.set_font_size("font_size", "GreenButton", text_px(font, "title"))
+	# The region map's island name tags (mockup 07): cream tags lettered in the title face, the current one green-edged.
+	theme.set_type_variation("MapTag", "Button")
+	theme.set_type_variation("MapTagHere", "CardSelected")
+	for type in ["MapTag", "MapTagHere"]:
+		theme.set_font("font", type, fonts["title"])
 	_icon_colors(theme, "GreenButton", GREEN_TEXT)
 
 	# A chosen card in a list (journal fish, equipped item): pale green with a gold-green rim.
@@ -343,6 +350,9 @@ static func build(text_scale: float, large_ui: bool, high_contrast: bool) -> The
 	theme.set_constant("shadow_offset_y", "LightLabel", 2)
 	theme.set_constant("shadow_outline_size", "LightLabel", 4)
 	_rim(theme, "LightLabel", SCENERY_RIM, 5)
+	# A title over the scenery (the catch result's headline, mockup 03): the light label in the title face.
+	theme.set_type_variation("LightTitleLabel", "LightLabel")
+	theme.set_font("font", "LightTitleLabel", fonts["title"])
 
 	# --- inputs ---
 	theme.set_color("font_color", "CheckButton", ink)
