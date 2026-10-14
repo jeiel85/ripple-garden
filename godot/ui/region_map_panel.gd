@@ -52,9 +52,7 @@ func _init() -> void:
 	var board := UiKit.sign_board("map", tr("ui.map.title"), "sign_map")
 	board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title.add_child(board)
-	var subtitle := UiKit.label(tr("ui.map.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	UiKit.text_size(subtitle, "caption")
-	title.add_child(subtitle)
+	title.add_child(UiKit.subtitle_pill(tr("ui.map.subtitle")))
 	add_child(title)
 
 	var back := UiKit.icon_button("back", tr("ui.back"), func() -> void: close_pressed.emit(), "", UiTheme.ICON_L)

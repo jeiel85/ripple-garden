@@ -362,3 +362,16 @@ func test_mockup_picture_buttons_grow_with_large_ui() -> void:
 	GameState.set_setting("large_ui", false)
 	TranslationServer.set_locale(previous)
 	host.free()
+
+func test_a_subtitle_pill_wraps_instead_of_widening_past_its_cap() -> void:
+	# Codex review #94: at the largest text scale a one-line subtitle pushed the journal header off screen.
+	var host := Control.new()
+	host.theme = UiTheme.build(1.6, true, false)
+	tree.root.add_child(host)
+	var long := UiKit.subtitle_pill("물가에서 만난 소중한 물고기들을 하나하나 정성껏 기록해 두는 곳이에요")
+	host.add_child(long)
+	assert_true(long.get_combined_minimum_size().x <= UiKit.SUBTITLE_MAX_WIDTH + 80.0, "the pill grew to %d px" % long.get_combined_minimum_size().x)
+	var short := UiKit.subtitle_pill("짧은 말")
+	host.add_child(short)
+	assert_true(short.get_combined_minimum_size().x < long.get_combined_minimum_size().x, "a short subtitle is not narrower")
+	host.free()
