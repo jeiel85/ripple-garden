@@ -40,6 +40,8 @@ var _hide_button: Button
 var _photo_button: Button
 var _time_button: Button
 var _weather_button: Button
+## The glass buttons' circle (mockup 08); `fit_buttons` raises it to the touch minimum.
+const GLASS_PX := 104.0
 var _mixer_button: Button
 var _mixer: PanelContainer
 var _sliders: Dictionary = {}
@@ -84,10 +86,10 @@ func _init() -> void:
 	row.offset_bottom = -70
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Glass circles with a word under the icon, as in mockup 08.
-	_photo_button = UiKit.round_button("camera", tr("ui.water_mind.save"), _request_photo, true, 104.0, "GlassButton")
-	_time_button = UiKit.round_button("clock", tr("ui.water_mind.time"), _cycle_time, true, 104.0, "GlassButton")
-	_weather_button = UiKit.round_button("weather", tr("ui.water_mind.weather"), _cycle_weather, true, 104.0, "GlassButton")
-	_mixer_button = UiKit.round_button("music", tr("ui.water_mind.bgm"), _toggle_mixer, true, 104.0, "GlassButton")
+	_photo_button = UiKit.round_button("camera", tr("ui.water_mind.save"), _request_photo, true, GLASS_PX, "GlassButton")
+	_time_button = UiKit.round_button("clock", tr("ui.water_mind.time"), _cycle_time, true, GLASS_PX, "GlassButton")
+	_weather_button = UiKit.round_button("weather", tr("ui.water_mind.weather"), _cycle_weather, true, GLASS_PX, "GlassButton")
+	_mixer_button = UiKit.round_button("music", tr("ui.water_mind.bgm"), _toggle_mixer, true, GLASS_PX, "GlassButton")
 	for button in [_photo_button, _time_button, _weather_button, _mixer_button]:
 		row.add_child(button)
 	_chrome.add_child(row)
@@ -174,6 +176,19 @@ func show_chrome() -> void:
 func apply_insets(top: float, bottom: float) -> void:
 	_chrome.offset_top = top
 	_chrome.offset_bottom = -bottom
+
+## Sizes the glass buttons: the mockup's compact circle, but never below the touch minimum (Large UI: 120 px,
+## Codex review #92).
+func fit_buttons(touch_min: float) -> void:
+	var size_px := maxf(GLASS_PX, touch_min)
+	for button: Button in [_photo_button, _time_button, _weather_button, _mixer_button]:
+		button.custom_minimum_size = Vector2(size_px, size_px)
+		button.add_theme_constant_override("icon_max_width", int(size_px * 0.4))
+		button.set_meta("caption_width", size_px - UiKit.CAPTION_PADDING)
+		UiKit.fit_caption(button)
+
+func button_size() -> float:
+	return _photo_button.custom_minimum_size.x
 
 ## Idle minutes before dimming (0 = never), from settings.
 func dim_after_sec() -> float:
