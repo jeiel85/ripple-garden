@@ -1,0 +1,15 @@
+Music and sound recordings (all CC0 1.0 — public domain; credit is not required, given with thanks)
+
+Music
+- Small Pond: "Calm3 - Peaceful Days" from JRPG Music Pack #4 [Calm] — Juhani Junkala (SubspaceAudio)
+  https://opengameart.org/content/jrpg-pack-4-calm
+- Forest Valley: "Champ de tournesol" — Komiku (Loyalty Freak Music)  https://opengameart.org/content/champ-de-tournesol
+- Big River: "Just you and me" — Alex McCulloch (Pro Sensory)  https://opengameart.org/content/just-you-and-me-guitar
+- Seaside: "Good Morning" — Cakeflaps @ You're Perfect Studio  https://opengameart.org/content/good-morning
+- Moonlight Isle: "Contemplation" — Joth  https://opengameart.org/content/contemplation-0
+
+Sounds
+- River ambience: "Sea and river wave sounds" (Vistula) — RandomMind  https://opengameart.org/content/sea-and-river-wave-sounds
+- Splashes: "40 CC0 water / splash / slime SFX" — rubberduck  https://opengameart.org/comment/82442
+
+The other sounds are made for this game (tools/generate_placeholder_audio.py).

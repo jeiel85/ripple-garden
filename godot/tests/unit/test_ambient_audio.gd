@@ -22,18 +22,40 @@ func _audio(band: String = "day", cloud: float = 0.0, rain: float = 0.0, level: 
 
 func test_audio_content_is_valid_and_every_stream_loads() -> void:
 	assert_false(ContentDB.audio.is_empty(), "audio.json failed validation: %s" % ContentDB.errors)
-	var paths: Array = []
-	for loop in ContentDB.audio["loops"]:
-		paths.append(loop["stream"])
-	for clip in ContentDB.audio["wildlife"]["clips"]:
-		paths.append(clip["stream"])
+	# Loops must be WAV (AmbientAudio sets the WAV loop points); one-shots may be any stream (D-039: the CC0
+	# splashes are Ogg Vorbis).
+	var loop_paths: Array = ContentDB.audio["loops"].map(func(loop: Dictionary) -> String: return loop["stream"])
+	for own in ContentDB.audio.get("regions", {}).values():
+		loop_paths.append_array(own.get("streams", {}).values())
+	var shot_paths: Array = ContentDB.audio["wildlife"]["clips"].map(func(clip: Dictionary) -> String: return clip["stream"])
 	for cue in ContentDB.audio["cues"].values():
-		paths.append(cue["stream"])
-	for path in paths:
-		var stream: Variant = load(path)
-		assert_true(stream is AudioStreamWAV, "%s did not import as a WAV" % path)
-		if stream is AudioStreamWAV:
+		shot_paths.append(cue["stream"])
+	for path in loop_paths:
+		assert_true(load(path) is AudioStreamWAV, "%s (a loop) did not import as a WAV" % path)
+	for path in loop_paths + shot_paths:
+		var stream: AudioStream = load(path)
+		assert_not_null(stream, "%s did not load" % path)
+		if stream != null:
 			assert_true(stream.get_length() > 0.1, "%s is suspiciously short" % path)
+
+func test_every_region_has_its_own_looping_music() -> void:
+	# D-039: one track per region on the BGM bus, looping, fading in.
+	var tracks := {}
+	for region_id in ContentDB.regions:
+		var mix := AmbientMix.for_region(ContentDB.audio, region_id)
+		assert_false(String(mix.get("bgm", "")).is_empty(), "%s has no music" % region_id)
+		tracks[mix["bgm"]] = true
+		var stream: AudioStream = load(mix["bgm"])
+		assert_true(stream != null and stream.get_length() > 30.0, "%s music is missing or too short" % region_id)
+	assert_eq(tracks.size(), ContentDB.regions.size(), "two regions share a track")
+
+func test_the_music_plays_on_the_bgm_bus_and_loops() -> void:
+	var audio := _audio()
+	assert_not_null(audio.music, "no music player")
+	assert_eq(String(audio.music.bus), "BGM")
+	assert_true(audio.music.playing, "the music is not playing")
+	assert_true(audio.music.stream.get("loop") == true, "the music does not loop")
+	audio.free()
 
 func test_loops_are_long_enough_and_start_where_they_end() -> void:
 	for loop in ContentDB.audio["loops"]:

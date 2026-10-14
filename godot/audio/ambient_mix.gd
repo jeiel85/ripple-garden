@@ -24,6 +24,7 @@ static func for_region(config: Dictionary, region_id: String) -> Dictionary:
 		result["mix"][loop_id].merge(mix_changes[loop_id], true)
 	result["wildlife"]["clips"] = result["wildlife"]["clips"].filter(func(clip: Dictionary) -> bool:
 		return not clip.has("regions") or region_id in clip["regions"])
+	result["bgm"] = own.get("bgm", "")  # the region's music ("" = none)
 	return result
 
 ## Target loudness (0..1) of every loop: {loop id: volume}. `cloud` and `rain` are 0..1.

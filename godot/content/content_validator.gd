@@ -1027,6 +1027,15 @@ func _validate_audio(data: Variant) -> Dictionary:
 							_errors.append("%s.bands: '%s' is not a known time band" % [label, band])
 
 	# Region soundscapes: {region id: {"streams": {loop id: file}, "mix": {loop id: {key: 0..1}}}}.
+	# Music (D-039): which bus, how loud, how long it fades in.
+	var music: Variant = data.get("music", {})
+	if typeof(music) != TYPE_DICTIONARY:
+		_errors.append("%s.music: must be an object" % file_name)
+	elif not music.is_empty():
+		if not music.get("bus") in AUDIO_BUSES:
+			_errors.append("%s.music.bus: must be one of %s" % [file_name, ", ".join(AUDIO_BUSES)])
+		_check_balance_number(music, "music", "volume", 0.0, 1.0, false, "audio")
+		_check_balance_number(music, "music", "fade_in_sec", 0.0, 30.0, false, "audio")
 	var region_audio: Variant = data.get("regions", {})
 	if typeof(region_audio) != TYPE_DICTIONARY:
 		_errors.append("%s.regions: must be an object" % file_name)
@@ -1037,6 +1046,8 @@ func _validate_audio(data: Variant) -> Dictionary:
 			if not _regions.has(region_id) or typeof(own) != TYPE_DICTIONARY:
 				_errors.append("%s: must be a known region with an object" % label)
 				continue
+			if own.has("bgm") and (typeof(own["bgm"]) != TYPE_STRING or not ResourceLoader.exists(own["bgm"])):
+				_errors.append("%s.bgm: file not found (%s)" % [label, var_to_str(own.get("bgm"))])
 			var streams: Variant = own.get("streams", {})
 			if typeof(streams) != TYPE_DICTIONARY:
 				_errors.append("%s.streams: must be an object" % label)

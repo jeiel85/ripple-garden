@@ -397,3 +397,14 @@
   Windows 릴리스 잡이 APK를 받아 `RippleGarden-<tag>-android.apk`로 릴리스에 올리고 SHA256SUMS에 함께 적는다.
 - 남은 위험: 태그를 밀 수 있는 사람은 태그 빌드에서 키에 닿는다. 지금은 오너 혼자 쓰는 저장소라 그대로 두고, 협업자가 생기면 태그 보호 규칙이나 승인이 필요한 environment로 옮긴다.
 - Play 스토어 제출용 AAB(gradle 빌드)와 Play App Signing은 아직이다(#81).
+
+## D-039 음악과 일부 소리는 CC0 녹음을 쓴다 — 지역마다 곡 하나 (2026-10-14)
+
+- 결정자: 프로젝트 오너("무료 라이선스 음원 확인 → 이대로 쭉 진행"). Codex·agy에는 음악·오디오 생성 도구가 없어(직접 확인) 녹음을 쓴다.
+- 출처는 출처 표기 의무가 없는 **CC0만** 쓴다(OpenGameArt 각 파일 페이지에서 확인). 그래도 설정 > 라이선스 화면에 `godot/audio/CREDITS.txt`로 감사 표시를 한다.
+- 음악: `audio.json` `regions.<지역>.bgm` → `AmbientAudio`가 BGM 버스에 반복 재생, `music.fade_in_sec` 동안 서서히 커진다(`music.volume` 0.55). 지역을 옮기면 장면을 다시 지으므로 곡도 바뀐다.
+  작은 연못 Peaceful Days(Juhani Junkala) / 숲속 계곡 Champ de tournesol(Komiku) / 큰 강 Just you and me(Pro Sensory) / 바닷가 Good Morning(Cakeflaps) / 달빛섬 Contemplation(Joth).
+  반복용이 아닌 두 곡(계곡·강)은 끝을 4초 줄여 다시 시작할 때 끊기지 않게 했다. Ogg Vorbis q4(곡당 1~2MB).
+- 소리: 큰 강의 물 소리는 실제 강물 녹음(Vistula, RandomMind) 1분을 이음매 없이, 착수·방생·놓침·물고기 뛰는 소리는 rubberduck의 CC0 물 튀는 소리.
+  루프는 계속 WAV(반복 지점을 코드가 정함), 단발 소리는 Ogg도 된다. 나머지는 합성 자리 표시(D-013) 그대로.
+- 오너가 들어 보고 곡을 바꾸려면 `godot/audio/music/`의 파일만 바꾸면 된다(후보는 다운로드 폴더 `ripple_audio_review`).

@@ -106,3 +106,6 @@
 - **지역 전용 소품·캠프 장식** (2026-10-13, Codex CLI, 모델 `gpt-5.6-luna`, 추론 `low`): `props/` 16장 — 풍경 소품(버섯·고사리·부들·노랑꽃창포·조개껍데기·불가사리·산호·히비스커스)과
   캠프 장식(통나무 의자·돌 등롱·나룻배·그물 걸이·파라솔·갑판 의자·해먹·대나무 횃불). 기존 소품 4장(벤치·꽃·랜턴·상자)을 한 장으로 붙인 참고 그림 1장으로 화풍을 맞췄다.
   상업적 이용은 OpenAI 이용 약관을 따른다. `tools/import_generated.py`로 잘라 가장 긴 변 256px로 줄였다(수정됨).
+- **음악·녹음 (CC0)** (2026-10-14, D-039): `godot/audio/music/bgm_*.ogg` 5곡, `audio/streams/river_vistula.wav`, `sfx_landed·released·escaped·fish_jump.ogg`.
+  곡명·작곡가·원본 링크는 `godot/audio/CREDITS.txt`(게임의 라이선스 화면에도 표시). 모두 OpenGameArt CC0. ffmpeg으로 Ogg q4 변환, 계곡·강 곡은 끝 4초 페이드(수정됨),
+  강물은 1분을 잘라 2초 교차 페이드로 이음매를 없앰(수정됨).
