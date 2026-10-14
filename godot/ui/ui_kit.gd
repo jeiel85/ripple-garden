@@ -112,16 +112,26 @@ static func icon_button(icon_name: String, text: String, callback: Callable, var
 
 ## A screen's subtitle under its sign: small light words in a dark translucent pill, so they stay readable over
 ## any scenery (UI_UX §14.1; the camp's subtitle in mockup 06).
-static func subtitle_pill(text: String) -> PanelContainer:
+## The pill is as wide as its words up to `max_width` and wraps beyond it (largest Text Scale, Large UI), so it
+## never pushes a header past the screen (Codex review #94).
+static func subtitle_pill(text: String, max_width: float = SUBTITLE_MAX_WIDTH) -> PanelContainer:
 	var pill := PanelContainer.new()
 	pill.theme_type_variation = "PillPanel"
 	pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# One line: a wrapping label in a shrinking pill would collapse to a letter per line.
-	var words := label(text, "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	var words := label(text, "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
 	text_size(words, "caption")
+	# A wrapping label has no width of its own: give it its one-line width, capped.
+	var fit := func() -> void:
+		var font := words.get_theme_font("font")
+		var natural := font.get_string_size(words.text, HORIZONTAL_ALIGNMENT_LEFT, -1, words.get_theme_font_size("font_size")).x
+		words.custom_minimum_size.x = minf(ceilf(natural) + 2.0, max_width)
+	words.theme_changed.connect(fit)
+	words.ready.connect(fit)
 	pill.add_child(words)
 	return pill
+
+const SUBTITLE_MAX_WIDTH := 420.0
 
 ## A round icon-only button over the scenery. `label` is its accessibility name (tooltip); with
 ## `caption` the name is also printed under the icon (the water-mind buttons in the mockup).
