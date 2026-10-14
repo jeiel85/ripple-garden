@@ -85,9 +85,15 @@ func configure(fish_def: Dictionary) -> void:
 		var data := ArtLibrary.meta("fish", fish_id + "_top")
 		var drawn_length := length_px * float(data.get("top_length", 1.3))
 		_sprite.scale = Vector2.ONE * drawn_length / maxf(1.0, art.get_width())
-		_sprite.modulate = Color(1, 1, 1, float(data.get("underwater_alpha", 0.88)))
+		_sprite.modulate = underwater_modulate(data)
 	queue_redraw()
 	_tail.queue_redraw()
+
+## How a fish seen through the water looks (art.json `fish`): faded (`underwater_alpha`) and washed towards the
+## water's colour (`underwater_tint`), so it reads as under the surface, not lying on it (owner's request 2026-10-14).
+static func underwater_modulate(data: Dictionary) -> Color:
+	var tint := Color(String(data.get("underwater_tint", "#ffffff")))
+	return Color(tint.r, tint.g, tint.b, float(data.get("underwater_alpha", 0.88)))
 
 ## Per-frame visual update: turn towards the velocity and wiggle the tail.
 func animate(delta: float, reduced_motion: bool) -> void:
