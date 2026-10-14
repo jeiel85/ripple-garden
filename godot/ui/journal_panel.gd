@@ -499,8 +499,12 @@ func _row(icon_name: String, caption_key: String, value: String, open: bool, nee
 	head.add_child(caption)
 	row.add_child(head)
 	var shown := UiKit.label(value if open else tr("ui.journal.locked") % needed, "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT, true)
+	# UI_UX §14.5: what is known reads as the answer (ink, body size); what is still hidden stays a small dim hint.
 	if open:
 		shown.add_theme_color_override("font_color", UiTheme.INK)
+		UiKit.text_size(shown, "body")
+	else:
+		UiKit.text_size(shown, "caption")
 	row.add_child(shown)
 	_page_rows.add_child(row)
 	var line := ColorRect.new()

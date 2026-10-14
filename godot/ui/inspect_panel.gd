@@ -62,7 +62,7 @@ func _init() -> void:
 	_header_icon_right = UiKit.icon("laurel", UiTheme.ICON_XL, Color("#e8d9a0"))
 	_header_icon_right.flip_h = true
 	_badge = UiKit.label("", "BigLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
-	_badge.theme_type_variation = "LightLabel"
+	_badge.theme_type_variation = "LightTitleLabel"
 	UiKit.text_size(_badge, "title")
 	_badge.custom_minimum_size.x = 420
 	header.add_child(_header_icon_left)
