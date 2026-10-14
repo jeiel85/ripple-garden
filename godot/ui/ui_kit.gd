@@ -113,8 +113,8 @@ static func icon_button(icon_name: String, text: String, callback: Callable, var
 ## A round icon-only button over the scenery. `label` is its accessibility name (tooltip); with
 ## `caption` the name is also printed under the icon (the water-mind buttons in the mockup).
 static func round_button(icon_name: String, label: String, callback: Callable, caption: bool = false,
-		size_px: float = UiTheme.TOUCH_MIN_PX) -> Button:
-	var node := icon_button(icon_name, label if caption else "", callback, "RoundButton", size_px * (0.34 if caption else 0.42), true)
+		size_px: float = UiTheme.TOUCH_MIN_PX, variation: String = "RoundButton") -> Button:
+	var node := icon_button(icon_name, label if caption else "", callback, variation, size_px * ((0.4 if variation == "GlassButton" else 0.34) if caption else 0.42), true)
 	node.tooltip_text = label
 	node.custom_minimum_size = Vector2(size_px, size_px)
 	if caption:

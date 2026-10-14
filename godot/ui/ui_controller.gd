@@ -703,6 +703,7 @@ func apply_insets(top: float, bottom: float) -> void:
 	_modal_full.offset_top = top
 	_modal_full.offset_bottom = -bottom
 	water_mind.apply_insets(top, bottom)
+	water_mind.fit_buttons(UiTheme.touch_min(GameState.get_setting("large_ui") == true))
 	photo_mode.apply_insets(top, bottom)
 
 func _unhandled_key_input(event: InputEvent) -> void:

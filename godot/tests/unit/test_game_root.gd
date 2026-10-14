@@ -454,3 +454,12 @@ func test_bottom_bar_pictures_keep_names_and_step_aside_in_high_contrast() -> vo
 	_stop(english)
 	LocalizationCheck.offered = offered
 	TranslationServer.set_locale(previous)
+
+func test_water_mind_buttons_keep_the_large_ui_touch_size() -> void:
+	# Codex review #92: the compact glass circles must still grow with Large UI.
+	var root := _start()
+	assert_true(root.ui.water_mind.button_size() >= UiTheme.touch_min(false))
+	GameState.set_setting("large_ui", true)
+	root.ui._apply_layout()
+	assert_true(root.ui.water_mind.button_size() >= UiTheme.touch_min(true), "Large UI did not enlarge the water-mind buttons")
+	_stop(root)
