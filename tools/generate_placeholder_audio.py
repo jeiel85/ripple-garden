@@ -4,7 +4,8 @@
 The sounds are synthesised from noise and sine waves with fixed seeds, so the output is
 reproducible and owned by the project (no third-party licence). They are stand-ins for produced
 audio (CONTENT_PLAN §4): replace the files, keep the names, and the mix in data/audio.json keeps
-working. Run only when a sound changes; the generated .wav files are committed.
+working. Run only when a sound changes; the generated .wav files are committed. The river loop and the
+splashes (landed, released, escaped, fish jump) are CC0 recordings now (D-039), not generated here.
 
     python tools/generate_placeholder_audio.py [file.wav ...]   (no names: every sound)
 
@@ -157,11 +158,6 @@ def cricket():
     return normalize(np.concatenate(parts + [np.zeros(int(0.3 * sr))] + parts), 0.35)
 
 
-def splash(seconds=0.45, low=200, high=2600, gain=1.0):
-    rng = _rng(f"splash{seconds}{low}")
-    sr = SHOT_SR
-    n = int(seconds * sr)
-    return normalize(band(rng.standard_normal(n), sr, low, high) * envelope(n, 0.004, seconds / 4.0, sr), 0.6 * gain)
 
 
 def cast():
@@ -173,12 +169,6 @@ def cast():
     return normalize(band(rng.standard_normal(n), sr, 600, 3500) * rise, 0.45)
 
 
-def plop():
-    sr = SHOT_SR
-    n = int(0.28 * sr)
-    t = np.arange(n) / sr
-    sweep = np.sin(2 * np.pi * np.cumsum(np.linspace(520, 170, n)) / sr)
-    return normalize(sweep * envelope(n, 0.002, 0.07, sr) + splash(0.28, 300, 2200, 0.4)[:n] * 0.4, 0.6)
 
 
 def bite():
@@ -205,18 +195,6 @@ def caught():
     return normalize(np.concatenate(parts), 0.5)
 
 
-def released():
-    rng = _rng("release")
-    sr = SHOT_SR
-    n = int(0.7 * sr)
-    swish = splash(0.7, 150, 2200, 0.8)[:n]
-    bubbles = np.zeros(n)
-    for position in rng.integers(int(0.1 * sr), n - 2000, size=5):
-        m = 1800
-        t = np.arange(m) / sr
-        f = rng.uniform(500, 900)
-        bubbles[position:position + m] += np.sin(2 * np.pi * np.cumsum(np.linspace(f, f * 1.6, m)) / sr) * envelope(m, 0.002, 0.03, sr) * 0.4
-    return normalize(swish + bubbles, 0.55)
 
 
 def stream_loop():
@@ -233,13 +211,6 @@ def stream_loop():
     return normalize(make_seamless(rush * 0.7 + babble, sr), 0.7)
 
 
-def river_loop():
-    """Region 03: a wide lowland river — a deep, slow, even flow with soft laps on the bank."""
-    rng = _rng("river")
-    sr = LOOP_SR
-    body = band(noise(rng, 12.0, sr), sr, 40, 520) * (0.7 + 0.3 * smooth_random(rng, int(12.0 * sr), sr, 0.25))
-    laps = band(noise(rng, 12.0, sr), sr, 200, 900) * smooth_random(rng, int(12.0 * sr), sr, 0.9) ** 4
-    return normalize(make_seamless(body + laps * 0.5, sr), 0.7)
 
 
 def dipper():
@@ -365,7 +336,6 @@ SOUNDS = {
     "gull.wav": (gull, SHOT_SR),
     "tern.wav": (tern, SHOT_SR),
     "stream_loop.wav": (stream_loop, LOOP_SR),
-    "river_loop.wav": (river_loop, LOOP_SR),
     "dipper.wav": (dipper, SHOT_SR),
     "woodpecker.wav": (woodpecker, SHOT_SR),
     "heron.wav": (heron, SHOT_SR),
@@ -377,14 +347,10 @@ SOUNDS = {
     "bird_b.wav": (bird_b, SHOT_SR),
     "frog.wav": (frog, SHOT_SR),
     "cricket.wav": (cricket, SHOT_SR),
-    "fish_jump.wav": (lambda: splash(0.5, 180, 2800, 0.9), SHOT_SR),
     "cast.wav": (cast, SHOT_SR),
-    "plop.wav": (plop, SHOT_SR),
     "bite.wav": (bite, SHOT_SR),
     "hooked.wav": (hooked, SHOT_SR),
     "caught.wav": (caught, SHOT_SR),
-    "released.wav": (released, SHOT_SR),
-    "escaped.wav": (lambda: splash(0.4, 250, 1800, 0.45), SHOT_SR),
 }
 
 if __name__ == "__main__":

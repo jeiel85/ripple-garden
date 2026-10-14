@@ -7,8 +7,10 @@ extends Node
 ## pooled: three loop players plus a small fixed pool of one-shot players, so the number of audio
 ## voices is bounded no matter how long the game runs (TECH_SPEC §14 soak goal).
 ##
-## The sounds are generated placeholders (tools/generate_placeholder_audio.py, D-013). The BGM bus
-## is intentionally silent until music is produced.
+## Each region also has its own music (`regions.<id>.bgm`, D-039): one looping track on the BGM bus that
+## fades in when the region is built. Most layers are still generated placeholders
+## (tools/generate_placeholder_audio.py, D-013); the music, the river and the splashes are CC0 recordings
+## (assets/placeholders/README.md).
 
 const ONE_SHOT_VOICES := 6
 const TARGET_STEP_SEC := 0.25
@@ -28,6 +30,9 @@ var _cue_streams: Dictionary = {}
 var _clip_streams: Dictionary = {}
 var _context: Dictionary = {}
 var _weather: WeatherService = null
+## The region's music (null when the region has none).
+var music: AudioStreamPlayer = null
+var _music_target_db := -80.0
 
 ## `weather` provides the cloud/rain amounts; the rest comes from TimeService and GameState.
 func setup(p_region_id: String, weather: WeatherService) -> void:
@@ -38,6 +43,7 @@ func setup(p_region_id: String, weather: WeatherService) -> void:
 	if config.is_empty():
 		push_error("AmbientAudio: audio.json is missing or invalid; the soundscape stays silent")
 		return
+	_start_music()
 	for loop in config["loops"]:
 		var player := AudioStreamPlayer.new()
 		player.name = "Loop_%s" % loop["id"]
@@ -71,6 +77,33 @@ func setup(p_region_id: String, weather: WeatherService) -> void:
 	EventBus.fish_caught.connect(func(_fish_id: String, _size_cm: float, _first: bool) -> void: play_cue("caught"))
 	EventBus.fish_released.connect(func(_fish_id: String, _region: String, _size_cm: float) -> void: play_cue("released"))
 	EventBus.fish_escaped.connect(func(_fish_id: String, _reason: String) -> void: play_cue("escaped"))
+
+## The region's track, looping, faded in over `music.fade_in_sec` to `music.volume`.
+func _start_music() -> void:
+	var path: String = config.get("bgm", "")
+	var settings: Dictionary = config.get("music", {})
+	if path.is_empty() or settings.is_empty():
+		return
+	var stream: AudioStream = load(path)
+	if stream == null:
+		push_error("AmbientAudio: music %s could not be loaded" % path)
+		return
+	stream = stream.duplicate()
+	if "loop" in stream:
+		stream.loop = true
+	music = AudioStreamPlayer.new()
+	music.name = "Music"
+	music.stream = stream
+	music.bus = settings.get("bus", "BGM")
+	music.volume_db = -80.0
+	add_child(music)
+	music.play()
+	_music_target_db = AmbientMix.to_db(float(settings.get("volume", 0.5)))
+	var fade := float(settings.get("fade_in_sec", 0.0))
+	if fade <= 0.0 or not is_inside_tree():
+		music.volume_db = _music_target_db
+	else:
+		create_tween().tween_property(music, "volume_db", _music_target_db, fade)
 
 ## Loop streams repeat forever without a click (the files are cross-faded at generation time). The
 ## loop end is the stream's length in samples, which holds for every import format (the default
