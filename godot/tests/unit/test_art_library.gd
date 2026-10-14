@@ -210,6 +210,13 @@ func test_every_art_only_prop_ships_its_picture() -> void:
 		assert_true(kind in PropKinds.PROPS, "%s is not a known prop kind" % kind)
 		assert_true(ResourceLoader.exists("res://art/props/%s.png" % kind), "art/props/%s.png is missing" % kind)
 
+func test_fish_in_the_water_are_faded_and_washed_with_the_water_colour() -> void:
+	# Owner's request 2026-10-14: swimming fish read as under the surface, not lying on it.
+	var look := FishAgent.underwater_modulate(ArtLibrary.meta("fish", "fish_crucian_carp_top"))
+	assert_true(look.a < 0.8, "fish are not faded enough (alpha %.2f)" % look.a)
+	assert_true(look.a > 0.4, "fish fade out of sight (alpha %.2f)" % look.a)
+	assert_true(look.r < look.b, "fish are not washed towards the water's blue-green")
+
 # --- the angler ---
 
 func test_the_angler_picture_follows_the_fishing_state_and_holds_the_rod_in_its_hands() -> void:
