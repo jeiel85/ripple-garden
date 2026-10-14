@@ -110,6 +110,19 @@ static func icon_button(icon_name: String, text: String, callback: Callable, var
 	node.pressed.connect(callback)
 	return node
 
+## A screen's subtitle under its sign: small light words in a dark translucent pill, so they stay readable over
+## any scenery (UI_UX §14.1; the camp's subtitle in mockup 06).
+static func subtitle_pill(text: String) -> PanelContainer:
+	var pill := PanelContainer.new()
+	pill.theme_type_variation = "PillPanel"
+	pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# One line: a wrapping label in a shrinking pill would collapse to a letter per line.
+	var words := label(text, "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
+	text_size(words, "caption")
+	pill.add_child(words)
+	return pill
+
 ## A round icon-only button over the scenery. `label` is its accessibility name (tooltip); with
 ## `caption` the name is also printed under the icon (the water-mind buttons in the mockup).
 static func round_button(icon_name: String, label: String, callback: Callable, caption: bool = false,

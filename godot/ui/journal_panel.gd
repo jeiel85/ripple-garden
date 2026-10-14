@@ -83,9 +83,7 @@ func _init() -> void:
 	var sign_board := UiKit.sign_board("fish", tr("ui.journal.title"), "sign_journal")
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
-	var subtitle := UiKit.label(tr("ui.journal.subtitle"), "LightLabel", HORIZONTAL_ALIGNMENT_CENTER, true)
-	UiKit.text_size(subtitle, "caption")
-	title_column.add_child(subtitle)
+	title_column.add_child(UiKit.subtitle_pill(tr("ui.journal.subtitle")))
 	header.add_child(title_column)
 	var counter_pill := PanelContainer.new()
 	counter_pill.theme_type_variation = "PillPanel"
