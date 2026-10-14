@@ -152,20 +152,33 @@ static func exit_button(icon_name: String, tooltip: String, callback: Callable) 
 	return node
 
 ## A page header: the way out on the left, the title (sign board and subtitle) centred on the page, and
-## `trailing` on the right — or an empty box as wide as the way out, so the title stays on the page's centre
-## line instead of the centre of what is left beside the button.
+## `trailing` (or nothing) on the right. Both sides are kept as wide as the wider of the two, so the title stays on
+## the page's centre line instead of the centre of what is left between them (Codex review #104: the journal's
+## counter is wider than the back button).
 static func page_header(back: Button, middle: Control, trailing: Control = null) -> HBoxContainer:
 	var row := hbox(10)
-	row.add_child(back)
+	var left := hbox(0)
+	left.alignment = BoxContainer.ALIGNMENT_BEGIN
+	left.add_child(back)
+	var right := hbox(0)
+	right.alignment = BoxContainer.ALIGNMENT_END
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if trailing != null:
+		right.add_child(trailing)
+	row.add_child(left)
 	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(middle)
-	if trailing == null:
-		trailing = Control.new()
-		trailing.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var mirror := func() -> void: trailing.custom_minimum_size.x = back.custom_minimum_size.x
-		mirror.call()
-		back.minimum_size_changed.connect(mirror)
-	row.add_child(trailing)
+	row.add_child(right)
+	var balance := func() -> void:
+		var side := back.get_combined_minimum_size().x
+		if trailing != null:
+			side = maxf(side, trailing.get_combined_minimum_size().x)
+		left.custom_minimum_size.x = side
+		right.custom_minimum_size.x = side
+	balance.call()
+	back.minimum_size_changed.connect(balance)
+	if trailing != null:
+		trailing.minimum_size_changed.connect(balance)
 	return row
 
 ## A dialog header: the title on the left and the "close" circle on the right.

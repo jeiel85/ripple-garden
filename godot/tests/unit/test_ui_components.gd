@@ -428,6 +428,17 @@ func test_a_page_title_sits_on_the_page_centre_line() -> void:
 	header.size = Vector2(720, header.get_combined_minimum_size().y)
 	header.notification(Container.NOTIFICATION_SORT_CHILDREN)
 	assert_true(absf(title.position.x + title.size.x / 2.0 - 360.0) <= 1.0, "title centre at %.1f" % (title.position.x + title.size.x / 2.0))
+	# Codex review #104: a trailing part wider than the back button (the journal's counter) must not pull it aside.
+	var other := Label.new()
+	other.text = "장비"
+	other.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var wide := Control.new()
+	wide.custom_minimum_size = Vector2(200, 40)
+	var with_counter := UiKit.page_header(UiKit.exit_button("back", "뒤로", func() -> void: pass), other, wide)
+	host.add_child(with_counter)
+	with_counter.size = Vector2(720, with_counter.get_combined_minimum_size().y)
+	with_counter.notification(Container.NOTIFICATION_SORT_CHILDREN)
+	assert_true(absf(other.position.x + other.size.x / 2.0 - 360.0) <= 1.0, "title centre at %.1f beside a wide counter" % (other.position.x + other.size.x / 2.0))
 	host.free()
 
 func test_the_top_bar_settings_circle_is_no_taller_than_a_status_pill() -> void:

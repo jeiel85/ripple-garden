@@ -82,13 +82,11 @@ func _init() -> void:
 	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var counter_box := UiKit.hbox(8)
 	counter_box.add_child(UiKit.icon("fish", UiTheme.ICON_M, UiTheme.PILL_TEXT))
-	var counter_text := UiKit.vbox(0)
-	var counter_caption := UiKit.label(tr("ui.journal.found"), "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	UiKit.text_size(counter_caption, "caption")
-	counter_text.add_child(counter_caption)
+	# One line, fish and count, about as wide as the back button: the header keeps both sides equally wide to
+	# centre the sign (Codex review #104), and a worded caption above the count ran past a phone screen.
+	counter_pill.tooltip_text = tr("ui.journal.found")
 	_counter = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
-	counter_text.add_child(_counter)
-	counter_box.add_child(counter_text)
+	counter_box.add_child(_counter)
 	counter_pill.add_child(counter_box)
 	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), title_column, counter_pill))
 
