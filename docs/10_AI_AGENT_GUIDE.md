@@ -17,7 +17,11 @@ MVP 데모가 아니라 저장 안정성·테스트·성능·접근성을 포함
 충돌 시 상위 문서가 우선. 임의로 게임 방향을 바꾸지 않는다.
 
 ## 3. Engineering Rules
-- Godot 4.x 문법 사용.
+- Godot 4.x 문법 사용. 엔진 API(클래스·메서드·속성·시그널·기본값)는 기억에 기대지 말고 **설치된 엔진과 같은 버전의 클래스
+  레퍼런스**에서 확인한다(학습 데이터의 Godot 3 문법·사라진 API를 막기 위해). 레퍼런스는 저장소 밖에 둔다:
+  `git clone --depth 1 --filter=blob:none --sparse --branch <엔진 버전>-stable https://github.com/godotengine/godot.git <경로>` 뒤
+  `git sparse-checkout set --no-cone '/doc/classes/' '/modules/*/doc_classes/' '/platform/*/doc_classes/'` (Git Bash에서는 `MSYS_NO_PATHCONV=1`을 붙인다. 약 12MB, 클래스당 XML 하나 —
+  예: `doc/classes/Label.xml`을 grep). 엔진 버전을 올리면 새 태그로 다시 받는다. 이 PC의 위치는 `D:\Tools\Godot\godot-4.7.2-docs`.
 - static content는 data-driven.
 - UI에서 save/state 직접 수정 금지.
 - scene tree node를 영속 DB처럼 사용 금지.
