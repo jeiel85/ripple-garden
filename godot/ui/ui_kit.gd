@@ -161,7 +161,10 @@ static func exit_button(icon_name: String, tooltip: String, callback: Callable) 
 ## `trailing` (or nothing) on the right. Both sides are kept as wide as the wider of the two, so the title stays on
 ## the page's centre line instead of the centre of what is left between them (Codex review #104: the journal's
 ## counter is wider than the back button).
-static func page_header(back: Button, middle: Control, trailing: Control = null) -> HBoxContainer:
+## `trailing_balances` lets a screen opt out of that: when false, the right slot keeps the back button's width and
+## the middle keeps the room the trailing would have taken, so a wide trailing (the journal's found-count pill)
+## no longer squeezes the subtitle into a dangling last character (BACKLOG 좁은 곳의 글자 배치).
+static func page_header(back: Button, middle: Control, trailing: Control = null, trailing_balances: bool = true) -> HBoxContainer:
 	var row := hbox(10)
 	var left := hbox(0)
 	left.alignment = BoxContainer.ALIGNMENT_BEGIN
@@ -177,7 +180,7 @@ static func page_header(back: Button, middle: Control, trailing: Control = null)
 	row.add_child(right)
 	var balance := func() -> void:
 		var side := back.get_combined_minimum_size().x
-		if trailing != null:
+		if trailing_balances and trailing != null:
 			side = maxf(side, trailing.get_combined_minimum_size().x)
 		left.custom_minimum_size.x = side
 		right.custom_minimum_size.x = side

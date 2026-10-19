@@ -77,6 +77,10 @@ func _init() -> void:
 	sign_board.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	title_column.add_child(sign_board)
 	title_column.add_child(UiKit.subtitle_pill(tr("ui.journal.subtitle")))
+	# Keep a little air below the subtitle so a two-line subtitle never sits flush against the tab row.
+	var subtitle_gap := MarginContainer.new()
+	subtitle_gap.add_theme_constant_override("margin_bottom", 8)
+	title_column.add_child(subtitle_gap)
 	var counter_pill := PanelContainer.new()
 	counter_pill.theme_type_variation = "PillPanel"
 	counter_pill.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -88,7 +92,7 @@ func _init() -> void:
 	_counter = UiKit.label("", "PillLabel", HORIZONTAL_ALIGNMENT_CENTER, false)
 	counter_box.add_child(_counter)
 	counter_pill.add_child(counter_box)
-	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), title_column, counter_pill))
+	column.add_child(UiKit.page_header(UiKit.exit_button("back", tr("ui.back"), func() -> void: close_pressed.emit()), title_column, counter_pill, false))
 
 	# Tabs.
 	var tab_row := UiKit.hbox(6)
