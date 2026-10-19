@@ -2,7 +2,7 @@
 
 ## P0 — Vertical Slice Foundation
 - [x] P0-001 Godot project bootstrap, folders, autoload registration
-  - EntitlementService autoload는 P1-011에서 등록 (TECH_SPEC §2 목록 중 유일한 미등록 항목)
+  - EntitlementService는 등록하지 않는다 — v1.0은 무료(D-040), P1-011 취소
 - [x] P0-002 ContentDB JSON loader + validation errors
   - 런타임 검증: `godot/content/content_validator.gd` (DATA_SCHEMA §7). 로컬라이제이션 키 존재는 `tests/unit/test_localization_keys.gd`
   - behavior 값은 `data/behaviors.json` 정의를 참조해 검사한다(P0-015에서 추가됨)

@@ -9,7 +9,6 @@
 - [ ] journal complete
 - [ ] water-mind mode complete
 - [ ] photo mode stable
-- [ ] free/full entitlement complete
 
 ## Technical
 - [ ] no P0/P1 bugs

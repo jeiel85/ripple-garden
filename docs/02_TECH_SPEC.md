@@ -27,9 +27,9 @@ Autoload
 ├─ ContentDB
 ├─ SaveService
 ├─ TimeService
-├─ AudioService
-└─ EntitlementService
+└─ AudioService
 ```
+(EntitlementService는 없다 — v1.0은 무료, D-040.)
 
 ## 3. Responsibility Rules
 - UI가 GameState를 직접 변경하지 않는다.
