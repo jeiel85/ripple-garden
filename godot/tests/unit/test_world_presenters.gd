@@ -164,6 +164,19 @@ func test_ambient_animals_appear_with_level_and_time_of_day() -> void:
 	assert_true(animals.animal_count() > 0)
 	animals.free()
 
+func test_firefly_lantern_reads_the_world_light() -> void:
+	var day := _environment(0, 12.0)
+	var night := _environment(0, 23.0)
+	var animals := AmbientAnimalPresenter.new()
+	tree.root.add_child(animals)
+	animals.light_provider = Callable(night, "current_light")
+	var night_light := animals._world_light()
+	assert_eq(night_light, night.current_light(), "the presenter follows the wired environment light")
+	assert_true(night_light.get_luminance() < day.current_light().get_luminance(), "night is darker than day")
+	animals.light_provider = Callable()
+	assert_eq(animals._world_light(), Color.WHITE, "no provider means the glow is drawn as authored")
+	day.free(); night.free(); animals.free()
+
 func test_ambient_animals_are_bounded() -> void:
 	var animals := AmbientAnimalPresenter.new()
 	tree.root.add_child(animals)

@@ -38,6 +38,7 @@ func setup(p_region_id: String, level: int, time_band: String) -> bool:
 	props.setup(layout, environment, region_id)
 	fish_presenter.setup(region_id, habitat_map)
 	animals.setup(layout, level, time_band)
+	animals.light_provider = Callable(environment, "current_light")
 	foreground.setup(layout, environment)
 	weather_presenter.setup(weather, habitat_map.pond)
 	return true

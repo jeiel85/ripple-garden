@@ -27,6 +27,10 @@ var time_band := "day"
 var reduced_motion := false
 ## Share of the layout's animals that are drawn (GraphicsProfile "wildlife").
 var wildlife := 1.0
+## The world light the firefly's lantern must shine through (RegionEnvironment.current_light): a
+## CanvasModulate dims everything under it at dusk/night, so the glow is drawn pre-divided by that
+## light (EnvironmentStyle.compensate) to read as bright. Left unset, the glow is drawn as authored.
+var light_provider: Callable = Callable()
 
 var _motes: Array[Dictionary] = []
 var _clock := 0.0
@@ -127,6 +131,11 @@ func frame_index(mote: Dictionary, count: int, fps: float) -> int:
 func _moving_right(mote: Dictionary) -> bool:
 	return -sin(_clock * float(mote["speed"]) + float(mote["phase"])) > 0.0
 
+## The live world light (the value the CanvasModulate multiplies the scene by), or white when no
+## environment is wired. Used to pre-divide the firefly glow so it reads through the night tint.
+func _world_light() -> Color:
+	return light_provider.call() if light_provider.is_valid() else Color.WHITE
+
 func _draw_art(mote: Dictionary, at: Vector2, art: Dictionary, glow: float = -1.0) -> void:
 	var frames: Array = art["frames"]
 	var tex: Texture2D = frames[frame_index(mote, frames.size(), art["fps"])]
@@ -136,10 +145,16 @@ func _draw_art(mote: Dictionary, at: Vector2, art: Dictionary, glow: float = -1.
 	draw_set_transform(at, 0.0, Vector2(mirror, 1.0))
 	draw_texture_rect(tex, Rect2(-size / 2.0, size), false)
 	if glow >= 0.0:
+		# A wider, softer halo first so the lantern reads against the night tint, then the bright core.
+		# Each ring is pre-divided by the world light so the CanvasModulate brings it back to the colour
+		# we want instead of dimming the firefly below readable (RegionEnvironment lighting).
 		var lantern := FIREFLY_LANTERN * size
-		draw_circle(lantern, 9.0, Color(1.0, 0.95, 0.45, 0.16 * glow))
-		draw_circle(lantern, 5.0, Color(1.0, 0.95, 0.45, 0.38 * glow))
-		draw_circle(lantern, 2.2, Color(1.0, 1.0, 0.8, glow))
+		var light := _world_light()
+		var warm := Color(1.0, 0.95, 0.45)
+		draw_circle(lantern, 15.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.10 * glow), light))
+		draw_circle(lantern, 9.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.18 * glow), light))
+		draw_circle(lantern, 5.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.40 * glow), light))
+		draw_circle(lantern, 2.4, EnvironmentStyle.compensate(Color(1.0, 1.0, 0.8, glow), light))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _draw() -> void:
@@ -173,9 +188,13 @@ func _draw() -> void:
 				draw_circle(at + Vector2(6, 1), 3.0, Color("#f2efe6"))
 			"firefly":
 				var glow := 0.45 + 0.55 * (sin(_clock * 2.2 + float(mote["phase"]) * 3.0) * 0.5 + 0.5)
-				draw_circle(at, 9.0, Color(1.0, 0.95, 0.45, 0.10 * glow))
-				draw_circle(at, 5.0, Color(1.0, 0.95, 0.45, 0.30 * glow))
-				draw_circle(at, 2.0, Color(1.0, 1.0, 0.8, glow))
+				# The same lantern look as the drawn firefly, lifted against the night tint.
+				var light := _world_light()
+				var warm := Color(1.0, 0.95, 0.45)
+				draw_circle(at, 15.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.10 * glow), light))
+				draw_circle(at, 9.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.18 * glow), light))
+				draw_circle(at, 5.0, EnvironmentStyle.compensate(Color(warm.r, warm.g, warm.b, 0.30 * glow), light))
+				draw_circle(at, 2.0, EnvironmentStyle.compensate(Color(1.0, 1.0, 0.8, glow), light))
 
 static func _wing(at: Vector2, width: float, height: float, side: float) -> PackedVector2Array:
 	var points := PackedVector2Array()
