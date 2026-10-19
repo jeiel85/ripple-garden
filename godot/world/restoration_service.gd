@@ -8,8 +8,8 @@ extends RefCounted
 ##
 ## Every region with a world (a layout, D-035) can reach `vertical_slice.max_restoration_level` (10 since
 ## P1-001); a region whose world has not arrived stays at 0. Points keep
-## accumulating past any cap, so raising it never loses progress. The free-trial boundary (BALANCE §8)
-## is applied with the full-game entitlement (P1-011/012).
+## accumulating past any cap, so raising it never loses progress. There is no free-trial boundary: v1.0 is
+## free and every region is open (D-040).
 
 class Requirement:
 	var region_id := ""
