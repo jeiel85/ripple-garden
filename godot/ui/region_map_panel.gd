@@ -124,11 +124,11 @@ func tap(region_id: String) -> String:
 			text = tr("ui.map.can_travel") % _name(region_id)
 			_travel_target = region_id
 		RegionUnlocks.COMING:
-			text = tr("ui.map.coming") % _name(region_id)
+			text = Loc.t("ui.map.coming", _name(region_id))
 		RegionUnlocks.LOCKED:
 			var condition := _unlocks.condition_of(region_id)
-			text = tr("ui.map.locked") % [_name(condition["region"]), condition["level"], condition["level_now"],
-				condition["fish"], condition["fish_now"]]
+			text = Loc.t("ui.map.locked", [_name(condition["region"]), condition["level"], condition["level_now"],
+				condition["fish"], condition["fish_now"]])
 	_note_label.text = text
 	_note.visible = not text.is_empty()
 	_travel_button.visible = not _travel_target.is_empty()

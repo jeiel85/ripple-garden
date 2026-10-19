@@ -39,7 +39,7 @@ func show_summary(summary: OfflineService.Summary) -> void:
 	var fish_ids: Array = summary.fish_added.keys()
 	for i in mini(fish_ids.size(), MAX_FISH_LINES):
 		var fish_id: String = fish_ids[i]
-		_rows.add_child(_row("fish", tr("ui.away.fish") % [tr(ContentDB.get_fish(fish_id).get("name_key", "")), summary.fish_added[fish_id]]))
+		_rows.add_child(_row("fish", Loc.t("ui.away.fish", [tr(ContentDB.get_fish(fish_id).get("name_key", "")), summary.fish_added[fish_id]])))
 	if fish_ids.size() > MAX_FISH_LINES:
 		_rows.add_child(_row("fish", tr("ui.away.more_fish") % (fish_ids.size() - MAX_FISH_LINES)))
 	if summary.ripple > 0:

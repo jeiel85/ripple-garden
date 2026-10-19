@@ -308,7 +308,7 @@ func _offer_button(deal: Dictionary) -> Button:
 			var text := tr("ui.gear.buy_pack") % [deal["pack"], currency, deal["amount"]] if tab == "bait" else tr("ui.gear.buy") % [currency, deal["amount"]]
 			return UiKit.icon_button(deal["currency"] if deal["currency"] == "ripple" else "memory", text, func() -> void: _buy(), "WaterButton", UiTheme.ICON_M, false)
 		LoadoutService.TOO_DEAR:
-			return _disabled("ripple" if deal["currency"] == "ripple" else "memory", "%s · %s %d" % [tr("ui.gear.not_enough") % currency, currency, deal["amount"]])
+			return _disabled("ripple" if deal["currency"] == "ripple" else "memory", "%s · %s %d" % [Loc.t("ui.gear.not_enough", currency), currency, deal["amount"]])
 		LoadoutService.LOCKED:
 			return _disabled("lock", tr("ui.gear.locked") % [_region_name(deal["region"]), deal["level"]])
 		LoadoutService.GIFT_LATER:
@@ -479,7 +479,7 @@ func _equip() -> void:
 func _buy() -> void:
 	var def := ContentDB.get_item(tab, selected_id)
 	if _loadout.buy(tab, selected_id):
-		message.emit(tr("ui.toast.bought") % tr(def.get("name_key", "")))
+		message.emit(Loc.t("ui.toast.bought", tr(def.get("name_key", ""))))
 		refresh()
 
 func _step(direction: int) -> void:

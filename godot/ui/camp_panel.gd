@@ -178,7 +178,7 @@ func choose(decoration_id: String) -> void:
 			_place_buttons()
 			_say(tr("ui.camp.buy_hint") % [tr(ContentDB.get_decoration(decoration_id)["name_key"]), tr("ui.currency." + String(deal["currency"])), deal["amount"]])
 		LoadoutService.TOO_DEAR:
-			_say(tr("ui.gear.not_enough") % tr("ui.currency." + String(deal["currency"])))
+			_say(Loc.t("ui.gear.not_enough", tr("ui.currency." + String(deal["currency"]))))
 		LoadoutService.LOCKED:
 			_say(tr("ui.gear.locked") % [tr(ContentDB.get_region(deal["region"]).get("name_key", "")), deal["level"]])
 
@@ -250,7 +250,7 @@ func _confirm() -> void:
 	var decoration_id := pending
 	pending = ""
 	if _camp.buy_and_place(region_id, selected_slot, decoration_id):
-		_say(tr("ui.toast.bought") % tr(ContentDB.get_decoration(decoration_id)["name_key"]))
+		_say(Loc.t("ui.toast.bought", tr(ContentDB.get_decoration(decoration_id)["name_key"])))
 	refresh()
 
 func _turn() -> void:

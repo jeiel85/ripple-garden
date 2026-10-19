@@ -408,3 +408,12 @@
 - 소리: 큰 강의 물 소리는 실제 강물 녹음(Vistula, RandomMind) 1분을 이음매 없이, 착수·방생·놓침·물고기 뛰는 소리는 rubberduck의 CC0 물 튀는 소리.
   루프는 계속 WAV(반복 지점을 코드가 정함), 단발 소리는 Ogg도 된다. 나머지는 합성 자리 표시(D-013) 그대로.
 - 오너가 들어 보고 곡을 바꾸려면 `godot/audio/music/`의 파일만 바꾸면 된다(후보는 다운로드 폴더 `ripple_audio_review`).
+
+## D-040 한국어 조사는 문자열에 마커로 적고 Loc.t가 해소한다 (2026-10-19)
+
+- `localization.csv`의 한국어 문자열은 "을(류)"처럼 선택지를 마커로 적고, 포맷은 `Loc.t(key, args)`만 쓴다.
+  Loc는 tr → placeholder 채우기 → 마커 해소(`godot/i18n/korean_particles.gd`, 앞 말의 받침 사용) → keep_words 재결합 순서로 처리한다.
+- 이유: 조사는 앞 명사에 붙어 "봄날의 약속을(를)"이 그대로 노출됐다(BACKLOG). 영어·일본어에는 마커가 없어 통과한다.
+  KeepWordsTranslation이 마커 글자 사이에 WORD JOINER를 넣으므로 해소 전에 조이너를 벗기고 결과에 다시 결합한다.
+- 숫자·라틴은 받침 있는 형태(3을, A이)로, "(으)로"는 ㄹ 받침에서 "로"를 취급한다(달로, 서울로).
+- 마커가 있는 키를 `tr(key) % args`로 쓰면 실패하는 소스 스캔 가드를 `test_localize.gd`가 둔다(마커 키는 CSV에서 자동 추론).
