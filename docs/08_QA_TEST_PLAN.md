@@ -3,8 +3,6 @@
 ## 1. Release Blockers
 - save corruption / loss
 - load softlock
-- purchase entitlement loss
-- purchase restore failure
 - region progression softlock
 - frequent crash
 - unsupported resolution causing unusable controls
@@ -42,7 +40,6 @@
 | Weather | all transitions |
 | UI | phone/tablet/desktop/aspect ratios |
 | Audio | route change, mute, headphone reconnect |
-| Purchase | success/cancel/offline/restore |
 | Localization | KO/EN/JA overflow |
 | Accessibility | large text/reduced motion/auto hook |
 

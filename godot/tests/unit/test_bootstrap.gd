@@ -3,7 +3,7 @@ extends TestCase
 ## P0-001: project bootstrap — autoload registration, main scene, audio buses,
 ## portrait display configuration.
 
-# TECH_SPEC §2 autoloads. EntitlementService is deferred to P1-011.
+# TECH_SPEC §2 autoloads. There is no EntitlementService: v1.0 is free (D-040).
 const EXPECTED_AUTOLOADS: PackedStringArray = [
 	"EventBus", "GameState", "ContentDB", "SaveService", "TimeService", "AudioService",
 ]

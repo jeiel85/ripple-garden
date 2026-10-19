@@ -1,7 +1,10 @@
 # 07. Monetization & Privacy
 
 ## 1. Commercial Model
-권장:
+**v1.0은 무료로 낸다(D-040, 2026-10-19).** 다섯 지역 모두 무료이고 플레이 진행(복원·발견)으로 열린다 — 결제·체험판 경계를 두지 않는다. 광고·계정·분석 SDK 없음(§4)은 그대로다.
+아래 §1~§2는 이전 계획으로, 품질이 오른 뒤 유료 확장(§3)을 검토할 때의 기준으로 남긴다.
+
+이전 권장:
 - Region 01 무료 체험
 - Full Game 1회 구매
 - 강제 광고 없음
@@ -39,7 +42,6 @@ v1.0 목표:
 - remote config 없음
 - gameplay server 없음
 - local save
-- platform store entitlement only
 
 ## 5. Diagnostics
 자동 업로드보다 사용자가 직접 내보내는 진단 파일.

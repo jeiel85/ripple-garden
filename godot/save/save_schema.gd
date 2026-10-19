@@ -133,7 +133,7 @@ static func default_save(now: int) -> Dictionary:
 			"decorations": [], "decorations_seen": [],
 		},
 		"settings": default_settings(),
-		"entitlement_cache": {"full_game": false},
+		"entitlement_cache": {"full_game": false},  # reserved, unused: v1.0 is free (D-040); kept so old saves need no migration
 		# A fish that was caught but not yet released when the game closed (see GameState).
 		"session": {"pending_catch": {}},
 		# P1-008: {moment_id: unix time first seen}

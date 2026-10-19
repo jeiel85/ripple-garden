@@ -9,7 +9,6 @@
 - [ ] journal complete
 - [ ] water-mind mode complete
 - [ ] photo mode stable
-- [ ] free/full entitlement complete
 
 ## Technical
 - [ ] no P0/P1 bugs
@@ -30,11 +29,8 @@
 - [ ] color-independent fishing meter
 
 ## Commerce
-- [ ] purchase success
-- [ ] purchase cancel
-- [ ] purchase restore
-- [ ] offline entitlement cache behavior
-- [ ] price/localized store listing reviewed
+v1.0은 무료(D-040) — 결제 항목 없음. 스토어에서 "무료"로 등록되고 앱 안에 구매 경로가 없는지만 확인한다.
+- [ ] free listing, no in-app purchase declared
 
 ## Privacy / Legal
 - [ ] Privacy Policy
@@ -57,6 +53,5 @@
 - [ ] fresh install
 - [ ] upgrade install
 - [ ] save migration
-- [ ] purchase
 - [ ] offline launch
 - [ ] 30-minute real-device session

@@ -27,9 +27,9 @@ Autoload
 ├─ ContentDB
 ├─ SaveService
 ├─ TimeService
-├─ AudioService
-└─ EntitlementService
+└─ AudioService
 ```
+(EntitlementService는 없다 — v1.0은 무료, D-040.)
 
 ## 3. Responsibility Rules
 - UI가 GameState를 직접 변경하지 않는다.
@@ -164,6 +164,7 @@ GL Compatibility 2D에는 그림자·MSAA 단계가 없어 위 항목이 화질 
 - lower visible population
 
 ## 16. Entitlement
+v1.0은 무료라 쓰지 않는다(D-040). 저장의 `entitlement_cache.full_game`은 예약 칸으로만 남는다. 유료 확장을 낼 때의 원칙:
 Full Game 여부만 저장.
 Store receipt/entitlement가 권위 소스.
 오프라인 실행을 고려한 캐시가 필요하지만 영구 unlock 우회 방지보다 사용자 접근성 우선.
@@ -185,7 +186,6 @@ Release는 debug cheat 경로 제거/비활성 확인.
 - save migration test
 - deterministic encounter test
 - pause/resume lifecycle test
-- purchase restore path test
 - 60 min soak
 - supported aspect ratio UI test
 - low/mid/high Android profile

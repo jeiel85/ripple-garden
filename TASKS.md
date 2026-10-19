@@ -2,7 +2,7 @@
 
 ## P0 — Vertical Slice Foundation
 - [x] P0-001 Godot project bootstrap, folders, autoload registration
-  - EntitlementService autoload는 P1-011에서 등록 (TECH_SPEC §2 목록 중 유일한 미등록 항목)
+  - EntitlementService는 등록하지 않는다 — v1.0은 무료(D-040), P1-011 취소
 - [x] P0-002 ContentDB JSON loader + validation errors
   - 런타임 검증: `godot/content/content_validator.gd` (DATA_SCHEMA §7). 로컬라이제이션 키 존재는 `tests/unit/test_localization_keys.gd`
   - behavior 값은 `data/behaviors.json` 정의를 참조해 검사한다(P0-015에서 추가됨)
@@ -73,8 +73,8 @@
 - [x] P1-009 photo mode
 - [x] P1-010 map/region unlock
   - `progression.json`의 `unique_fish`는 "선행 지역에서 발견한 종 수"로 해석 (ContentValidator가 그 지역 서식 종 수 이하를 강제)
-- [ ] P1-011 entitlement service abstraction
-- [ ] P1-012 full-game unlock UI
+- [x] ~~P1-011 entitlement service abstraction~~ — 취소: v1.0은 무료(D-040)
+- [x] ~~P1-012 full-game unlock UI~~ — 취소: v1.0은 무료(D-040)
 - [x] P1-013 KO/EN/JA localization
 - [x] P1-014 graphics quality profiles
 - [x] P1-015 battery saver
@@ -97,9 +97,9 @@
 - [ ] P2-010 BGM/Ambience production — 진행 중: 지역별 CC0 BGM 5곡, 강물 녹음, 물 튀는 소리 4종(D-039). 나머지 환경음·야생 소리·신호음은 합성 자리 표시
 
 ## P3 — Productization
-- [ ] P3-001 purchase integration Android
-- [ ] P3-002 purchase integration Windows/Steam strategy
-- [ ] P3-003 purchase restore tests
+- [x] ~~P3-001 purchase integration Android~~ — 취소(D-040)
+- [x] ~~P3-002 purchase integration Windows/Steam strategy~~ — 취소(D-040)
+- [x] ~~P3-003 purchase restore tests~~ — 취소(D-040)
 - [ ] P3-004 privacy/legal pages
 - [ ] P3-005 device test pass
 - [ ] P3-006 soak/performance pass
@@ -107,4 +107,4 @@
 - [ ] P3-008 accessibility QA
 - [ ] P3-009 store assets/listing
 - [ ] P3-010 closed external playtest
-- [ ] P3-011 release candidate — v1.0.0-rc.1(2026-10-13)은 **콘텐츠 완성 후보**다(다섯 지역·72종). 결제(P3-001~003)·약관(P3-004)·기기/성능(P3-005/006)·외부 플레이테스트(P3-010) 등 출시 준비는 아직이라 이 항목은 열어 둔다
+- [ ] P3-011 release candidate — v1.0.0-rc.1(2026-10-13)은 **콘텐츠 완성 후보**다(다섯 지역·72종). 약관(P3-004)·기기/성능(P3-005/006)·외부 플레이테스트(P3-010) 등 출시 준비는 아직이라 이 항목은 열어 둔다
