@@ -1,5 +1,14 @@
 # 09. Release Checklist
 
+## 준비 현황 (2026-10-19)
+
+아래 초안이 준비돼 있다. 검토 후 해당 항목을 닫는다:
+- Privacy Policy 3개 언어 초안 — `legal/PRIVACY_POLICY.md`(ko/en/ja)
+- 제3자 라이선스 인벤토리 — `legal/THIRD_PARTY_LICENSES.md`
+- 스토어 문구·등급·데이터 안전 초안 — `store/LISTING.md`
+- 출시 준비 태스크 분해 — `TASKS.md` P3 항목
+
+
 ## Product
 - [ ] 5 regions complete
 - [ ] 72 fish data/art complete

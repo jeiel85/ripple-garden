@@ -95,16 +95,31 @@
 - [ ] P2-008 Decorations 60+ — 지금 18개(공용 10 + 지역 전용 8: 계곡 통나무 의자·돌 등롱 / 강 나룻배·그물 걸이 / 바닷가 파라솔·갑판 의자 / 섬 해먹·대나무 횃불)
 - [ ] P2-009 Rods 12 / Baits 16
 - [ ] P2-010 BGM/Ambience production — 진행 중: 지역별 CC0 BGM 5곡, 강물 녹음, 물 튀는 소리 4종(D-039). 나머지 환경음·야생 소리·신호음은 합성 자리 표시
-
 ## P3 — Productization
 - [ ] P3-001 purchase integration Android
+  - EntitlementService autoload 등록(P1-011)와 정식판 해금 UI(P1-012)가 선행. 체험판 경계: 복원 6단계(BALANCE §8).
+  - 오너 결정 대기: 스토어 연동 방식(Google Play Billing 권장) → 구매·복원·오프라인 권한 캐시 테스트(P3-003).
+  - 가격·문구 초안: `store/LISTING.md` §1 (내부 검토 ₩6,900~9,900, docs/07).
 - [ ] P3-002 purchase integration Windows/Steam strategy
+  - 오너 결정 대기: Steamworks 연습 또는 Steam 키 방식. PC 체험판 제공 범위 포함해 정한다.
 - [ ] P3-003 purchase restore tests
+  - 재설치 복원, 오프라인 권한 캐시, 구매 실패 시 진행 데이터 보존(docs/07 §2) 시나리오 자동화.
 - [ ] P3-004 privacy/legal pages
+  - 초안 준비됨: `legal/PRIVACY_POLICY.md`(ko/en/ja), `legal/THIRD_PARTY_LICENSES.md`(Godot MIT·폰트 OFL·CC0 음악·AI 그림 약관 ⚠재확인).
+  - 남은 것: 지원 이메일·호스팅 URL 확정, 결제 연동 후 구매 조항 확정, Play 데이터 안전 양식 응답(`store/LISTING.md` §7 초안).
 - [ ] P3-005 device test pass
+  - Android는 에뮬레이터(API 36)만 확인된 상태. 중·저가 실기기에서 설치·기동·낚시 루프·방생 저장·홈/재개·설정.
+  - PSS 메모리(현재 약 184MB)·프레임·드로콜 측정 후 화질 단계별 값 보정(BACKLOG "그림 텍스처 메모리").
 - [ ] P3-006 soak/performance pass
+  - 60분 소크, 발열/배터리(물멍 10분 기준), 중급기 30 FPS 확인 후 `balance.json`·그래픽 프로필 값 교정.
 - [ ] P3-007 localization QA
+  - 한국어 문구 전수 교정 — 조사 자동 선택은 완료(`godot/i18n/`, D-040, 2026-10-19).
+  - 영어·일본어는 원어민 검수(제공 시, D-033).
 - [ ] P3-008 accessibility QA
+  - 모달 포커스 이동·포커스 링, 텍스트 크기 160%+큰 UI 가로 넘침(BACKLOG), reduced motion, 자동 훅, 색약 배색 미터 실기기 확인.
 - [ ] P3-009 store assets/listing
+  - 문구·키워드·등급 응답·데이터 안전·릴리스 노트 초안 준비됨: `store/LISTING.md`.
+  - 남은 것: 피처 그래픽 1024×500, 휴대전화 스크린샷(`godot -s res://tools/capture_screenshot.gd`), 태블릿 스크린샷. 앱 아이콘 512는 존재.
 - [ ] P3-010 closed external playtest
+  - 첫 10분 유저 테스트, 장력 손맛 교정(BACKLOG "장력 싸움 수치 교정"), 결제 UX(도입 후). 대상: 현재 프리릴리스(v1.0.0-rc.8).
 - [ ] P3-011 release candidate — v1.0.0-rc.1(2026-10-13)은 **콘텐츠 완성 후보**다(다섯 지역·72종). 결제(P3-001~003)·약관(P3-004)·기기/성능(P3-005/006)·외부 플레이테스트(P3-010) 등 출시 준비는 아직이라 이 항목은 열어 둔다
