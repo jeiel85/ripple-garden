@@ -4,7 +4,7 @@ extends Node
 ## res://audio/default_bus_layout.tres; callers address them by name.
 
 const REQUIRED_BUSES: PackedStringArray = [
-	"Master", "BGM", "Water", "Wind", "Wildlife", "Weather", "Fishing", "Camp",
+	"Master", "BGM", "Water", "Wind", "Wildlife", "Weather", "Fishing", "Camp", "Ui",
 ]
 
 func _ready() -> void:

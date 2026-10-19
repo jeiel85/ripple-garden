@@ -1080,6 +1080,28 @@ func _validate_audio(data: Variant) -> Dictionary:
 			else:
 				_check_audio_source(cues[cue_id], "%s.cues.%s" % [file_name, cue_id])
 				_check_balance_number(cues[cue_id], "cues." + cue_id, "volume", 0.0, 1.0, false, "audio")
+
+	# Interface sounds (BACKLOG "오디오: 버튼 소리"): the clips UiKit buttons play, on the Ui bus.
+	var ui: Variant = data.get("ui")
+	if ui != null:
+		if typeof(ui) != TYPE_DICTIONARY:
+			_errors.append("%s.ui: must be an object" % file_name)
+		else:
+			if not ui.get("bus") in AUDIO_BUSES:
+				_errors.append("%s.ui.bus: must be one of %s (got %s)" % [file_name, ", ".join(AUDIO_BUSES), var_to_str(ui.get("bus"))])
+			var ui_sounds: Variant = ui.get("sounds")
+			if typeof(ui_sounds) != TYPE_DICTIONARY or ui_sounds.is_empty():
+				_errors.append("%s.ui.sounds: must be a non-empty object" % file_name)
+			else:
+				for sound_id in ui_sounds:
+					var sound: Variant = ui_sounds[sound_id]
+					if typeof(sound) != TYPE_DICTIONARY:
+						_errors.append("%s.ui.sounds.%s: must be an object" % [file_name, sound_id])
+						continue
+					# The bus lives on the parent `ui` object, not per sound, so only the stream file is checked here.
+					if typeof(sound.get("stream")) != TYPE_STRING or not ResourceLoader.exists(sound["stream"]):
+						_errors.append("%s.ui.sounds.%s.stream: file not found (%s)" % [file_name, sound_id, var_to_str(sound.get("stream"))])
+					_check_balance_number(sound, "ui.sounds." + String(sound_id), "volume", 0.0, 1.0, false, "audio")
 	return data if _errors.size() == before else {}
 
 func _check_audio_source(entry: Dictionary, label: String) -> void:

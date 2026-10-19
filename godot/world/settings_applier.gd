@@ -10,6 +10,7 @@ extends RefCounted
 const VOLUME_BUSES := {
 	"volume_master": "Master", "volume_bgm": "BGM", "volume_water": "Water", "volume_wind": "Wind",
 	"volume_wildlife": "Wildlife", "volume_weather": "Weather", "volume_fishing": "Fishing", "volume_camp": "Camp",
+	"volume_ui": "Ui",
 }
 const BATTERY_SAVER_FPS := 30
 

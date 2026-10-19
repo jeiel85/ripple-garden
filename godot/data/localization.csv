@@ -304,6 +304,7 @@ bait.old_recipe.name,"옛 비법 떡밥","Old Recipe Dough","昔ながらの練�
 "ui.setting.volume_weather","날씨 소리","Weather","天気の音"
 "ui.setting.volume_fishing","낚시 소리","Fishing","釣りの音"
 "ui.setting.volume_camp","캠프 소리","Camp","キャンプ音"
+"ui.setting.volume_ui","버튼 소리","Interface","UIの音"
 "ui.setting.water_mind_dim_minutes","물멍 화면 어둡게 (분, 0 = 끔)","Dim water-mind after (minutes, 0 = never)","水ながめの減光（分、0 = オフ）"
 "ui.quality.low","낮음","Low","低"
 "ui.quality.medium","보통","Medium","中"

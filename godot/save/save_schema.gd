@@ -53,6 +53,7 @@ const SETTING_SPECS := {
 	"volume_weather": {"default": 0.7, "min": 0.0, "max": 1.0},
 	"volume_fishing": {"default": 0.8, "min": 0.0, "max": 1.0},
 	"volume_camp": {"default": 0.7, "min": 0.0, "max": 1.0},
+	"volume_ui": {"default": 0.7, "min": 0.0, "max": 1.0},
 	# Water-mind (UI_UX §8): minutes of inactivity before dimming, 0 = never.
 	"water_mind_dim_minutes": {"default": 5, "min": 0, "max": 60},
 	"battery_saver_hint_seen": {"default": false},

@@ -328,6 +328,19 @@ def dolphin():
     return normalize(tone * envelope(n, 0.05, 0.35, sr), 0.35)
 
 
+def ui_click():
+    """Interface click (BACKLOG "오디오: 버튼 소리"): a soft wooden tick.
+
+    Short enough for a mashed button and quiet enough to sit under the soundscape; plays on the
+    Ui bus through the pooled UiSound players.
+    """
+    sr = SHOT_SR
+    n = int(0.06 * sr)
+    t = np.arange(n) / sr
+    tick = (np.sin(2 * np.pi * 880 * t) + 0.5 * np.sin(2 * np.pi * 1320 * t)) * envelope(n, 0.001, 0.05, sr)
+    return normalize(tick, 0.35)
+
+
 SOUNDS = {
     "lagoon_loop.wav": (lagoon_loop, LOOP_SR),
     "tropic_bird.wav": (tropic_bird, SHOT_SR),
@@ -351,6 +364,7 @@ SOUNDS = {
     "bite.wav": (bite, SHOT_SR),
     "hooked.wav": (hooked, SHOT_SR),
     "caught.wav": (caught, SHOT_SR),
+    "ui_click.wav": (ui_click, SHOT_SR),
 }
 
 if __name__ == "__main__":

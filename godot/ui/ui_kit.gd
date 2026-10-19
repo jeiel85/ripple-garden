@@ -30,8 +30,14 @@ static func button(text: String, callback: Callable, primary: bool = false, min_
 		node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if primary:
 		node.theme_type_variation = "PrimaryButton"
-	node.pressed.connect(callback)
+	_wire_press(node, callback)
 	return node
+
+## Connects a button's press to its callback and to the interface click (BACKLOG "오디오: 버튼 소리").
+## A disabled button never fires pressed, so only real presses click.
+static func _wire_press(node: Button, callback: Callable) -> void:
+	node.pressed.connect(callback)
+	node.pressed.connect(func() -> void: UiSound.play("click"))
 
 static func spacer(height: float) -> Control:
 	var node := Control.new()
@@ -111,7 +117,7 @@ static func icon_button(icon_name: String, text: String, callback: Callable, var
 		node.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	if not variation.is_empty():
 		node.theme_type_variation = variation
-	node.pressed.connect(callback)
+	_wire_press(node, callback)
 	return node
 
 ## A screen's subtitle under its sign: small light words in a dark translucent pill, so they stay readable over
@@ -267,7 +273,7 @@ static func action_card(icon_name: String, title: String, subtitle: String, call
 		node.custom_minimum_size = Vector2(maxf(needed.x + 20.0, UiTheme.TOUCH_MIN_PX), maxf(needed.y + insets, UiTheme.TOUCH_MIN_PX))
 	column.minimum_size_changed.connect(fit)
 	fit.call()
-	node.pressed.connect(callback)
+	_wire_press(node, callback)
 	return node
 
 ## A wide button whose icon and word sit centred together (the mockups' wooden "낚시" / "완료"): a Button
@@ -293,7 +299,7 @@ static func centered_button(icon_name: String, text: String, callback: Callable,
 	# The word only has its real size once the theme reaches it (in the tree): the button grows to fit then.
 	content.minimum_size_changed.connect(func() -> void:
 		node.custom_minimum_size.x = maxf(node.custom_minimum_size.x, content.get_combined_minimum_size().x + 48.0))
-	node.pressed.connect(callback)
+	_wire_press(node, callback)
 	return node
 
 ## A vertical hair line, the separator inside status pills.

@@ -24,7 +24,8 @@ const SECTIONS: Array = [
 		["volume_master", "slider", 0.0, 1.0, 0.05], ["volume_bgm", "slider", 0.0, 1.0, 0.05],
 		["volume_water", "slider", 0.0, 1.0, 0.05], ["volume_wind", "slider", 0.0, 1.0, 0.05],
 		["volume_wildlife", "slider", 0.0, 1.0, 0.05], ["volume_weather", "slider", 0.0, 1.0, 0.05],
-		["volume_fishing", "slider", 0.0, 1.0, 0.05], ["volume_camp", "slider", 0.0, 1.0, 0.05]]},
+		["volume_fishing", "slider", 0.0, 1.0, 0.05], ["volume_camp", "slider", 0.0, 1.0, 0.05],
+		["volume_ui", "slider", 0.0, 1.0, 0.05]]},
 	{"title": "ui.settings.water_mind", "rows": [["water_mind_dim_minutes", "slider", 0, 60, 1]]},
 ]
 

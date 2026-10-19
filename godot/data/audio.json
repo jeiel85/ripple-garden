@@ -1,51 +1,324 @@
 {
-  "loops": [
-    {"id": "water", "stream": "res://audio/streams/water_loop.wav", "bus": "Water"},
-    {"id": "wind", "stream": "res://audio/streams/wind_loop.wav", "bus": "Wind"},
-    {"id": "rain", "stream": "res://audio/streams/rain_loop.wav", "bus": "Weather"}
-  ],
-  "mix": {
-    "water": {"base": 0.55, "rain_boost": 0.15},
-    "wind": {"base": 0.2, "cloud_boost": 0.45, "night_factor": 0.6},
-    "rain": {"gain": 0.9}
+ "loops": [
+  {
+   "id": "water",
+   "stream": "res://audio/streams/water_loop.wav",
+   "bus": "Water"
   },
-  "fade_per_sec": 0.25,
-  "music": {"bus": "BGM", "volume": 0.55, "fade_in_sec": 3.0},
-  "wildlife": {
-    "bus": "Wildlife",
-    "interval_sec": {"min": 6.0, "max": 16.0},
-    "level_speedup": 0.15,
-    "volume": {"min": 0.35, "max": 0.8},
-    "clips": [
-      {"id": "bird_a", "stream": "res://audio/streams/bird_a.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 0, "weight": 3},
-      {"id": "bird_b", "stream": "res://audio/streams/bird_b.wav", "bands": ["dawn", "morning", "day"], "min_level": 2, "weight": 2},
-      {"id": "frog", "stream": "res://audio/streams/frog.wav", "bands": ["dusk", "night"], "min_level": 1, "weight": 2},
-      {"id": "cricket", "stream": "res://audio/streams/cricket.wav", "bands": ["dusk", "night"], "min_level": 2, "weight": 3},
-      {"id": "fish_jump", "stream": "res://audio/streams/sfx_fish_jump.ogg", "bands": ["dawn", "morning", "day", "dusk", "night"], "min_level": 1, "weight": 1},
-      {"id": "dipper", "stream": "res://audio/streams/dipper.wav", "bands": ["dawn", "morning", "day"], "min_level": 1, "weight": 2, "regions": ["region_02_forest_stream"]},
-      {"id": "woodpecker", "stream": "res://audio/streams/woodpecker.wav", "bands": ["morning", "day"], "min_level": 3, "weight": 1, "regions": ["region_02_forest_stream"]},
-      {"id": "heron", "stream": "res://audio/streams/heron.wav", "bands": ["dawn", "dusk", "night"], "min_level": 1, "weight": 1, "regions": ["region_03_reed_river"]},
-      {"id": "warbler", "stream": "res://audio/streams/warbler.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 2, "weight": 2, "regions": ["region_03_reed_river"]},
-      {"id": "gull", "stream": "res://audio/streams/gull.wav", "bands": ["dawn", "morning", "day", "dusk"], "min_level": 0, "weight": 3, "regions": ["region_04_blue_coast"]},
-      {"id": "tern", "stream": "res://audio/streams/tern.wav", "bands": ["morning", "day"], "min_level": 3, "weight": 1, "regions": ["region_04_blue_coast"]},
-      {"id": "tropic_bird", "stream": "res://audio/streams/tropic_bird.wav", "bands": ["dawn", "morning", "day"], "min_level": 1, "weight": 2, "regions": ["region_05_moonlight_isle"]},
-      {"id": "dolphin", "stream": "res://audio/streams/dolphin.wav", "bands": ["dusk", "night"], "min_level": 3, "weight": 1, "regions": ["region_05_moonlight_isle"]}
-    ]
+  {
+   "id": "wind",
+   "stream": "res://audio/streams/wind_loop.wav",
+   "bus": "Wind"
   },
-  "regions": {
-    "region_01_quiet_pond": {"bgm": "res://audio/music/bgm_quiet_pond.ogg"},
-    "region_02_forest_stream": {"bgm": "res://audio/music/bgm_forest_stream.ogg", "streams": {"water": "res://audio/streams/stream_loop.wav"}, "mix": {"water": {"base": 0.7}}},
-    "region_03_reed_river": {"bgm": "res://audio/music/bgm_reed_river.ogg", "streams": {"water": "res://audio/streams/river_vistula.wav"}, "mix": {"water": {"base": 0.6}, "wind": {"base": 0.3}}},
-    "region_04_blue_coast": {"bgm": "res://audio/music/bgm_blue_coast.ogg", "streams": {"water": "res://audio/streams/waves_loop.wav"}, "mix": {"water": {"base": 0.75}, "wind": {"base": 0.35}}},
-    "region_05_moonlight_isle": {"bgm": "res://audio/music/bgm_moonlight_isle.ogg", "streams": {"water": "res://audio/streams/lagoon_loop.wav"}, "mix": {"water": {"base": 0.6}, "wind": {"base": 0.15}}}
-  },
-  "cues": {
-    "cast": {"stream": "res://audio/streams/cast.wav", "bus": "Fishing", "volume": 0.8},
-    "landed": {"stream": "res://audio/streams/sfx_landed.ogg", "bus": "Fishing", "volume": 0.55},
-    "bite": {"stream": "res://audio/streams/bite.wav", "bus": "Fishing", "volume": 0.7},
-    "hooked": {"stream": "res://audio/streams/hooked.wav", "bus": "Fishing", "volume": 0.8},
-    "caught": {"stream": "res://audio/streams/caught.wav", "bus": "Fishing", "volume": 0.8},
-    "released": {"stream": "res://audio/streams/sfx_released.ogg", "bus": "Fishing", "volume": 0.6},
-    "escaped": {"stream": "res://audio/streams/sfx_escaped.ogg", "bus": "Fishing", "volume": 0.45}
+  {
+   "id": "rain",
+   "stream": "res://audio/streams/rain_loop.wav",
+   "bus": "Weather"
   }
+ ],
+ "mix": {
+  "water": {
+   "base": 0.55,
+   "rain_boost": 0.15
+  },
+  "wind": {
+   "base": 0.2,
+   "cloud_boost": 0.45,
+   "night_factor": 0.6
+  },
+  "rain": {
+   "gain": 0.9
+  }
+ },
+ "fade_per_sec": 0.25,
+ "music": {
+  "bus": "BGM",
+  "volume": 0.55,
+  "fade_in_sec": 3.0
+ },
+ "ui": {
+  "bus": "Ui",
+  "sounds": {
+   "click": {
+    "stream": "res://audio/streams/ui_click.wav",
+    "volume": 0.5
+   }
+  }
+ },
+ "wildlife": {
+  "bus": "Wildlife",
+  "interval_sec": {
+   "min": 6.0,
+   "max": 16.0
+  },
+  "level_speedup": 0.15,
+  "volume": {
+   "min": 0.35,
+   "max": 0.8
+  },
+  "clips": [
+   {
+    "id": "bird_a",
+    "stream": "res://audio/streams/bird_a.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day",
+     "dusk"
+    ],
+    "min_level": 0,
+    "weight": 3
+   },
+   {
+    "id": "bird_b",
+    "stream": "res://audio/streams/bird_b.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day"
+    ],
+    "min_level": 2,
+    "weight": 2
+   },
+   {
+    "id": "frog",
+    "stream": "res://audio/streams/frog.wav",
+    "bands": [
+     "dusk",
+     "night"
+    ],
+    "min_level": 1,
+    "weight": 2
+   },
+   {
+    "id": "cricket",
+    "stream": "res://audio/streams/cricket.wav",
+    "bands": [
+     "dusk",
+     "night"
+    ],
+    "min_level": 2,
+    "weight": 3
+   },
+   {
+    "id": "fish_jump",
+    "stream": "res://audio/streams/sfx_fish_jump.ogg",
+    "bands": [
+     "dawn",
+     "morning",
+     "day",
+     "dusk",
+     "night"
+    ],
+    "min_level": 1,
+    "weight": 1
+   },
+   {
+    "id": "dipper",
+    "stream": "res://audio/streams/dipper.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day"
+    ],
+    "min_level": 1,
+    "weight": 2,
+    "regions": [
+     "region_02_forest_stream"
+    ]
+   },
+   {
+    "id": "woodpecker",
+    "stream": "res://audio/streams/woodpecker.wav",
+    "bands": [
+     "morning",
+     "day"
+    ],
+    "min_level": 3,
+    "weight": 1,
+    "regions": [
+     "region_02_forest_stream"
+    ]
+   },
+   {
+    "id": "heron",
+    "stream": "res://audio/streams/heron.wav",
+    "bands": [
+     "dawn",
+     "dusk",
+     "night"
+    ],
+    "min_level": 1,
+    "weight": 1,
+    "regions": [
+     "region_03_reed_river"
+    ]
+   },
+   {
+    "id": "warbler",
+    "stream": "res://audio/streams/warbler.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day",
+     "dusk"
+    ],
+    "min_level": 2,
+    "weight": 2,
+    "regions": [
+     "region_03_reed_river"
+    ]
+   },
+   {
+    "id": "gull",
+    "stream": "res://audio/streams/gull.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day",
+     "dusk"
+    ],
+    "min_level": 0,
+    "weight": 3,
+    "regions": [
+     "region_04_blue_coast"
+    ]
+   },
+   {
+    "id": "tern",
+    "stream": "res://audio/streams/tern.wav",
+    "bands": [
+     "morning",
+     "day"
+    ],
+    "min_level": 3,
+    "weight": 1,
+    "regions": [
+     "region_04_blue_coast"
+    ]
+   },
+   {
+    "id": "tropic_bird",
+    "stream": "res://audio/streams/tropic_bird.wav",
+    "bands": [
+     "dawn",
+     "morning",
+     "day"
+    ],
+    "min_level": 1,
+    "weight": 2,
+    "regions": [
+     "region_05_moonlight_isle"
+    ]
+   },
+   {
+    "id": "dolphin",
+    "stream": "res://audio/streams/dolphin.wav",
+    "bands": [
+     "dusk",
+     "night"
+    ],
+    "min_level": 3,
+    "weight": 1,
+    "regions": [
+     "region_05_moonlight_isle"
+    ]
+   }
+  ]
+ },
+ "regions": {
+  "region_01_quiet_pond": {
+   "bgm": "res://audio/music/bgm_quiet_pond.ogg"
+  },
+  "region_02_forest_stream": {
+   "bgm": "res://audio/music/bgm_forest_stream.ogg",
+   "streams": {
+    "water": "res://audio/streams/stream_loop.wav"
+   },
+   "mix": {
+    "water": {
+     "base": 0.7
+    }
+   }
+  },
+  "region_03_reed_river": {
+   "bgm": "res://audio/music/bgm_reed_river.ogg",
+   "streams": {
+    "water": "res://audio/streams/river_vistula.wav"
+   },
+   "mix": {
+    "water": {
+     "base": 0.6
+    },
+    "wind": {
+     "base": 0.3
+    }
+   }
+  },
+  "region_04_blue_coast": {
+   "bgm": "res://audio/music/bgm_blue_coast.ogg",
+   "streams": {
+    "water": "res://audio/streams/waves_loop.wav"
+   },
+   "mix": {
+    "water": {
+     "base": 0.75
+    },
+    "wind": {
+     "base": 0.35
+    }
+   }
+  },
+  "region_05_moonlight_isle": {
+   "bgm": "res://audio/music/bgm_moonlight_isle.ogg",
+   "streams": {
+    "water": "res://audio/streams/lagoon_loop.wav"
+   },
+   "mix": {
+    "water": {
+     "base": 0.6
+    },
+    "wind": {
+     "base": 0.15
+    }
+   }
+  }
+ },
+ "cues": {
+  "cast": {
+   "stream": "res://audio/streams/cast.wav",
+   "bus": "Fishing",
+   "volume": 0.8
+  },
+  "landed": {
+   "stream": "res://audio/streams/sfx_landed.ogg",
+   "bus": "Fishing",
+   "volume": 0.55
+  },
+  "bite": {
+   "stream": "res://audio/streams/bite.wav",
+   "bus": "Fishing",
+   "volume": 0.7
+  },
+  "hooked": {
+   "stream": "res://audio/streams/hooked.wav",
+   "bus": "Fishing",
+   "volume": 0.8
+  },
+  "caught": {
+   "stream": "res://audio/streams/caught.wav",
+   "bus": "Fishing",
+   "volume": 0.8
+  },
+  "released": {
+   "stream": "res://audio/streams/sfx_released.ogg",
+   "bus": "Fishing",
+   "volume": 0.6
+  },
+  "escaped": {
+   "stream": "res://audio/streams/sfx_escaped.ogg",
+   "bus": "Fishing",
+   "volume": 0.45
+  }
+ }
 }
