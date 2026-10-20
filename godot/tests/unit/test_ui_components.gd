@@ -179,6 +179,63 @@ func test_gear_panel_equips_owned_items_only_through_the_state() -> void:
 	panel.free()
 	_fresh_state()
 
+func test_gear_fits_the_page_at_the_largest_text_scale() -> void:
+	# BACKLOG "최대 글자 크기에서 장비 화면 가로 넘침": the bait and bag summaries needed 769 px side
+	# by side in Japanese at 160% + Large UI, against a 688 px page. ResponsiveRow stacks them.
+	var previous := TranslationServer.get_locale()
+	_fresh_state()
+	for locale in ["ko", "en", "ja"]:
+		TranslationServer.set_locale(locale)
+		var host := Control.new()
+		host.theme = UiTheme.build(1.6, true, false)
+		host.size = Vector2(720, 1280)
+		tree.root.add_child(host)
+		var panel := GearPanel.new()
+		host.add_child(panel)
+		panel.setup(LoadoutService.new(GameState))
+		panel.select_tab("rod")
+		await tree.process_frame
+		await tree.process_frame
+		var page := panel.get_child(0) as Control
+		assert_true(page.get_combined_minimum_size().x <= 720.0,
+			"the gear page needs %.0f px in %s at 160%% + Large UI" % [page.get_combined_minimum_size().x, locale])
+		var rows := _responsive_rows(panel)
+		assert_eq(rows.size(), 2, "the featured card and the summaries share the responsive row")
+		for row in rows:
+			assert_true(row.size.x <= 720.0, "a responsive row grew past the page")
+		# The summaries are the second row; at 720 px they cannot sit side by side in any language.
+		var summaries := rows[1] as ResponsiveRow
+		assert_true(summaries.vertical, "the summaries stack instead of running off the page in %s" % locale)
+		host.size = Vector2(1080, 1280)
+		await tree.process_frame
+		await tree.process_frame
+		assert_false(summaries.vertical, "a wide page puts the summaries back side by side")
+		host.free()
+	TranslationServer.set_locale(previous)
+	_fresh_state()
+
+func test_a_responsive_row_stacks_only_when_side_by_side_does_not_fit() -> void:
+	var row := ResponsiveRow.new(10)
+	for text in ["가나다라마바사", "아자차카타파하"]:
+		var card := PanelContainer.new()
+		var words := Label.new()
+		words.text = text
+		card.add_child(words)
+		row.add_child(card)
+	var needed := row.needed_width()
+	assert_true(needed > 120.0 and needed < 600.0, "the two cards need %.0f px side by side" % needed)
+	assert_true(row.fits(600.0), "a wide page keeps the cards side by side")
+	assert_false(row.fits(120.0), "a narrow page cannot hold them side by side")
+	row.free()
+
+func _responsive_rows(node: Node) -> Array:
+	var found: Array = []
+	if node is ResponsiveRow:
+		found.append(node)
+	for child in node.get_children():
+		found.append_array(_responsive_rows(child))
+	return found
+
 func test_restoration_panel_states_the_requirement_and_the_cap() -> void:
 	_fresh_state()
 	var restoration := RestorationService.new(GameState, ContentDB.progression["restoration_points"], ContentDB.balance["vertical_slice"])

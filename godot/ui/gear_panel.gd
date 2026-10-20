@@ -103,7 +103,9 @@ func _init() -> void:
 	folder.add_child(_build_featured())
 	on_board.add_child(folder)
 	on_board.add_child(_build_list())
-	var summaries := UiKit.hbox(10)
+	# Side by side at the largest Text Scale with Large UI the two summaries need 769 px in Japanese,
+	# wider than the page: ResponsiveRow stacks them instead of running off screen (BACKLOG).
+	var summaries := ResponsiveRow.new(10)
 	summaries.add_child(_build_summary("bait"))
 	summaries.add_child(_build_summary("bag"))
 	on_board.add_child(summaries)
@@ -113,7 +115,9 @@ func _init() -> void:
 func _build_featured() -> Control:
 	var card := PanelContainer.new()
 	card.theme_type_variation = "PaperPanel"
-	var row := UiKit.hbox(14)
+	# Picture beside the words on a page that can hold both; above them when the largest Text Scale
+	# makes the stat rows too wide (BACKLOG "최대 글자 크기에서 장비 화면 가로 넘침").
+	var row := ResponsiveRow.new(14)
 	var picture := UiKit.vbox(6)
 	var art_box := Control.new()
 	art_box.custom_minimum_size = Vector2(230, 200)
