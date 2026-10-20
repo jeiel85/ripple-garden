@@ -23,6 +23,8 @@ var camp: CampService
 var offline: OfflineService
 var moments: MomentService
 var hints: TutorialHints
+## Small events while the line is out: a leaping fish or a frog near the bobber (BACKLOG).
+var wait_ambience: WaitAmbience
 
 @onready var region: RegionRuntime = $World/RegionRuntime
 @onready var fishing: FishingController = $FishingController
@@ -57,6 +59,11 @@ func _ready() -> void:
 		fishing.save_hook = SaveService.save_if_dirty
 		save_hook = SaveService.save_game
 	region.fishing_view.setup(fishing, region.rod_origin(), region.angler_position())
+	# Over the water and under the foreground: the event sits between the bobber and the reeds.
+	wait_ambience = WaitAmbience.new()
+	region.add_child(wait_ambience)
+	region.move_child(wait_ambience, region.fishing_view.get_index() + 1)
+	wait_ambience.setup(fishing, region.fishing_view, region_id, Callable(ambient_audio, "play_cue").bind("landed"))
 	ambient_audio.setup(region_id, region.weather)
 	fishing.state_changed.connect(_on_fishing_state_changed)
 
