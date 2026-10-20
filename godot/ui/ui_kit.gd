@@ -157,6 +157,31 @@ static func exit_button(icon_name: String, tooltip: String, callback: Callable) 
 	node.theme_changed.connect(fit)
 	return node
 
+## Keyboard / game-pad focus: put the focus on the first control that can take it, in reading order.
+## Opening a screen focuses its way out (built first), so a controller player is never stranded on a
+## screen they cannot leave (P3-008). Returns the control that took the focus, or null.
+static func focus_first(root: Node) -> Control:
+	var first := first_focusable(root)
+	if first != null:
+		first.grab_focus()
+	return first
+
+## The first control under `root` that can take the focus: visible in the tree, focusable, and not a
+## disabled button. Containers are skipped over, their children are not.
+static func first_focusable(root: Node) -> Control:
+	for child in root.get_children():
+		var control := child as Control
+		if control == null or not control.is_visible_in_tree():
+			continue
+		if control.focus_mode != Control.FOCUS_NONE:
+			if control is BaseButton and (control as BaseButton).disabled:
+				continue
+			return control
+		var found := first_focusable(control)
+		if found != null:
+			return found
+	return null
+
 ## A page header: the way out on the left, the title (sign board and subtitle) centred on the page, and
 ## `trailing` (or nothing) on the right. Both sides are kept as wide as the wider of the two, so the title stays on
 ## the page's centre line instead of the centre of what is left between them (Codex review #104: the journal's

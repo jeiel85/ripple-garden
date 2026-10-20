@@ -228,6 +228,60 @@ func test_a_responsive_row_stacks_only_when_side_by_side_does_not_fit() -> void:
 	assert_false(row.fits(120.0), "a narrow page cannot hold them side by side")
 	row.free()
 
+func test_opening_a_page_puts_the_focus_on_its_way_out() -> void:
+	# P3-008: a keyboard / game-pad player who opens a screen must be able to leave it.
+	_fresh_state()
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	host.size = Vector2(720, 1280)
+	tree.root.add_child(host)
+	var panel := GearPanel.new()
+	host.add_child(panel)
+	panel.setup(LoadoutService.new(GameState))
+	panel.select_tab("rod")
+	await tree.process_frame
+	var focused := UiKit.focus_first(panel)
+	assert_not_null(focused, "the page offers something to focus")
+	if focused != null:
+		assert_eq(focused.tooltip_text, String(TranslationServer.translate("ui.back")), "the way out takes the focus first")
+		assert_eq(tree.root.gui_get_focus_owner(), focused)
+	host.free()
+	_fresh_state()
+
+func test_focus_skips_hidden_and_disabled_controls() -> void:
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	host.size = Vector2(300, 300)
+	tree.root.add_child(host)
+	var column := UiKit.vbox(4)
+	host.add_child(column)
+	var hidden := UiKit.button("숨김", func() -> void: pass)
+	hidden.visible = false
+	column.add_child(hidden)
+	var disabled := UiKit.button("꺼짐", func() -> void: pass)
+	disabled.disabled = true
+	column.add_child(disabled)
+	var target := UiKit.button("열림", func() -> void: pass)
+	column.add_child(target)
+	await tree.process_frame
+	assert_eq(UiKit.first_focusable(column), target, "a hidden or disabled button cannot take the focus")
+	assert_eq(UiKit.focus_first(column), target)
+	host.free()
+
+func test_every_button_variation_draws_a_focus_ring() -> void:
+	var host := Control.new()
+	host.theme = UiTheme.build(1.0, false, false)
+	tree.root.add_child(host)
+	for variation in ["", "CircleButton", "GreenButton", "WaterButton", "PillButton"]:
+		var button := Button.new()
+		button.theme_type_variation = variation
+		host.add_child(button)
+		await tree.process_frame
+		var type_name: String = variation if not variation.is_empty() else "Button"
+		assert_not_null(button.get_theme_stylebox("focus"), "%s has no focus ring" % type_name)
+		button.free()
+	host.free()
+
 func _responsive_rows(node: Node) -> Array:
 	var found: Array = []
 	if node is ResponsiveRow:

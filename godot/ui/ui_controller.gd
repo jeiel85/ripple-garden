@@ -282,6 +282,8 @@ func _open(panel: Control) -> void:
 	hud.allow_bottom = panel_flag(panel, "KEEPS_NAV")
 	hud.apply_visibility()
 	world_input.enabled = false
+	# Keyboard / game-pad: the screen's first control (its way out) takes the focus (P3-008).
+	UiKit.focus_first(panel)
 
 func _set_backdrop(fullscreen: bool) -> void:
 	if fullscreen:
@@ -313,6 +315,9 @@ func close_panel() -> void:
 	hud.apply_visibility()
 	hud.wake()
 	world_input.enabled = not water_mind.active
+	# The focus comes back to the water's main action instead of being lost with the closed screen.
+	if not water_mind.active and hud.cta_button != null and hud.cta_button.is_visible_in_tree():
+		hud.cta_button.grab_focus()
 	# The inspect screen is part of the fishing flow: closing a side panel returns to it.
 	if _fishing.state == FishingController.State.INSPECT:
 		_show_inspect()
