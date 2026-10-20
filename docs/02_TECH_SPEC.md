@@ -146,6 +146,19 @@ SettingsApplier가 설정이 바뀔 때 한 번 계산해 각 표현 노드에 �
 
 GL Compatibility 2D에는 그림자·MSAA 단계가 없어 위 항목이 화질 단계의 전부다. 수치는 실기기 프로파일링 전 시작값이다.
 
+### 13.2 그림 텍스처와 비디오 메모리 (P3-005)
+그림은 무손실(RGBA8)로 가져온다. 한 장의 비디오 메모리는 `가로 × 세로 × 4바이트`이고, 밉맵을 만들면 1/3이 더 붙는다
+(1024×1536 풍경 한 장 ≈ 8.0 MB). `TextureBudget`(`godot/art/texture_budget.gd`)이 계산과 한도를 갖고,
+`godot --headless --path godot -s res://tools/texture_memory.gd`가 PNG 헤더만 읽어 총량·가장 큰 그림·한도 초과를
+보고한다(CI 단계 "Check texture memory", 한도를 넘으면 종료 코드 1).
+
+- 한 변 한도 2048 px, 모든 그림을 동시에 올렸을 때 256 MB — 현재 309장 · 217.5 MB(2026-10-20).
+- 한 지역의 풍경만 올리므로 평상시 상주량은 이보다 훨씬 적다. 이 한도는 실수로 두 배 크기로 가져온 그림을 잡는 상한이다.
+
+안드로이드 VRAM 압축(ETC2/ASTC)은 아직 켜지 않았다. 수채화 그림은 압축 잡음(밴딩)에 민감해서 P3-005 실기기 측정에서
+메모리(PSS 약 184 MB)·프레임을 잰 뒤에 정한다. 켤 때는 텍스처 import 기본값을 `compress/mode=VRAM`으로 두고
+UI 간판·아이콘은 무손실로 남긴다. ASTC 4×4는 품질이 좋고 6×6은 메모리가 절반이다.
+
 ## 14. Performance Targets
 내부 목표:
 - Mid Android: stable 30 FPS

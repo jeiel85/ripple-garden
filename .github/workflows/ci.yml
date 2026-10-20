@@ -40,6 +40,9 @@ jobs:
       - name: Validate content data
         run: '"$GODOT_BIN" --headless --path godot -s res://tools/validate_content.gd'
 
+      - name: Check texture memory
+        run: '"$GODOT_BIN" --headless --path godot -s res://tools/texture_memory.gd'
+
       - name: Run Godot tests
         run: '"$GODOT_BIN" --headless --path godot -s res://tests/run_tests.gd'
 
