@@ -109,14 +109,14 @@
   - 남은 것: 지원 이메일·호스팅 URL 확정, 결제 연동 후 구매 조항 확정, Play 데이터 안전 양식 응답(`store/LISTING.md` §7 초안).
 - [ ] P3-005 device test pass
   - Android는 에뮬레이터(API 36)만 확인된 상태. 중·저가 실기기에서 설치·기동·낚시 루프·방생 저장·홈/재개·설정.
-  - PSS 메모리(현재 약 184MB)·프레임·드로콜 측정 후 화질 단계별 값 보정(BACKLOG "그림 텍스처 메모리").
+  - PSS 메모리(현재 약 184MB)·프레임·드로콜 측정 후 화질 단계별 값 보정. 텍스처 예산 도구는 준비됨(`tools/texture_memory.gd`, CI).
 - [ ] P3-006 soak/performance pass
   - 60분 소크, 발열/배터리(물멍 10분 기준), 중급기 30 FPS 확인 후 `balance.json`·그래픽 프로필 값 교정.
 - [ ] P3-007 localization QA
   - 한국어 문구 전수 교정 — 조사 자동 선택은 완료(`godot/i18n/`, D-040, 2026-10-19).
   - 영어·일본어는 원어민 검수(제공 시, D-033).
 - [ ] P3-008 accessibility QA
-  - 모달 포커스 이동·포커스 링, 텍스트 크기 160%+큰 UI 가로 넘침(BACKLOG), reduced motion, 자동 훅, 색약 배색 미터 실기기 확인.
+  - 모달 포커스 이동·포커스 링, 텍스트 크기 160%+큰 UI 가로 넘침은 코드·테스트로 완료(2026-10-20). 남은 것: 실기기에서 reduced motion, 자동 훅, 색약 배색 미터 확인.
 - [ ] P3-009 store assets/listing
   - 문구·키워드·등급 응답·데이터 안전·릴리스 노트 초안 준비됨: `store/LISTING.md`.
   - 남은 것: 피처 그래픽 1024×500, 휴대전화 스크린샷(`godot -s res://tools/capture_screenshot.gd`), 태블릿 스크린샷. 앱 아이콘 512는 존재.
